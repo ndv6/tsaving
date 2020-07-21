@@ -14,5 +14,5 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Println("ini branch develop")
+	fmt.Println("branch develop")
 }

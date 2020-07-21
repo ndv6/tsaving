@@ -10,7 +10,7 @@ import (
 func main() {
 	fmt.Println("branch develop")
 
-	var check = helpers.CheckBalance("VA", "2828271", 60000)
+	var check = helpers.CheckBalance("VA", "2828271", 40000)
 	if !check {
 		log.Fatal("uang tidak valid")
 	}

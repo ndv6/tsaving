@@ -10,7 +10,8 @@ CREATE TABLE "public"."accounts" (
     "account_balance" numeric(100,2),
     "created_at" timestamp,
     CONSTRAINT "accounts_account_num_key" UNIQUE ("account_num"),
-    CONSTRAINT "accounts_pkey" PRIMARY KEY ("account_id")
+    CONSTRAINT "accounts_pkey" PRIMARY KEY ("account_id"),
+    CONSTRAINT "account_fk" FOREIGN KEY (account_num) REFERENCES customers(account_num) NOT DEFERRABLE
 ) WITH (oids = false);
 
 
@@ -34,8 +35,7 @@ CREATE TABLE "public"."customers" (
     CONSTRAINT "customers_account_num" UNIQUE ("account_num"),
     CONSTRAINT "customers_cust_email_key" UNIQUE ("cust_email"),
     CONSTRAINT "customers_cust_phone_key" UNIQUE ("cust_phone"),
-    CONSTRAINT "customers_pkey" PRIMARY KEY ("cust_id"),
-    CONSTRAINT "account_fk" FOREIGN KEY (account_num) REFERENCES accounts(account_num) NOT DEFERRABLE
+    CONSTRAINT "customers_pkey" PRIMARY KEY ("cust_id")
 ) WITH (oids = false);
 
 
@@ -105,4 +105,4 @@ CREATE TABLE "public"."virtual_accounts" (
 ) WITH (oids = false);
 
 
--- 2020-07-21 09:13:00.118982+00
+-- 2020-07-21 15:26:13.584233+00

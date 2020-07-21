@@ -4,7 +4,7 @@ import (
 	"time"
 )
 
-type VirtualAccount struct {
+type VirtualAccounts struct {
 	VaId       int    `json:"var_id"`
 	VaNum      string `json:"va_num"`
 	AccountNum string `json:"account_num"`
@@ -15,6 +15,7 @@ type VirtualAccount struct {
 	UpdateAt   time.Time
 }
 
-func (va *VirtualAccount) TesA() {
+//
+func check_rekening() {
 
 }

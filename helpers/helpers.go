@@ -1,0 +1,11 @@
+package helpers
+
+import (
+	"encoding/json"
+	"net/http"
+)
+
+func HTTPError(w http.ResponseWriter, status int, errorMessage string) {
+	w.WriteHeader(status)
+	json.NewEncoder(w).Encode(map[string]string{"error": errorMessage})
+}

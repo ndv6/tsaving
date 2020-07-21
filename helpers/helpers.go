@@ -1,9 +1,11 @@
 package helpers
 
-func CheckBalance(target string, acc_number string, amount int) bool {
+import (
+	"encoding/json"
+	"net/http"
+)
 
-	if amount > 0 && amount <= 50000 {
-		return true
-	}
-	return false
+func HTTPError(w http.ResponseWriter, status int, errorMessage string) {
+	w.WriteHeader(status)
+	json.NewEncoder(w).Encode(map[string]string{"error": errorMessage})
 }

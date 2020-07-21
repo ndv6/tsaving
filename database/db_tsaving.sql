@@ -8,7 +8,7 @@ CREATE TABLE "public"."accounts" (
     "account_id" integer DEFAULT nextval('accounts_account_id_seq') NOT NULL,
     "account_num" character varying(10),
     "account_balance" numeric(100,2),
-    "create_at" timestamp,
+    "created_at" timestamp,
     CONSTRAINT "accounts_account_num_key" UNIQUE ("account_num"),
     CONSTRAINT "accounts_pkey" PRIMARY KEY ("account_id")
 ) WITH (oids = false);
@@ -29,8 +29,8 @@ CREATE TABLE "public"."customers" (
     "cust_pict" character varying(200),
     "is_verified" boolean,
     "channel" character varying(20),
-    "create_at" timestamp,
-    "update_at" timestamp,
+    "created_at" timestamp,
+    "updated_at" timestamp,
     CONSTRAINT "customers_account_num" UNIQUE ("account_num"),
     CONSTRAINT "customers_cust_email_key" UNIQUE ("cust_email"),
     CONSTRAINT "customers_cust_phone_key" UNIQUE ("cust_phone"),
@@ -97,12 +97,12 @@ CREATE TABLE "public"."virtual_accounts" (
     "va_balance" numeric(100,2),
     "va_color" character varying(15),
     "va_label" character varying(100),
-    "create_at" timestamp,
-    "update_at" timestamp,
+    "created_at" timestamp,
+    "updated_at" timestamp,
     CONSTRAINT "virtual_accounts_pkey" PRIMARY KEY ("va_id"),
     CONSTRAINT "virtual_accounts_va_num_key" UNIQUE ("va_num"),
     CONSTRAINT "virtual_accounts_account_num_fkey" FOREIGN KEY (account_num) REFERENCES accounts(account_num) NOT DEFERRABLE
 ) WITH (oids = false);
 
 
--- 2020-07-21 08:23:35.538252+00
+-- 2020-07-21 09:13:00.118982+00

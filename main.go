@@ -1,18 +1,18 @@
 package main
 
 import (
-	"fmt"
 	"log"
 
-	"github.com/david1312/tsaving/helpers"
+	"github.com/david1312/tsaving/database"
+	_ "github.com/david1312/tsaving/database"
 )
 
 func main() {
-	fmt.Println("branch develop")
-
-	var check = helpers.CheckBalance("VA", "2828271", 40000)
-	if !check {
-		log.Fatal("uang tidak valid")
+	//cara connect ke db
+	_, err := database.GetDatabaseConnection("host=127.0.0.1 port=5432 user=postgres password=password dbname=db sslmode=disable")
+	if err != nil {
+		log.Fatal("gagal connect ke db")
 	}
-	println("ok")
+	//kalo konek sukses
+	println("sukses")
 }

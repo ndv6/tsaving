@@ -1,5 +1,4 @@
-// change the module path to your directory
-module github.com/polipopoliko/tsaving/tsaving
+module github.com/polipopoliko/ndv6/tsaving
 
 go 1.14
 

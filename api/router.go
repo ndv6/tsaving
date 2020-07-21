@@ -2,23 +2,16 @@ package api
 
 import (
 	"database/sql"
-	"fmt"
-	"net/http"
+
+	"github.com/polipopoliko/ndv6/tsaving/api/home/homepage"
+	"github.com/polipopoliko/ndv6/tsaving/api/not_found/not_found_page"
 
 	"github.com/go-chi/chi"
 )
 
 func Router(db *sql.DB) *chi.Mux {
 	chiRouter := chi.NewRouter()
-	chiRouter.Get("/", HomeHandler)
-	chiRouter.NotFound(NotFoundHandler)
+	chiRouter.Get("/", homepage.HomeHandler)
+	chiRouter.NotFound(not_found_page.NotFoundHandler)
 	return chiRouter
-}
-
-func HomeHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "Welcome to Tsaving")
-}
-
-func NotFoundHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Seems like %v is not available or does not exist", r.URL)
 }

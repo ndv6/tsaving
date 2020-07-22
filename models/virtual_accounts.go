@@ -1,6 +1,7 @@
 package models
 
 import (
+	"database/sql"
 	"time"
 )
 
@@ -15,6 +16,9 @@ type VirtualAccounts struct {
 	UpdateAt   time.Time `json:"updated_at"`
 }
 
-// func (va *Virtual_Account) TesA() {
-
-// }
+func GetBalanceVA(vaNum string, db *sql.DB) (va VirtualAccounts, err error) {
+	var balancefloat float32
+	err = db.QueryRow("SELECT va_balance from virtual_accounts where va_num = ($1) ", vaNum).Scan(&balancefloat)
+	va.VaBalance = int(balancefloat)
+	return
+}

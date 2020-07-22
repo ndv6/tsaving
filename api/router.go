@@ -18,7 +18,6 @@ func Router(db *sql.DB) *chi.Mux {
 
 	// VAC transactions API endpoints
 	chiRouter.Post("/vac/to_main", va.VacToMain)
-	chiRouter.Get("/vac/list", va.VacList)
 
 	// Url endpoint not found
 	chiRouter.NotFound(not_found.NotFoundHandler)

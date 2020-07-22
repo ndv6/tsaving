@@ -5,3 +5,8 @@ type EmailToken struct {
 	Token string `json:"token"`
 	Email string `json:"email"`
 }
+
+type VerifiedEmailResponse struct {
+	Email  string `json:"email"`
+	Status string `json:"status"`
+}

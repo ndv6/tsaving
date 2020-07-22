@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"time"
 
 	"github.com/ndv6/tsaving/helpers"
 
@@ -55,6 +54,7 @@ func VerifyEmailToken(db *sql.DB) http.HandlerFunc {
 
 		if err != nil {
 			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+			return
 		}
 
 		err = DeleteVerifiedEmailToken(et.Et_id, db)
@@ -62,6 +62,16 @@ func VerifyEmailToken(db *sql.DB) http.HandlerFunc {
 			helpers.HTTPError(w, http.StatusBadRequest, "Unable to delete verified email: "+err.Error())
 			return
 		}
-		fmt.Fprintf(w, "Email %v has been succesfully verified at %v\n", et.Email, time.Now())
+
+		b, err := json.Marshal(models.VerifiedEmailResponse{
+			Email:  et.Email,
+			Status: "verified",
+		})
+
+		if err != nil {
+			helpers.HTTPError(w, http.StatusBadRequest, "Unable to parse to json")
+			return
+		}
+		fmt.Fprintf(w, string(b))
 	}
 }

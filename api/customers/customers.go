@@ -4,10 +4,10 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"net/http"
+
 	"github.com/ndv6/tsaving/helpers"
 	"github.com/ndv6/tsaving/models"
-	"github.com/ndv6/tsaving/tokens"
-	"net/http"
 )
 
 type CustomerHandler struct {

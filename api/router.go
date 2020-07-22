@@ -11,22 +11,18 @@ import (
 	"github.com/ndv6/tsaving/api/home"
 	"github.com/ndv6/tsaving/api/not_found"
 	"github.com/ndv6/tsaving/tokens"
-	"github.com/ndv6/tsaving/api/customers"
 
 	"github.com/go-chi/chi"
 )
 
 func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 	chiRouter := chi.NewRouter()
-<<<<<<< HEAD
 
 	// Handler objects initialization
 	ph := database.NewPartnerHandler(db)
 	ah := database.NewAccountHandler(db)
-
-=======
 	ch := customers.NewCustomerHandler(jwt, db)
->>>>>>> Requirement Register
+
 	// Home endpoint
 	chiRouter.Get("/", home.HomeHandler)
 	chiRouter.Post("/register", ch.Create)
@@ -40,5 +36,6 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 
 	// Url endpoint not found
 	chiRouter.NotFound(not_found.NotFoundHandler)
+
 	return chiRouter
 }

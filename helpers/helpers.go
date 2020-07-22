@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/ndv6/tsaving/models"
+	"github.com/ndv6/tsaving/database"
 )
 
 func HTTPError(w http.ResponseWriter, status int, errorMessage string) {
@@ -15,7 +15,7 @@ func HTTPError(w http.ResponseWriter, status int, errorMessage string) {
 
 func CheckBalance(target string, accNumber string, amount int, db *sql.DB) (status bool) {
 	if target == "MAIN" {
-		sourceBalance, err := models.GetBalanceAcc(accNumber, db)
+		sourceBalance, err := database.GetBalanceAcc(accNumber, db)
 		if err != nil {
 			return
 		}
@@ -25,7 +25,7 @@ func CheckBalance(target string, accNumber string, amount int, db *sql.DB) (stat
 		status = true
 	}
 	if target == "VA" {
-		sourceBalance, err := models.GetBalanceVA(accNumber, db)
+		sourceBalance, err := database.GetBalanceVA(accNumber, db)
 		if err != nil {
 			return
 		}

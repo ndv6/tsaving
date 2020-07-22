@@ -89,4 +89,6 @@ func (va *VAHandler) VacToMain(w http.ResponseWriter, r *http.Request) {
 
 }
 
-//function di model
+func (va *VAHandler) VacList() {
+
+}

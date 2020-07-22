@@ -19,13 +19,13 @@ type VirtualAccounts struct {
 //
 func (va *VirtualAccounts) UpdateVacBalance(db *sql.DB, saldoInput float64, RekVac string) error {
 
-	_, err := db.Exec("UPDATE virtual_accounts SET va_balance = va_balance - $1 WHERE va_num = '$2'", saldoInput, RekVac)
+	_, err := db.Exec("UPDATE virtual_accounts SET va_balance = va_balance - $1 WHERE va_num = $2", saldoInput, RekVac)
 
 	return err
 }
 
 func (va *VirtualAccounts) UpdateMainBalance(db *sql.DB, saldoInput float64, accountNum string) error {
-	_, err := db.Exec("UPDATE accounts WHERE account_balance = account_balance + $1 WHERE account_num = $2", saldoInput, accountNum)
+	_, err := db.Exec("UPDATE accounts SET account_balance = account_balance + $1 WHERE account_num = $2", saldoInput, accountNum)
 
 	return err
 }

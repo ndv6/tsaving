@@ -1,17 +1,16 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 
-<<<<<<< HEAD
-	"github.com/jocelyntjahyadi/tsaving/database"
-	_ "github.com/jocelyntjahyadi/tsaving/database"
-=======
+	"os"
+
 	"github.com/ndv6/tsaving/api"
 	"github.com/ndv6/tsaving/database"
->>>>>>> 68e54b1bf40f1d82ad6d51f0c2092e1fda8b51c9
+	token "github.com/ndv6/tsaving/tokens"
 )
 
 type Config struct {
@@ -21,26 +20,28 @@ type Config struct {
 }
 
 func main() {
-<<<<<<< HEAD
 	//cara connect ke db
 	jwt := token.New([]byte(cfg.JWTSecret))
-
-	db, err := database.GetDatabaseConnection("host=127.0.0.1 port=5432 user=postgres password=password dbname=db sslmode=disable")
-=======
+	// cfg, err := LoadConfig("config/configs.json")
+	// jwt := token.New([]byte(cfg.JWTSecret))
 	db, err := database.GetDatabaseConnection("host=127.0.0.1 port=5432 user=postgres password=password dbname=db_tsaving sslmode=disable")
->>>>>>> 68e54b1bf40f1d82ad6d51f0c2092e1fda8b51c9
 	if err != nil {
 		log.Fatal(err)
 	}
 
-<<<<<<< HEAD
-	fmt.Println("branch develop")
-
-=======
 	fmt.Println("Server is now accepting request from port 8000")
 	err = http.ListenAndServe("127.0.0.1:8000", api.Router(db))
 	if err != nil {
 		log.Fatal("Can not listen to port 8000", err)
 	}
->>>>>>> 68e54b1bf40f1d82ad6d51f0c2092e1fda8b51c9
+}
+
+func LoadConfig(file string) (Config, error) {
+	f, err := os.Open(file)
+	if err != nil {
+		return Config{}, err
+	}
+	var cfg Config
+	err = json.NewDecoder(f).Decode(&cfg)
+	return cfg, err
 }

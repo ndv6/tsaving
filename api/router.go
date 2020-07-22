@@ -2,21 +2,22 @@ package api
 
 import (
 	"database/sql"
-	"net/http"
+
+	"github.com/ndv6/tsaving/api/home"
+	"github.com/ndv6/tsaving/api/not_found"
 
 	"github.com/go-chi/chi"
 )
 
-func Router(db *sql.DB) http.Handler {
-	va := virtual_accounts.NewVAHandler(db)
-	r := chi.NewRouter()
-	// r.Post("/login", LoginHandler(jwt, db))
-	// r.Get("/", HomeHandler)
-	// r.With().Get("/customers", ch.List)          //ini get jenisnya.
-	// r.With().Post("/customer/create", ch.Create) // kalau ini tesnya POST.
-	// r.With().Get("/customer/{id}", ch.Get)       // kalau di chi bisa langsung di define expect apa.
-	r.Post("/vac/main", va.vac_to_main(db))
-	// r.NotFound(NotFound)
+func Router(db *sql.DB) *chi.Mux {
+	chiRouter := chi.NewRouter()
+	// Home endpoint
+	chiRouter.Get("/", home.HomeHandler)
 
-	return r
+	// VAC trsnsactions API endpoints
+	r.Post("/vac/main", va.vac_to_main(db))
+
+	// Url endpoint not found
+	chiRouter.NotFound(not_found.NotFoundHandler)
+	return chiRouter
 }

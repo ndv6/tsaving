@@ -1,16 +1,26 @@
+<<<<<<< HEAD
 package helper
 
 import (
 	"database/sql"
+=======
+package helpers
+
+import (
+>>>>>>> 68e54b1bf40f1d82ad6d51f0c2092e1fda8b51c9
 	"encoding/json"
 	"net/http"
 )
 
+<<<<<<< HEAD
 //untuk ngehandle error"
+=======
+>>>>>>> 68e54b1bf40f1d82ad6d51f0c2092e1fda8b51c9
 func HTTPError(w http.ResponseWriter, status int, errorMessage string) {
 	w.WriteHeader(status)
 	json.NewEncoder(w).Encode(map[string]string{"error": errorMessage})
 }
+<<<<<<< HEAD
 
 //untuk ngecek input rekening apakah benar atau tidak.
 func CheckRekeningVA(db *sql.DB, RekVA string) error {
@@ -38,3 +48,5 @@ func CheckRekening(db *sql.DB, Rek string) error {
 	return nil
 
 }
+=======
+>>>>>>> 68e54b1bf40f1d82ad6d51f0c2092e1fda8b51c9

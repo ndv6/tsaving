@@ -15,12 +15,10 @@ func HTTPError(w http.ResponseWriter, status int, errorMessage string) {
 
 func CheckBalance(target string, accNumber string, amount int, db *sql.DB) (status bool) {
 	if target == "MAIN" {
-		sourceBalance, err := models.GetBalanceAcc(accNumber, db) // println(err.Error())
-		//cek dapet engga balancenya
+		sourceBalance, err := models.GetBalanceAcc(accNumber, db)
 		if err != nil {
 			return
 		}
-		//kalo balancenya dapet lanjut cek saldo yg sesuai engga sama gaboleh negatif yg diinput
 		if sourceBalance.AccountBalance < amount || amount <= 0 {
 			return
 		}
@@ -28,11 +26,9 @@ func CheckBalance(target string, accNumber string, amount int, db *sql.DB) (stat
 	}
 	if target == "VA" {
 		sourceBalance, err := models.GetBalanceVA(accNumber, db)
-		//cek dapet engga balancenya
 		if err != nil {
 			return
 		}
-		//kalo balancenya dapet lanjut cek saldo yg sesuai engga sama gaboleh negatif yg diinput
 		if sourceBalance.VaBalance < amount || amount <= 0 {
 			return
 		}

@@ -13,28 +13,14 @@ func HTTPError(w http.ResponseWriter, status int, errorMessage string) {
 }
 
 //untuk ngecek input rekening apakah benar atau tidak.
-func CheckRekeningVA(db *sql.DB, RekVA string) error {
-	VirtualRek := 0
-	err := db.QueryRow("SELECT va_num FROM virtual_accounts WHERE va_num = $1", RekVA).Scan(&VirtualRek)
-
-	if VirtualRek == 0 {
-		return err
-	}
-
-	return nil
-
-	// token := ch.jwt.GetToken(r)
-
+func CheckAccountVA(db *sql.DB, VaNum string) (err error) {
+	VaNumber := 0
+	err = db.QueryRow("SELECT va_num FROM virtual_accounts WHERE va_num = $1", VaNum).Scan(&VaNumber)
+	return
 }
 
-func CheckRekening(db *sql.DB, Rek string) error {
-	NoRek := 0
-	err := db.QueryRow("SELECT account_num FROM customers WHERE account_num = $1", Rek).Scan(&NoRek)
-
-	if NoRek == 0 {
-		return err
-	}
-
-	return nil
-
+func CheckAccount(db *sql.DB, AccountNum string) (err error) {
+	AccountNumber := 0
+	err = db.QueryRow("SELECT account_num FROM customers WHERE account_num = $1", AccountNum).Scan(&AccountNumber)
+	return
 }

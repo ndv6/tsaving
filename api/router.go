@@ -5,13 +5,13 @@ import (
 
 	"github.com/ndv6/tsaving/api/home"
 	"github.com/ndv6/tsaving/api/not_found"
+	"github.com/ndv6/tsaving/api/virtual_accounts"
 
 	"github.com/go-chi/chi"
-	va "github.com/ndv6/tsaving/api/virtual_accounts"
 )
 
 func Router(db *sql.DB) *chi.Mux {
-	va := va.NewVAHandler(db)
+	va := virtual_accounts.NewVAHandler(db)
 	chiRouter := chi.NewRouter()
 	// Home endpoint
 	chiRouter.Get("/", home.HomeHandler)

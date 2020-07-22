@@ -3,11 +3,14 @@ package virtual_accounts
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 
-	helper "github.com/ndv6/tsaving/helpers"
 	"github.com/ndv6/tsaving/models"
+
+	"github.com/ndv6/tsaving/database"
+	helper "github.com/ndv6/tsaving/helpers"
 )
 
 type InputVac struct {
@@ -48,24 +51,39 @@ func (va *VAHandler) VacToMain(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//cek input apakah melebihi saldo
-
-	var ViA models.VirtualAccounts
+	var BalanceChange int = int(VirAcc.BalanceChange)
+	fmt.Println(VirAcc.BalanceChange)
+	fmt.Println(VirAcc.VacNumber)
+	returnValue := helper.CheckBalance("VA", VirAcc.VacNumber, BalanceChange, va.db)
+	if returnValue == false {
+		helper.HTTPError(w, http.StatusBadRequest, "your input is bigger than virtual account balance.")
+		return
+	}
 
 	//get no rekening by rekening vac
-	AccountNumber, _ := ViA.GetAccountByVA(va.db, VirAcc.VacNumber)
+	AccountNumber, _ := database.GetAccountByVA(va.db, VirAcc.VacNumber)
 
 	//update balance at both accounts
-	err = ViA.UpdateVacBalance(va.db, VirAcc.BalanceChange, VirAcc.VacNumber)
+	err = database.UpdateVacBalance(va.db, VirAcc.BalanceChange, VirAcc.VacNumber)
 	if err != nil {
 		helper.HTTPError(w, http.StatusBadRequest, "error updating virtual account balance")
 		return
 	}
 
-	err = ViA.UpdateMainBalance(va.db, VirAcc.BalanceChange, AccountNumber)
+	err = database.UpdateMainBalance(va.db, VirAcc.BalanceChange, AccountNumber)
 	if err != nil {
 		helper.HTTPError(w, http.StatusBadRequest, "error updating account balance")
 		return
 	}
+
+	// get virtual account info, status
+	var VaObj models.VirtualAccounts
+	var MaObj models.Accounts
+	VaObj, err = database.GetVaStatus(va.db, VirAcc.VacNumber)
+	MaObj, err = database.GetBalanceAcc(AccountNumber, va.db)
+
+	fmt.Fprintf(w, "%v VA Balance: %v, ", VaObj.VaLabel, VaObj.VaBalance)
+	fmt.Fprintf(w, "Main Account Balance: %v", MaObj.AccountBalance)
 
 	return
 

@@ -3,8 +3,6 @@ package models
 import (
 	"database/sql"
 	"time"
-
-	token "github.com/david1312/tsaving/tokens"
 )
 
 type Customers struct {
@@ -22,7 +20,7 @@ type Customers struct {
 	UpdateAt     time.Time `json:"updated_at"`
 }
 
-type CustomersHandler struct {
-	jwt *token.JWT
-	db  *sql.DB
+func GetAccountNumById(id int, db *sql.DB) (cus Customers, err error) {
+	err = db.QueryRow("SELECT account_num from customers where cust_id = ($1) ", id).Scan(&cus.AccountNum)
+	return
 }

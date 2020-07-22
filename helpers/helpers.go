@@ -29,7 +29,7 @@ func CheckRekeningVA(db *sql.DB, RekVA string) error {
 
 func CheckRekening(db *sql.DB, Rek string) error {
 	NoRek := 0
-	err := db.QueryRow("SELECT account_num FROM customers WHERE account_num = $1", NoRek).Scan(&NoRek)
+	err := db.QueryRow("SELECT account_num FROM customers WHERE account_num = $1", Rek).Scan(&NoRek)
 
 	if NoRek == 0 {
 		return err

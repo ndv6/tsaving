@@ -12,12 +12,12 @@ import (
 	"github.com/ndv6/tsaving/models"
 )
 
-func DeleteVerifiedEmailToken(id int, db *sql.DB) (err error) {
+func DeleteVerifiedEmailTokenById(id int, db *sql.DB) (err error) {
 	_, err = db.Exec("DELETE FROM email_token WHERE et_id=$1;", id)
 	return
 }
 
-func UpdateCustomerVerificationStatus(email string, db *sql.DB) (err error) {
+func UpdateCustomerVerificationStatusByEmail(email string, db *sql.DB) (err error) {
 	_, err = db.Exec("UPDATE CUSTOMERS SET is_verified = TRUE WHERE cust_email = $1;", email)
 	return
 }
@@ -50,14 +50,14 @@ func VerifyEmailToken(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		err = UpdateCustomerVerificationStatus(et.Email, db)
+		err = UpdateCustomerVerificationStatusByEmail(et.Email, db)
 
 		if err != nil {
 			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
 			return
 		}
 
-		err = DeleteVerifiedEmailToken(et.Et_id, db)
+		err = DeleteVerifiedEmailTokenById(et.Et_id, db)
 		if err != nil {
 			helpers.HTTPError(w, http.StatusBadRequest, "Unable to delete verified email: "+err.Error())
 			return

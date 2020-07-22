@@ -1,6 +1,9 @@
 package models
 
-import "database/sql"
+import (
+	"database/sql"
+	"fmt"
+)
 
 type TransactionLogs struct {
 	TlId        int    `json:"tl_id"`
@@ -11,7 +14,7 @@ type TransactionLogs struct {
 	CreatedAt   string `json:"created_at"`
 }
 
-func TransactionLog(db *sql.DB, log TransactionLogs) error {
+func CreateTransactionLog(db *sql.DB, log TransactionLogs) error {
 	_, err := db.Exec("INSERT INTO transaction_logs (account_num, dest_account, tran_amount, description, created_at) VALUES ($1, $2, $3, $4, $5);",
 		log.AccountNum,
 		log.DestAccount,
@@ -19,4 +22,16 @@ func TransactionLog(db *sql.DB, log TransactionLogs) error {
 		log.Description,
 		log.CreatedAt)
 	return err
+}
+
+func LogDescriptionVaToMainTemplate(amount int, vaNum, accountNum string) string {
+	return fmt.Sprintf("Transfer %d from Virtual Account %s to Main Account %s", amount, vaNum, accountNum)
+}
+
+func LogDescriptionPartnerToMainTemplate(amount, partnerId int, accountNum string) string {
+	return fmt.Sprintf("Transfer %d from Partner %d to Main Account %s", amount, partnerId, accountNum)
+}
+
+func LogDescriptionMainToVaTemplate(amount int, accountNum, vaNum string) string {
+	return fmt.Sprintf("Transfer %d from Main Account %s to Virtual Account %s", amount, accountNum, vaNum)
 }

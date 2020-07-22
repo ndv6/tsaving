@@ -24,3 +24,10 @@ func CheckAccount(db *sql.DB, AccountNum string) (err error) {
 	err = db.QueryRow("SELECT account_num FROM customers WHERE account_num = $1", AccountNum).Scan(&AccountNumber)
 	return
 }
+func CheckBalance(target string, acc_number string, amount int) bool {
+
+	if amount > 0 && amount >= 50000 {
+		return true
+	}
+	return false
+}

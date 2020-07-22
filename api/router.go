@@ -3,6 +3,8 @@ package api
 import (
 	"database/sql"
 
+	"github.com/ndv6/tsaving/api/email"
+
 	"github.com/ndv6/tsaving/api/home"
 	"github.com/ndv6/tsaving/api/not_found"
 
@@ -14,7 +16,10 @@ func Router(db *sql.DB) *chi.Mux {
 	// Home endpoint
 	chiRouter.Get("/", home.HomeHandler)
 
-	// Url endpoint not found
+	// Email verification endpoint
+	chiRouter.Post("/email/verify-email-token", email.VerifyEmailToken(db))
+
+	// Not found endpoint
 	chiRouter.NotFound(not_found.NotFoundHandler)
 	return chiRouter
 }

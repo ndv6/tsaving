@@ -41,6 +41,9 @@ func GetVaStatus(db *sql.DB, vacNum string) (va models.VirtualAccounts, err erro
 
 func GetListVA(db *sql.DB, id int) (VirAcc []models.VirtualAccounts, err error) {
 	rows, err := db.Query("SELECT va_id, va_num, va_label, va_color, va_balance, virtual_accounts.created_at, virtual_accounts.created_at FROM virtual_accounts INNER JOIN customers ON virtual_accounts.account_num = customers.account_num WHERE cust_id = $1", id)
+	if err != nil {
+		return VirAcc, err
+	}
 
 	defer rows.Close()
 	//defer -> yang harus dipanggil di akhir (biar ga lupa
@@ -50,13 +53,12 @@ func GetListVA(db *sql.DB, id int) (VirAcc []models.VirtualAccounts, err error) 
 	for rows.Next() {
 		var va models.VirtualAccounts
 		var balance float64
-		err := rows.Scan(&va.VaId, &va.VaNum, &va.VaLabel, &va.VaColor, &balance, &va.CreatedAt, &va.UpdateAt)
-		va.VaBalance = int(balance)
+		err := rows.Scan(&va.VaId, &va.VaNum, &va.VaLabel, &va.VaColor, &balance, &va.CreatedAt, &va.UpdatedAt)
 
-		// err := rows.Scan(&cus.ID, &cus.Name, &cus.Address, &cus.Phone)
 		if err != nil {
-
+			return VirAcc, err
 		}
+		va.VaBalance = int(balance)
 		res = append(res, va)
 	}
 

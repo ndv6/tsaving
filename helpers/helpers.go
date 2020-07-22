@@ -15,15 +15,15 @@ func HTTPError(w http.ResponseWriter, status int, errorMessage string) {
 }
 
 //untuk ngecek input rekening apakah benar atau tidak.
-func CheckAccountVA(db *sql.DB, VaNum string) (err error) {
+func CheckAccountVA(db *sql.DB, VaNum string, id int) (err error) {
 	VaNumber := 0
-	err = db.QueryRow("SELECT va_num FROM virtual_accounts WHERE va_num = $1", VaNum).Scan(&VaNumber)
+	err = db.QueryRow("SELECT va_num FROM virtual_accounts INNER JOIN customers ON virtual_accounts.account_num = customers.account_num WHERE va_num = $1 AND cust_id = $2", VaNum, id).Scan(&VaNumber)
 	return
 }
 
-func CheckAccount(db *sql.DB, AccountNum string) (err error) {
+func CheckAccount(db *sql.DB, AccountNum string, id int) (err error) {
 	AccountNumber := 0
-	err = db.QueryRow("SELECT account_num FROM customers WHERE account_num = $1", AccountNum).Scan(&AccountNumber)
+	err = db.QueryRow("SELECT account_num FROM customers WHERE account_num = $1 AND cust_id = $2", AccountNum, id).Scan(&AccountNumber)
 	return
 }
 

@@ -12,5 +12,5 @@ type VirtualAccounts struct {
 	VaColor    string `json:"va_color"`
 	VaLabel    string `json:"va_label"`
 	CreatedAt  time.Time
-	UpdateAt   time.Time
+	UpdatedAt  time.Time
 }

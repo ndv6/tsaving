@@ -6,7 +6,7 @@ import (
 )
 
 type VirtualAccounts struct {
-	VaId       int       `json:"var_id"`
+	VaId       int       `json:"va_id"`
 	VaNum      string    `json:"va_num"`
 	AccountNum string    `json:"account_num"`
 	VaBalance  int       `json:"va_balance"`

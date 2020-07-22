@@ -23,6 +23,7 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 	// Handler objects initialization
 	ph := database.NewPartnerHandler(db)
 	ah := database.NewAccountHandler(db)
+	ch := customers.NewCustomerHandler(jwt, db)
 
 	// Home endpoint
 	chiRouter.Get("/", home.HomeHandler)
@@ -40,5 +41,6 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 
 	// Url endpoint not found
 	chiRouter.NotFound(not_found.NotFoundHandler)
+
 	return chiRouter
 }

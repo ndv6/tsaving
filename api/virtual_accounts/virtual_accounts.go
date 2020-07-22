@@ -88,35 +88,3 @@ func (va *VAHandler) VacToMain(w http.ResponseWriter, r *http.Request) {
 	return
 
 }
-
-func (va *VAHandler) VacList(w http.ResponseWriter, r *http.Request) {
-
-	res, err := database.GetListVA(va.db, 4)
-
-	if err != nil {
-		helper.HTTPError(w, http.StatusBadRequest, "id must be integer")
-		return
-	}
-
-	// err = json.NewEncoder(w).Encode(res) // kalau pake ini, tidak usah ada *
-
-	for i, va := range res {
-
-		fmt.Fprintf(w, "Row %v: Number = %v,  Color = %v, Label = %v, Balance = %v,\n", i, va.VaNum, va.VaColor, va.VaLabel, va.VaBalance)
-		t := va.CreatedAt
-		fmt.Fprintf(w, "Created : %02d-%02d-%d %02d:%02d:%02d,",
-			t.Day(), t.Month(), t.Year(),
-			t.Hour(), t.Minute(), t.Second())
-		t = va.UpdateAt
-		fmt.Fprintf(w, " Updated : %02d-%02d-%d %02d:%02d:%02d\n",
-			t.Day(), t.Month(), t.Year(),
-			t.Hour(), t.Minute(), t.Second())
-	}
-
-	// b, err := json.Marshal(cus) // *
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprint(w, "Unable to encode data to json")
-	}
-
-}

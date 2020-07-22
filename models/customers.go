@@ -1,7 +1,6 @@
 package models
 
 import (
-	"database/sql"
 	"time"
 )
 
@@ -18,9 +17,4 @@ type Customers struct {
 	Channel      string    `json:"channel"`
 	CreatedAt    time.Time `json:"created_at"`
 	UpdateAt     time.Time `json:"updated_at"`
-}
-
-func GetAccountNumById(id int, db *sql.DB) (cus Customers, err error) {
-	err = db.QueryRow("SELECT account_num from customers where cust_id = ($1) ", id).Scan(&cus.AccountNum)
-	return
 }

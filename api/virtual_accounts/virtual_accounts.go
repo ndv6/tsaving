@@ -7,12 +7,12 @@ import (
 	"net/http"
 
 	helpers "github.com/ndv6/tsaving/helpers"
-	"github.com/ndv6/tsaving/models"
 )
 
 type AddBalanceVARequest struct {
-	VaNum     string `json:"va_num"`
-	VaBalance int    `json:"va_balance"`
+	VaNum      string `json:"va_num"`
+	VaBalance  int    `json:"va_balance"`
+	AccountNum string `json:"account_num"`
 }
 
 type AddBalanceVAResponse struct {
@@ -35,15 +35,10 @@ func (va *VAHandler) AddBalanceVA(w http.ResponseWriter, r *http.Request) {
 		helpers.HTTPError(w, http.StatusBadRequest, "unable to parse json request")
 		return
 	}
-	//disini karena inputannya gak ada rekeningnya maka cari norek asal dulu ,diisi angka 1 karena blm ada token simpen id customer jadi manual input
-	noRek, err := models.GetAccountNumById(1, va.db)
-	if err != nil {
-		helpers.HTTPError(w, http.StatusUnauthorized, "acc number not found")
-		return
-	}
+
 	//cek balance
 	// fmt.Fprintf(w, "Api Called Sukses : %v", noRek.AccountNum)
-	status := helpers.CheckBalance("MAIN", noRek.AccountNum, vac.VaBalance, va.db)
+	status := helpers.CheckBalance("MAIN", vac.AccountNum, vac.VaBalance, va.db)
 	if !status {
 		helpers.HTTPError(w, http.StatusBadRequest, "saldo tidak mencukupi")
 		return

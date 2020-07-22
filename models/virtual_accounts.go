@@ -13,12 +13,15 @@ type VirtualAccounts struct {
 	VaColor    string    `json:"va_color"`
 	VaLabel    string    `json:"va_label"`
 	CreatedAt  time.Time `json:"created_at"`
-	UpdateAt   time.Time `json:"updated_at"`
+	UpdatedAt  time.Time `json:"updated_at"`
 }
 
 func GetBalanceVA(vaNum string, db *sql.DB) (va VirtualAccounts, err error) {
-	var balancefloat float32
-	err = db.QueryRow("SELECT va_balance from virtual_accounts where va_num = ($1) ", vaNum).Scan(&balancefloat)
-	va.VaBalance = int(balancefloat)
+	var balanceFloat float32
+	err = db.QueryRow("SELECT va_balance FROM virtual_accounts WHERE va_num = ($1) ", vaNum).Scan(&balanceFloat)
+	if err != nil {
+		return
+	}
+	va.VaBalance = int(balanceFloat)
 	return
 }

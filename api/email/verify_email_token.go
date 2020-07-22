@@ -73,5 +73,6 @@ func VerifyEmailToken(db *sql.DB) http.HandlerFunc {
 			return
 		}
 		fmt.Fprintf(w, string(b))
+		return
 	}
 }

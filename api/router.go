@@ -9,6 +9,7 @@ import (
 	"github.com/ndv6/tsaving/api/not_found"
 
 	"github.com/go-chi/chi"
+	"github.com/ndv6/tsaving/api/virtual_accounts"
 )
 
 func Router(db *sql.DB) *chi.Mux {

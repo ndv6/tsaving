@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/david1312/tsaving/models"
+	"github.com/ndv6/tsaving/models"
 )
 
 func HTTPError(w http.ResponseWriter, status int, errorMessage string) {
@@ -18,12 +18,10 @@ func CheckBalance(target string, accNumber string, amount int, db *sql.DB) (stat
 		saldoasal, err := models.GetBalanceAcc(accNumber, db) // println(err.Error())
 		//cek dapet engga balancenya
 		if err != nil {
-			status = false
 			return
 		}
 		//kalo balancenya dapet lanjut cek saldo yg sesuai engga sama gaboleh negatif yg diinput
 		if saldoasal.AccountBalance < amount || amount <= 0 {
-			status = false
 			return
 		}
 		status = true
@@ -33,12 +31,10 @@ func CheckBalance(target string, accNumber string, amount int, db *sql.DB) (stat
 		//cek dapet engga balancenya
 		println(saldoasal.VaBalance)
 		if err != nil {
-			status = false
 			return
 		}
 		//kalo balancenya dapet lanjut cek saldo yg sesuai engga sama gaboleh negatif yg diinput
 		if saldoasal.VaBalance < amount || amount <= 0 {
-			status = false
 			return
 		}
 		status = true

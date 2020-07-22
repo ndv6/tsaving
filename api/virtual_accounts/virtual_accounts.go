@@ -16,7 +16,8 @@ type AddBalanceVARequest struct {
 }
 
 type AddBalanceVAResponse struct {
-	Token string `json:"token"`
+	Status       int    `json:"status"`
+	Notification string `json:"notification"`
 }
 
 type VAHandler struct {
@@ -42,6 +43,16 @@ func (va *VAHandler) AddBalanceVA(w http.ResponseWriter, r *http.Request) {
 		helpers.HTTPError(w, http.StatusBadRequest, "insufficient balance")
 		return
 	}
-	fmt.Fprintln(w, "lanjut coding nambahin balance ke va")
+	token := AddBalanceVAResponse{
+		Status:       1,
+		Notification: fmt.Sprintf("successfully add balance to your virtual account : %v", vac.VaBalance),
+	}
+	err = json.NewEncoder(w).Encode(token)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, "unable to encode response")
+		return
+	}
+
 	// json.NewEncoder(w).Encode({"status" : 1})
+
 }

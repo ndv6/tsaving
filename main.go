@@ -5,8 +5,8 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/polipopoliko/ndv6/tsaving/api"
-	"github.com/polipopoliko/ndv6/tsaving/database"
+	"github.com/ndv6/tsaving/api"
+	"github.com/ndv6/tsaving/database"
 )
 
 func main() {

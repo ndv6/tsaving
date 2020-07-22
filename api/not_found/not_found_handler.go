@@ -1,4 +1,4 @@
-package not_found_page
+package not_found
 
 import (
 	"fmt"

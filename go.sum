@@ -8,3 +8,5 @@ github.com/go-chi/jwtauth v4.0.4+incompatible h1:LGIxg6YfvSBzxU2BljXbrzVc1fMlgqS
 github.com/go-chi/jwtauth v4.0.4+incompatible/go.mod h1:Q5EIArY/QnD6BdS+IyDw7B2m6iNbnPxtfd6/BcmtWbs=
 github.com/lib/pq v1.7.1 h1:FvD5XTVTDt+KON6oIoOmHq6B6HzGuYEhuTMpEG0yuBQ=
 github.com/lib/pq v1.7.1/go.mod h1:AlVN5x4E4T544tWzH6hKfbfQvm3HdbOxrmggDNAPY9o=
+github.com/ndv6/tsaving v0.0.0-20200721112146-e49bb26f5779 h1:gD9F71Fn9H1fOBUcH/WBfM8q/d5vBfS/e77kwBzNfFg=
+github.com/ndv6/tsaving v0.0.0-20200721112146-e49bb26f5779/go.mod h1:mLwHh2BCkWdOXq3E8/KfFPVEOhaI0aQWRzeiaFIYa6s=

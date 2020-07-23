@@ -48,7 +48,7 @@ func (va *VAHandler) VacToMain(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// cek rekening
-	err = helper.CheckAccountVA(va.db, VirAcc.VacNumber, 4)
+	err = database.CheckAccountVA(va.db, VirAcc.VacNumber, 4)
 	// fmt.Fprint(w, err)
 	if err != nil {
 		// fmt.Fprint(w, err)
@@ -58,7 +58,7 @@ func (va *VAHandler) VacToMain(w http.ResponseWriter, r *http.Request) {
 
 	//cek input apakah melebihi saldo
 	var BalanceChange int = int(VirAcc.BalanceChange)
-	returnValue := helper.CheckBalance("VA", VirAcc.VacNumber, BalanceChange, va.db)
+	returnValue := database.CheckBalance("VA", VirAcc.VacNumber, BalanceChange, va.db)
 	if returnValue == false {
 		helper.HTTPError(w, http.StatusBadRequest, "your input is bigger than virtual account balance.")
 		return

@@ -3,6 +3,7 @@ package database
 import (
 	"database/sql"
 	"errors"
+	"time"
 
 	"github.com/ndv6/tsaving/models"
 )
@@ -31,7 +32,6 @@ func TransferFromMainToVa(accNum, vaNum string, amount int, db *sql.DB) (err err
 		err = errors.New("insufficient balance")
 		return
 	}
-
 	_, err = tx.Exec("UPDATE accounts SET account_balance = account_balance - $1 WHERE account_num = $2", amount, accNum)
 	if err != nil {
 		return
@@ -40,6 +40,26 @@ func TransferFromMainToVa(accNum, vaNum string, amount int, db *sql.DB) (err err
 	if err != nil {
 		return
 	}
+	_, err = tx.Exec("UPDATE virtual_accounts SET va_balance = va_balance + $1 WHERE va_num = $2", amount, vaNum)
+	if err != nil {
+		return
+	}
+	// println("d")
+	logDesc := models.LogDescriptionMainToVaTemplate(amount, accNum, vaNum)
+	logData := models.TransactionLogs{
+		AccountNum:  accNum,
+		DestAccount: vaNum,
+		TranAmount:  amount,
+		Description: logDesc,
+		CreatedAt:   time.Now(),
+	}
+
+	err = models.TransactionLog(tx, logData)
+	if err != nil {
+		return
+	}
+
 	tx.Commit()
+
 	return
 }

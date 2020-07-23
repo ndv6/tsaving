@@ -29,15 +29,19 @@ func NewVAHandler(db *sql.DB) *VAHandler {
 }
 
 func (va *VAHandler) AddBalanceVA(w http.ResponseWriter, r *http.Request) {
-	//CEK inputan body dari apinya dulu sesuai format json apa gak
 	var vac AddBalanceVARequest
 	err := json.NewDecoder(r.Body).Decode(&vac)
 	if err != nil {
 		helpers.HTTPError(w, http.StatusBadRequest, "unable to parse json request")
 		return
 	}
-
-	//perlu diupdate ambil dari token
+	//check if va number is exist and valid to its owner need update to use token
+	err = database.CheckAccountVA(va.db, vac.VaNum, 1)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	//perlu diupdate ambil dari token nomor accnya
 	updateBalanceVA := database.TransferFromMainToVa("2008210001", vac.VaNum, vac.VaBalance, va.db)
 	if updateBalanceVA != nil {
 		helpers.HTTPError(w, http.StatusBadRequest, updateBalanceVA.Error())

@@ -108,7 +108,6 @@ func isValidPartnerAuthCode(request DepositRequest, partner PartnerInterface) (i
 
 	//hashing is a one-way process, so we can only reconstruct the hashed string
 	hashedData := helpers.HashString(request.AccountNumber + strconv.Itoa(request.BalanceAdded) + clientSecret)
-	fmt.Println(hashedData, request.AuthCode)
 
 	if hashedData == request.AuthCode {
 		isValidCode = true

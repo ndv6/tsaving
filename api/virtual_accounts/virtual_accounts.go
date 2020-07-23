@@ -11,9 +11,9 @@ import (
 	helper "github.com/ndv6/tsaving/helpers"
 )
 
-type InputVac struct {
+type InputVa struct {
 	BalanceChange int    `json:"balance_change"`
-	VacNumber     string `json:"va_num"`
+	VaNum         string `json:"va_num"`
 }
 
 type VAResponse struct {
@@ -39,7 +39,7 @@ func (va *VAHandler) VacToMain(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// di parse dan dimasukkan kedalam struct InputVac
-	var VirAcc InputVac
+	var VirAcc InputVa
 	err = json.Unmarshal(b, &VirAcc)
 	if err != nil {
 		helper.HTTPError(w, http.StatusBadRequest, "unable to parse json request")
@@ -47,35 +47,27 @@ func (va *VAHandler) VacToMain(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// cek rekening
-	err = database.CheckAccountVA(va.db, VirAcc.VacNumber, 4)
-	// fmt.Fprint(w, err)
+	err = database.CheckAccountVA(va.db, VirAcc.VaNum, 4)
 	if err != nil {
-		// fmt.Fprint(w, err)
 		helper.HTTPError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	//cek input apakah melebihi saldo
 	var BalanceChange int = VirAcc.BalanceChange
-	returnValue := database.CheckBalance("VA", VirAcc.VacNumber, BalanceChange, va.db)
+	returnValue := database.CheckBalance("VA", VirAcc.VaNum, BalanceChange, va.db)
 	if returnValue == false {
 		helper.HTTPError(w, http.StatusBadRequest, "your input is bigger than virtual account balance.")
 		return
 	}
 
 	//get no rekening by rekening vac
-	AccountNumber, _ := database.GetAccountByVA(va.db, VirAcc.VacNumber)
+	AccountNumber, _ := database.GetAccountByVA(va.db, VirAcc.VaNum)
 
 	//update balance at both accounts
-	err = database.UpdateVacBalance(va.db, VirAcc.BalanceChange, VirAcc.VacNumber)
+	err = database.UpdateVacToMain(va.db, VirAcc.BalanceChange, VirAcc.VaNum, AccountNumber)
 	if err != nil {
-		helper.HTTPError(w, http.StatusBadRequest, "error updating virtual account balance")
-		return
-	}
-
-	err = database.UpdateMainBalance(va.db, VirAcc.BalanceChange, AccountNumber)
-	if err != nil {
-		helper.HTTPError(w, http.StatusBadRequest, "error updating account balance")
+		helper.HTTPError(w, http.StatusBadRequest, "transfer error")
 		return
 	}
 

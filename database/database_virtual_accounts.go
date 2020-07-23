@@ -26,6 +26,37 @@ func UpdateMainBalance(db *sql.DB, balanceInput int, accountNum string) (err err
 	return
 }
 
+func UpdateVacToMain(db *sql.DB, balanceInput int, vacNum string, accountNum string) (err error) {
+	tx, err := db.Begin()
+	if err != nil {
+		return
+	}
+	defer tx.Rollback()
+
+	var sourceBalance int
+	err = tx.QueryRow("SELECT va_balance FROM virtual_accounts WHERE account_num = $1 FOR UPDATE", accountNum).Scan(&sourceBalance)
+	if err != nil {
+		return
+	}
+
+	status := CheckBalance("VA", vacNum, balanceInput, db)
+	if !status {
+		err = errors.New("insufficient balance")
+		return
+	}
+
+	_, err = tx.Exec("UPDATE accounts SET account_balance = account_balance + $1 WHERE account_num = $2", balanceInput, accountNum)
+	if err != nil {
+		return
+	}
+	_, err = tx.Exec("UPDATE virtual_accounts SET va_balance = va_balance - $1 WHERE va_num = $2", balanceInput, vacNum)
+	if err != nil {
+		return
+	}
+	tx.Commit()
+	return
+}
+
 func GetAccountByVA(db *sql.DB, vacNum string) (AccountNum string, err error) {
 	err = db.QueryRow("SELECT account_num from virtual_accounts WHERE va_num = $1", vacNum).Scan(&AccountNum)
 	return

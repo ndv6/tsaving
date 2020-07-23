@@ -9,6 +9,8 @@ import (
 )
 
 var cust_id = 1
+var AccountVA = "2009110001001"
+var InputBalance = 1000000
 
 var InputVac = []virtual_accounts.InputVac{
 	{
@@ -48,6 +50,7 @@ var Cust = []models.Customers{
 		"Jalan Dr. Satrio 88, Jakarta",
 		"081293829092",
 		"lyra@gmail.com",
+		"lyra.jpg",
 		"lyra",
 		true,
 		"web",
@@ -61,9 +64,10 @@ var Cust = []models.Customers{
 		"Jalan Kuningan, Jakarta",
 		"08192839209",
 		"taylor@gmail.com",
+		"taylor.jpg",
 		"taylor",
-		true,
 		"android",
+		true,
 		time.Now(),
 		time.Date(2009, 11, 17, 20, 34, 58, 651387237, time.UTC),
 	},
@@ -114,8 +118,27 @@ var VirAcc = []models.VirtualAccounts{
 
 func TestVacToMain(t *testing.T) {
 
-	// ini dibikin skenario, kalau inputnya begini, dan hasilnya oke, nanti akan keluar oke.
-	res := VacToMain()
+	//
+	var status = CheckAccountVA(AccountVA)
+	if status != true {
+		t.Fatal("Invalid Virtual Account Number")
+	}
+
+	err := CheckBalance()
+	if err != nil {
+		t.Fatal("Input is bigger than VA Balance")
+	}
+
+	AccountNumber := GetAccountById()
+
+	status = UpdateVacBalance(InputBalance, AccountVA)
+	if status != true {
+		t.Fatal("Update Failed")
+	}
+
+	status = UpdateMainBalance(InputBalance,AccountNumber)
+	if
+
 	if len(res) != 2 {
 		t.Fatalf("Expect 2 Events, got: %v", len(res))
 	}
@@ -132,17 +155,21 @@ func TestVacList(t *testing.T) {
 
 }
 
-func TestCheckAccountVA(t *testing.T) {
-
-}
-
 // function test support
 
 func VacToMain() {
 
 }
 
-func CheckAccountVA() {
+func CheckAccountVA(AccVa string) (status bool) {
+
+	var AccountNumber = GetAccountById()
+	for _, v := range VirAcc {
+		if v.VaNum == AccVa && v.AccountNum == AccountNumber {
+			return true
+		}
+	}
+	return
 
 }
 
@@ -165,5 +192,9 @@ func GetAccountById() (AccountNumber string) {
 			return
 		}
 	}
+	return
+}
+
+func CheckBalance() {
 	return
 }

@@ -12,15 +12,15 @@ type Customers struct {
 	CustAddress  string    `json:"cust_address"`
 	CustPhone    string    `json:"cust_phone"`
 	CustEmail    string    `json:"cust_email"`
-	CustPict     string    `json:"cust_pict"`
 	CustPassword string    `json:"cust_password"`
+	CustPict     string    `json:"cust_pict"`
 	IsVerified   bool      `json:"is_verified"`
 	Channel      string    `json:"channel"`
 	CreatedAt    time.Time `json:"created_at"`
 	UpdatedAt    time.Time `json:"updated_at"`
 }
 
-func RegisterCustomer(db *sql.DB, objCustomer Customers, AccNum string) error {
+func RegisterCustomer(db *sql.DB, objCustomer Customers, AccNum string, Pass string) error {
 	Create := time.Now()
 	Update := time.Now()
 	Verified := false
@@ -29,7 +29,7 @@ func RegisterCustomer(db *sql.DB, objCustomer Customers, AccNum string) error {
 		objCustomer.CustAddress,
 		objCustomer.CustPhone,
 		objCustomer.CustEmail,
-		objCustomer.CustPassword,
+		Pass,
 		Verified,
 		objCustomer.Channel,
 		Create,

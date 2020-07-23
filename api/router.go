@@ -5,6 +5,9 @@ import (
 
 	"github.com/ndv6/tsaving/api/customers"
 	"github.com/ndv6/tsaving/api/email"
+
+	"github.com/ndv6/tsaving/database"
+
 	"github.com/ndv6/tsaving/api/home"
 	"github.com/ndv6/tsaving/api/not_found"
 	"github.com/ndv6/tsaving/api/virtual_accounts"
@@ -15,6 +18,10 @@ import (
 
 func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 	chiRouter := chi.NewRouter()
+
+	// Handler objects initialization
+	ph := database.NewPartnerHandler(db)
+	ah := database.NewAccountHandler(db)
 	ch := customers.NewCustomerHandler(jwt, db)
 	va := virtual_accounts.NewVAHandler(jwt, db)
 	// Home endpoint
@@ -33,7 +40,16 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 	// Email verification endpoint
 	chiRouter.Post("/email/verify-email-token", email.VerifyEmailToken(db))
 
-	// Not found endpoint
+	// Customer Endpoint
+	chiRouter.With(jwt.AuthMiddleware).Get("/customers/getprofile", ch.GetProfile)
+	chiRouter.With(jwt.AuthMiddleware).Post("/customers/updateprofile", ch.UpdateProfile)
+	chiRouter.With(jwt.AuthMiddleware).Post("/customers/updatephoto", ch.UpdatePhoto)
+
+	// Main account transactions endpoint
+	chiRouter.Post("/deposit", customers.DepositToMainAccount(ph, ah))
+
+	// Url endpoint not found
 	chiRouter.NotFound(not_found.NotFoundHandler)
+
 	return chiRouter
 }

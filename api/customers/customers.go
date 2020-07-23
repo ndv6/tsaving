@@ -65,8 +65,6 @@ func (ch *CustomerHandler) GetProfile(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Fprintln(w, string(res))
 }
-<<<<<<< HEAD
-=======
 
 func (ch *CustomerHandler) Create(w http.ResponseWriter, r *http.Request) {
 	b, err := ioutil.ReadAll(r.Body)
@@ -123,4 +121,3 @@ func (ch *CustomerHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
->>>>>>> 4505c76... feat: api to deposit to main account

@@ -15,19 +15,18 @@ import (
 	"github.com/go-chi/chi"
 )
 
-func Router(db *sql.DB) *chi.Mux {
+func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 	chiRouter := chi.NewRouter()
 
 	// Handler objects initialization
 	ph := database.NewPartnerHandler(db)
 	ah := database.NewAccountHandler(db)
-<<<<<<< HEAD
-=======
 	ch := customers.NewCustomerHandler(jwt, db)
->>>>>>> 4505c76... feat: api to deposit to main account
 
 	// Home endpoint
 	chiRouter.Get("/", home.HomeHandler)
+	chiRouter.Post("/register", ch.Create)
+	chiRouter.Post("/login", customers.LoginHandler(jwt, db))
 
 	// Email verification endpoint
 	chiRouter.Post("/email/verify-email-token", email.VerifyEmailToken(db))

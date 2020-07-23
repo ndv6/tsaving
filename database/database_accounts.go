@@ -44,7 +44,7 @@ func TransferFromMainToVa(accNum, vaNum string, amount int, db *sql.DB) (err err
 	if err != nil {
 		return
 	}
-	// println("d")
+
 	logDesc := models.LogDescriptionMainToVaTemplate(amount, accNum, vaNum)
 	logData := models.TransactionLogs{
 		AccountNum:  accNum,

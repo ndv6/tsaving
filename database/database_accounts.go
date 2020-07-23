@@ -8,12 +8,7 @@ import (
 )
 
 func GetBalanceAcc(accNum string, db *sql.DB) (acc models.Accounts, err error) {
-	var balanceFloat float32
-	err = db.QueryRow("SELECT account_balance FROM accounts WHERE account_num = ($1) ", accNum).Scan(&balanceFloat)
-	if err != nil {
-		return
-	}
-	acc.AccountBalance = int(balanceFloat)
+	err = db.QueryRow("SELECT account_balance FROM accounts WHERE account_num = ($1) ", accNum).Scan(&acc.AccountBalance)
 	return
 }
 
@@ -25,15 +20,13 @@ func TransferFromMainToVa(accNum, vaNum string, amount int, db *sql.DB) (err err
 	}
 	defer tx.Rollback()
 
-	var sourceBalance float32
+	var sourceBalance int
 	err = tx.QueryRow("SELECT account_balance FROM accounts WHERE account_num = $1 FOR UPDATE", accNum).Scan(&sourceBalance)
 	if err != nil {
 		return
 	}
 
 	status := CheckBalance("MAIN", accNum, amount, db)
-	//check balance here
-
 	if !status {
 		err = errors.New("insufficient balance")
 		return
@@ -49,5 +42,4 @@ func TransferFromMainToVa(accNum, vaNum string, amount int, db *sql.DB) (err err
 	}
 	tx.Commit()
 	return
-
 }

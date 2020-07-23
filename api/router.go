@@ -18,7 +18,7 @@ func Router(db *sql.DB) *chi.Mux {
 
 	// Virtual Account endpoint
 	chiRouter.Post("/virtualaccount/create", vah.Create)
-	chiRouter.Put("/virtualaccount/edit/{vaNumber}", vah.Edit)
+	chiRouter.Put("/virtualaccount/edit", vah.Edit)
 
 	// Url endpoint not found
 	chiRouter.NotFound(not_found.NotFoundHandler)

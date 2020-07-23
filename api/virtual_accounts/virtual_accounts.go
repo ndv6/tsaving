@@ -5,11 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"math/rand"
+	"log"
 	"net/http"
 	"strconv"
 
-	"github.com/go-chi/chi"
 	"github.com/ndv6/tsaving/database"
 	helper "github.com/ndv6/tsaving/helpers"
 	"github.com/ndv6/tsaving/models"
@@ -48,22 +47,53 @@ func (vah *VirtualAccHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//rows, err := db.Query("SELECT va_num FROM virtual_accounts WHERE account_num = $1;", vac.AccountNum)
-	//if err != nil {
-	// return
-	//}
+	// initialize model
+	var vam models.VirtualAccounts
+	// var am models.Accounts
+
+	// validasi
+	am, err := models.GetMainAccount(vah.db, vac.AccountNum)
+	if err != nil {
+		helper.HTTPError(w, http.StatusBadRequest, "unable to validate account. please try again and make sure account is correct")
+		return
+	}
 
 	// generate random va number
-	vaNum := vac.AccountNum + strconv.Itoa(rand.Intn(999)) // combine account number with random number (0-999)
+	// vaNum := valAccNum + strconv.Itoa(rand.Intn(999)) // combine account number with random number (0-999)
+
+	// generate va number
+	res, err := database.GetListVANum(am.AccountNum, vah.db)
+	if err != nil {
+		fmt.Println(err)
+		helper.HTTPError(w, http.StatusBadRequest, "unable to get virtual account list")
+		return
+	}
+
+	// get the last of VaNum
+	suffixVaNumLast := []rune(res[len(res)-1])
+	suffixVaNum := string(suffixVaNumLast[10:])
+
+	lastVaNum, err := strconv.Atoi(suffixVaNum)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+
+	newSuffix := ""
+	if lastVaNum+1 < 10 {
+		newSuffix = "00" + strconv.Itoa(lastVaNum+1)
+	} else if (lastVaNum + 1) < 100 {
+		newSuffix = "0" + strconv.Itoa(lastVaNum+1)
+	} else {
+		newSuffix = strconv.Itoa(lastVaNum + 1)
+	}
+	newVaNum := am.AccountNum + newSuffix
+	log.Println(newSuffix)
+	log.Println(am.AccountNum)
+	log.Println(newVaNum)
 
 	// insert to db
-	var vam models.VirtualAccounts
-	// id := select max(id) from db
-	// check if VaID < 10 -> vaNum := string(norek + "-00%s", string(vaID))
-	// check if VaID < 100 -> vaNum := string(norek + "-0%s", string(vaID))
-	// check else -> vaNum := string(norek + "-%s", string(vaID))
-	// vaNum := string(norek + "-%s", vaID)
-	vam, err = database.CreateVA(vaNum, vac.AccountNum, vac.VaColor, vac.VaLabel, vah.db)
+	vam, err = database.CreateVA(newVaNum, vac.AccountNum, vac.VaColor, vac.VaLabel, vah.db)
 
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -73,8 +103,8 @@ func (vah *VirtualAccHandler) Create(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "VA Number: %v Created!\n", vam.VaNum)
 }
 
+// to edit VA
 func (vah *VirtualAccHandler) Edit(w http.ResponseWriter, r *http.Request) {
-	vaNum := chi.URLParam(r, "vaNumber")
 
 	// read request body
 	req, err := ioutil.ReadAll(r.Body)
@@ -92,14 +122,15 @@ func (vah *VirtualAccHandler) Edit(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// update to db
-	fmt.Printf(vaNum + " " + vac.AccountNum + " " + vac.VaColor + " " + vac.VaLabel)
+	fmt.Printf(vac.VaNumber + " " + " " + vac.VaColor + " " + vac.VaLabel)
 	var vam models.VirtualAccounts
-	vam, err = database.UpdateVA(vaNum, vac.VaColor, vac.VaLabel, vah.db)
+	vam, err = database.UpdateVA(vac.VaNumber, vac.VaColor, vac.VaLabel, vah.db)
 
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		fmt.Fprint(w, "failed insert data to db")
+		return
 	}
 
-	fmt.Fprintf(w, "VA Number: %v Updated!\n", vam.VaNum)
+	fmt.Fprintf(w, "Virtual Account: %v Updated!\n", vam.VaNum)
 }

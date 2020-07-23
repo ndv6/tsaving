@@ -1,7 +1,9 @@
 package helpers
 
 import (
+	"crypto/sha256"
 	"database/sql"
+	"encoding/hex"
 	"encoding/json"
 	"net/http"
 
@@ -35,4 +37,9 @@ func CheckBalance(target string, accNumber string, amount int, db *sql.DB) (stat
 		status = true
 	}
 	return
+}
+
+func HashString(toHash string) string {
+	hashed := sha256.Sum256([]byte(toHash))
+	return hex.EncodeToString(hashed[:])
 }

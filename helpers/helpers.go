@@ -3,6 +3,7 @@ package helpers
 import (
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"net/http"
 
 	"github.com/ndv6/tsaving/database"
@@ -16,14 +17,29 @@ func HTTPError(w http.ResponseWriter, status int, errorMessage string) {
 
 //untuk ngecek input rekening apakah benar atau tidak.
 func CheckAccountVA(db *sql.DB, VaNum string, id int) (err error) {
-	VaNumber := 0
-	err = db.QueryRow("SELECT va_num FROM virtual_accounts INNER JOIN customers ON virtual_accounts.account_num = customers.account_num WHERE va_num = $1 AND cust_id = $2", VaNum, id).Scan(&VaNumber)
+	var exist bool
+	err = db.QueryRow("SELECT EXISTS(SELECT va_num FROM virtual_accounts INNER JOIN customers ON virtual_accounts.account_num = customers.account_num WHERE va_num = $1 AND cust_id = $2)", VaNum, id).Scan(&exist)
+	if err != nil {
+		return
+	}
+	if !exist {
+		err = errors.New("invalid virtual account number")
+		return
+	}
 	return
 }
 
 func CheckAccount(db *sql.DB, AccountNum string, id int) (err error) {
-	AccountNumber := 0
-	err = db.QueryRow("SELECT account_num FROM customers WHERE account_num = $1 AND cust_id = $2", AccountNum, id).Scan(&AccountNumber)
+	// AccountNumber := 0
+	var exist bool
+	err = db.QueryRow("SELECT EXISTS(SELECT account_num FROM customers WHERE account_num = $1 AND cust_id = $2)", AccountNum, id).Scan(&exist)
+	if err != nil {
+		return
+	}
+	if !exist {
+		err = errors.New("invalid account number")
+		return
+	}
 	return
 }
 

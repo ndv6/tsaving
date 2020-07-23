@@ -49,8 +49,10 @@ func (va *VAHandler) VacToMain(w http.ResponseWriter, r *http.Request) {
 
 	// cek rekening
 	err = helper.CheckAccountVA(va.db, VirAcc.VacNumber, 4)
+	// fmt.Fprint(w, err)
 	if err != nil {
-		helper.HTTPError(w, http.StatusBadRequest, "invalid virtual account number")
+		// fmt.Fprint(w, err)
+		helper.HTTPError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 

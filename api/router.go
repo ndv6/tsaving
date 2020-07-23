@@ -15,7 +15,8 @@ func Router(db *sql.DB) *chi.Mux {
 	chiRouter := chi.NewRouter()
 	chiRouter.Get("/", home.HomeHandler)
 	va := virtual_accounts.NewVAHandler(db)
-	chiRouter.Post("/vac/add_balance_vac", va.AddBalanceVA)
+	chiRouter.Put("/vac/add_balance_vac", va.AddBalanceVA)
+	// ch := customers.New
 	chiRouter.NotFound(not_found.NotFoundHandler)
 	return chiRouter
 }

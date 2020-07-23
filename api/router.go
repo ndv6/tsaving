@@ -3,9 +3,13 @@ package api
 import (
 	"database/sql"
 
+	"github.com/ndv6/tsaving/api/customers"
 	"github.com/ndv6/tsaving/api/email"
+<<<<<<< HEAD
 
 	"github.com/ndv6/tsaving/api/customers"
+=======
+>>>>>>> origin
 	"github.com/ndv6/tsaving/api/home"
 	"github.com/ndv6/tsaving/api/not_found"
 	"github.com/ndv6/tsaving/api/virtual_accounts"
@@ -23,11 +27,17 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 	chiRouter.Post("/register", ch.Create)
 	chiRouter.Post("/login", customers.LoginHandler(jwt, db))
 
+<<<<<<< HEAD
 	// VAC transactions API endpoints
 	chiRouter.With(jwt.AuthMiddleware).Post("/vac/to_main", va.VacToMain)
 	chiRouter.With(jwt.AuthMiddleware).Get("/vac/list", va.VacList)
 
 	// Url endpoint not found
+=======
+	// Get transaction history
+	chiRouter.With(jwt.AuthMiddleware).Get("/transaction/history", ch.HistoryTransactionHandler(db))
+
+>>>>>>> origin
 	// Email verification endpoint
 	chiRouter.Post("/email/verify-email-token", email.VerifyEmailToken(db))
 

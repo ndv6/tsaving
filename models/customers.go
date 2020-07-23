@@ -44,6 +44,11 @@ func LoginCustomer(db *sql.DB, email string, password string) (objCustomer Custo
 	return
 }
 
+func GetAccNumber(db *sql.DB, id int) (acc string, err error) {
+	err = db.QueryRow("SELECT account_num FROM customers WHERE cust_id = $1", id).Scan(&acc)
+	return
+}
+
 func GetProfile(db *sql.DB, id int) (Customers, error) {
 	var cus Customers
 	row := db.QueryRow("SELECT cust_id, account_num, cust_name, cust_address, cust_phone, cust_email, cust_pict, is_verified, channel, created_at, updated_at FROM customers WHERE cust_id = $1", id)

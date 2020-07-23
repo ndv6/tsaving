@@ -59,7 +59,7 @@ func (ch *CustomerHandler) Create(w http.ResponseWriter, r *http.Request) {
 	Pass := helpers.HashString(cus.CustPassword)
 
 	if err := models.RegisterCustomer(ch.db, cus, AccNum, Pass); err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+		helpers.HTTPError(w, http.StatusBadRequest, "Unable to Register, Your Phone Number Or Email Has Been Used")
 		return
 	}
 

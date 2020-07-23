@@ -25,6 +25,8 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 
 	// Home endpoint
 	chiRouter.Get("/", home.HomeHandler)
+
+	// Account actions endpoint
 	chiRouter.Post("/register", ch.Create)
 	chiRouter.Post("/login", customers.LoginHandler(jwt, db))
 

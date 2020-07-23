@@ -6,36 +6,37 @@ import (
 )
 
 type Customers struct {
-	CustId       int       `json:"cust_id"`
-	AccountNum   string    `json:"account_num"`
-	CustName     string    `json:"cust_name"`
-	CustAddress  string    `json:"cust_address"`
-	CustPhone    string    `json:"cust_phone"`
-	CustEmail    string    `json:"cust_email"`
-	CustPict     string    `json:"cust_pict"`
-	CustPassword string    `json:"cust_password"`
-	IsVerified   bool      `json:"is_verified"`
-	Channel      string    `json:"channel"`
-	CreatedAt    time.Time `json:"created_at"`
-	UpdatedAt    time.Time `json:"updated_at"`
+	CustId 			int 		`json:"cust_id"`
+	AccountNum 		string		`json:"account_num"`
+ 	CustName 		string 		`json:"cust_name"`
+	CustAddress 	string 		`json:"cust_address"`
+	CustPhone 		string 		`json:"cust_phone"`
+	CustEmail 		string 		`json:"cust_email"`
+	CustPassword 	string 		`json:"cust_password"`
+	CustPict		string		`json:"cust_pict"`
+	IsVerified 		bool 		`json:"is_verified"`
+	Channel 		string 		`json:"channel"`
+	CreatedAt 		time.Time 	`json:"created_at"`
+	UpdatedAt 		time.Time 	`json:"updated_at"`
 }
 
-func RegisterCustomer(db *sql.DB, objCustomer Customers, AccNum string) error {
+
+func RegisterCustomer(db *sql.DB, objCustomer Customers, AccNum string, Pass string) error {
 	Create := time.Now()
 	Update := time.Now()
 	Verified := false
 	_, err := db.Exec("INSERT into customers (account_num, cust_name, cust_address, cust_phone, cust_email, cust_password, is_verified, channel, created_at, updated_at) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)", AccNum,
-		objCustomer.CustName,
-		objCustomer.CustAddress,
-		objCustomer.CustPhone,
-		objCustomer.CustEmail,
-		objCustomer.CustPassword,
-		Verified,
-		objCustomer.Channel,
-		Create,
-		Update,
-	)
-	return err
+			objCustomer.CustName,
+			objCustomer.CustAddress,
+			objCustomer.CustPhone,
+			objCustomer.CustEmail,
+			Pass,
+			Verified,
+			objCustomer.Channel,
+			Create,
+			Update,
+		)
+		return err
 }
 
 func LoginCustomer(db *sql.DB, email string, password string) (objCustomer Customers, err error) {

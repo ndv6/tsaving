@@ -10,10 +10,16 @@ import (
 	"github.com/ndv6/tsaving/models"
 )
 
-func HistoryTransactionHandler(db *sql.DB) http.HandlerFunc {
+func (ch *CustomerHandler) HistoryTransactionHandler(db *sql.DB) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		custID := 1
-		listHistoryTransaction, err := models.ListTransactionLog(db, custID)
+		token := ch.jwt.GetToken(r)
+		err := token.Valid()
+		if err != nil {
+			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		listHistoryTransaction, err := models.ListTransactionLog(db, token.CustId)
 		if err != nil {
 			helpers.HTTPError(w, http.StatusBadRequest, "Cannot get history transaction")
 			return

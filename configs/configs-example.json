@@ -1,9 +1,9 @@
 {
     "port": "-",
-    "SECRET_KEY": "yoursecretkey",
+    "SECRET_KEY": "-",
     "database": {
         "username": "postgres",
-        "password": "password",
+        "password": "-",
         "dbName": "db_tsaving",
         "dbType": "postgres",
         "port": "5432",

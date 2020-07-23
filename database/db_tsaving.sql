@@ -1,19 +1,4 @@
 -- Adminer 4.7.7 PostgreSQL dump
-DROP TABLE IF EXISTS "virtual_accounts";
-DROP SEQUENCE IF EXISTS virtual_accounts_va_id_seq;
-CREATE SEQUENCE virtual_accounts_va_id_seq INCREMENT 1 MINVALUE 1 MAXVALUE 2147483647 START 1 CACHE 1;
-
-DROP TABLE IF EXISTS "transaction_logs";
-DROP SEQUENCE IF EXISTS transaction_logs_tl_id_seq;
-CREATE SEQUENCE transaction_logs_tl_id_seq INCREMENT 1 MINVALUE 1 MAXVALUE 2147483647 START 1 CACHE 1;
-
-DROP TABLE IF EXISTS "email_token";
-DROP SEQUENCE IF EXISTS email_token_et_id_seq;
-CREATE SEQUENCE email_token_et_id_seq INCREMENT 1 MINVALUE 1 MAXVALUE 2147483647 START 1 CACHE 1;
-
-DROP TABLE IF EXISTS "accounts";
-DROP SEQUENCE IF EXISTS accounts_account_id_seq;
-CREATE SEQUENCE accounts_account_id_seq INCREMENT 1 MINVALUE 1 MAXVALUE 2147483647 START 1 CACHE 1;
 
 DROP TABLE IF EXISTS "customers";
 DROP SEQUENCE IF EXISTS customers_cust_id_seq;
@@ -38,11 +23,14 @@ CREATE TABLE "public"."customers" (
     CONSTRAINT "customers_pkey" PRIMARY KEY ("cust_id")
 ) WITH (oids = false);
 
+DROP TABLE IF EXISTS "accounts";
+DROP SEQUENCE IF EXISTS accounts_account_id_seq;
+CREATE SEQUENCE accounts_account_id_seq INCREMENT 1 MINVALUE 1 MAXVALUE 2147483647 START 1 CACHE 1;
 
 CREATE TABLE "public"."accounts" (
     "account_id" integer DEFAULT nextval('accounts_account_id_seq') NOT NULL,
     "account_num" character varying(10),
-    "account_balance" numeric(100,2),
+    "account_balance" integer,
     "created_at" timestamp,
     CONSTRAINT "accounts_account_num_key" UNIQUE ("account_num"),
     CONSTRAINT "accounts_pkey" PRIMARY KEY ("account_id"),
@@ -50,9 +38,13 @@ CREATE TABLE "public"."accounts" (
 ) WITH (oids = false);
 
 
+DROP TABLE IF EXISTS "email_token";
+DROP SEQUENCE IF EXISTS email_token_et_id_seq;
+CREATE SEQUENCE email_token_et_id_seq INCREMENT 1 MINVALUE 1 MAXVALUE 2147483647 START 1 CACHE 1;
+
 CREATE TABLE "public"."email_token" (
     "et_id" integer DEFAULT nextval('email_token_et_id_seq') NOT NULL,
-    "token" character varying(200),
+    "token" text,
     "email" character varying(64),
     CONSTRAINT "email_token_pkey" PRIMARY KEY ("et_id"),
     CONSTRAINT "email_token_token_key" UNIQUE ("token"),
@@ -76,12 +68,15 @@ CREATE TABLE "public"."partners" (
 INSERT INTO "partners" ("partner_id", "client_id", "secret") VALUES
 (1,	1,	'SVG2020');
 
+DROP TABLE IF EXISTS "transaction_logs";
+DROP SEQUENCE IF EXISTS transaction_logs_tl_id_seq;
+CREATE SEQUENCE transaction_logs_tl_id_seq INCREMENT 1 MINVALUE 1 MAXVALUE 2147483647 START 1 CACHE 1;
 
 CREATE TABLE "public"."transaction_logs" (
     "tl_id" integer DEFAULT nextval('transaction_logs_tl_id_seq') NOT NULL,
     "account_num" character varying(10),
     "dest_account" character varying(20),
-    "tran_amount" numeric(100,2),
+    "tran_amount" integer,
     "description" character varying(200) NOT NULL,
     "created_at" timestamp,
     CONSTRAINT "transaction_logs_pkey" PRIMARY KEY ("tl_id"),
@@ -89,11 +84,15 @@ CREATE TABLE "public"."transaction_logs" (
 ) WITH (oids = false);
 
 
+DROP TABLE IF EXISTS "virtual_accounts";
+DROP SEQUENCE IF EXISTS virtual_accounts_va_id_seq;
+CREATE SEQUENCE virtual_accounts_va_id_seq INCREMENT 1 MINVALUE 1 MAXVALUE 2147483647 START 1 CACHE 1;
+
 CREATE TABLE "public"."virtual_accounts" (
     "va_id" integer DEFAULT nextval('virtual_accounts_va_id_seq') NOT NULL,
     "va_num" character varying(13),
     "account_num" character varying(10),
-    "va_balance" numeric(100,2),
+    "va_balance" integer,
     "va_color" character varying(15),
     "va_label" character varying(100),
     "created_at" timestamp,
@@ -104,4 +103,4 @@ CREATE TABLE "public"."virtual_accounts" (
 ) WITH (oids = false);
 
 
--- 2020-07-21 15:26:13.584233+00
+-- 2020-07-23 07:05:30.389713+00

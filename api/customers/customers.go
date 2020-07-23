@@ -1,4 +1,4 @@
-package api
+package customers
 
 import (
 	"database/sql"
@@ -8,14 +8,15 @@ import (
 
 	"github.com/ndv6/tsaving/helpers"
 	"github.com/ndv6/tsaving/models"
+	"github.com/ndv6/tsaving/tokens"
 )
 
 type CustomerHandler struct {
-	jwt *token.JWT
+	jwt *tokens.JWT
 	db  *sql.DB
 }
 
-func NewCustomerHandler(db *sql.DB, jwt *token.JWT) *CustomerHandler {
+func NewCustomerHandler(db *sql.DB, jwt *tokens.JWT) *CustomerHandler {
 	return &CustomerHandler{db: db, jwt: jwt}
 }
 

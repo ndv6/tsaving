@@ -7,8 +7,9 @@ import (
 	"encoding/json"
 	"net/http"
 	"os"
-	"github.com/ndv6/tsaving/models"
+
 	"github.com/ndv6/tsaving/database"
+	"github.com/ndv6/tsaving/models"
 )
 
 func HTTPError(w http.ResponseWriter, status int, errorMessage string) {
@@ -27,7 +28,8 @@ func LoadConfig(file string) (models.Config, error) {
 		return models.Config{}, err
 	}
 	return cfg, err
-  
+}
+
 func CheckBalance(target string, accNumber string, amount int, db *sql.DB) (status bool) {
 	if target == "MAIN" {
 		sourceBalance, err := database.GetBalanceAcc(accNumber, db)

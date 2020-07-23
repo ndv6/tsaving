@@ -13,8 +13,8 @@ import (
 )
 
 type InputVac struct {
-	BalanceChange float64 `json:"balance_change"`
-	VacNumber     string  `json:"va_num"`
+	BalanceChange int    `json:"balance_change"`
+	VacNumber     string `json:"va_num"`
 }
 
 type VAResponse struct {
@@ -57,7 +57,7 @@ func (va *VAHandler) VacToMain(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//cek input apakah melebihi saldo
-	var BalanceChange int = int(VirAcc.BalanceChange)
+	var BalanceChange int = VirAcc.BalanceChange
 	returnValue := database.CheckBalance("VA", VirAcc.VacNumber, BalanceChange, va.db)
 	if returnValue == false {
 		helper.HTTPError(w, http.StatusBadRequest, "your input is bigger than virtual account balance.")

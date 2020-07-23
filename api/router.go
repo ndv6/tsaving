@@ -8,7 +8,6 @@ import (
 
 	"github.com/ndv6/tsaving/database"
 
-	"github.com/ndv6/tsaving/api/customers"
 	"github.com/ndv6/tsaving/api/home"
 	"github.com/ndv6/tsaving/api/not_found"
 	"github.com/ndv6/tsaving/tokens"
@@ -18,7 +17,6 @@ import (
 
 func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 	chiRouter := chi.NewRouter()
-	ch := customers.NewCustomerHandler(jwt, db)
 
 	// Handler objects initialization
 	ph := database.NewPartnerHandler(db)

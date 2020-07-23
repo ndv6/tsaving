@@ -15,13 +15,12 @@ var jwt *tokens.JWT
 
 func main() {
 	config, err := helpers.LoadConfig("configs/configs.json")
-	jwt := tokens.New([]byte(config.SecretKey))
-
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	jwt := tokens.New([]byte(config.SecretKey))
+
 	db, err := database.GetDatabaseConnection(config.DbCfg)
 	if err != nil {
 		log.Fatal(err)

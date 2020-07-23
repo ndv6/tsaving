@@ -44,14 +44,12 @@ func ListTransactionLog(db *sql.DB, id int) (list []HistoryTransaction, err erro
 	}
 
 	defer rows.Close()
-	var amount float32
 	for rows.Next() {
 		var ht HistoryTransaction
-		err = rows.Scan(&ht.AccountNum, &ht.DestAccount, &amount, &ht.Description, &ht.CreatedAt)
+		err = rows.Scan(&ht.AccountNum, &ht.DestAccount, &ht.TranAmount, &ht.Description, &ht.CreatedAt)
 		if err != nil {
 			return list, err
 		}
-		ht.TranAmount = int(amount)
 		list = append(list, ht)
 	}
 	return

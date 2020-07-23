@@ -23,7 +23,6 @@ CREATE TABLE "public"."customers" (
     CONSTRAINT "customers_pkey" PRIMARY KEY ("cust_id")
 ) WITH (oids = false);
 
-
 DROP TABLE IF EXISTS "accounts";
 DROP SEQUENCE IF EXISTS accounts_account_id_seq;
 CREATE SEQUENCE accounts_account_id_seq INCREMENT 1 MINVALUE 1 MAXVALUE 2147483647 START 1 CACHE 1;
@@ -45,7 +44,7 @@ CREATE SEQUENCE email_token_et_id_seq INCREMENT 1 MINVALUE 1 MAXVALUE 2147483647
 
 CREATE TABLE "public"."email_token" (
     "et_id" integer DEFAULT nextval('email_token_et_id_seq') NOT NULL,
-    "token" character varying(200),
+    "token" text,
     "email" character varying(64),
     CONSTRAINT "email_token_pkey" PRIMARY KEY ("et_id"),
     CONSTRAINT "email_token_token_key" UNIQUE ("token"),
@@ -104,4 +103,4 @@ CREATE TABLE "public"."virtual_accounts" (
 ) WITH (oids = false);
 
 
--- 2020-07-23 03:47:48.142343+00
+-- 2020-07-23 07:05:30.389713+00

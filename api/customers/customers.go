@@ -23,8 +23,7 @@ func NewCustomerHandler(jwt *tokens.JWT, db *sql.DB) *CustomerHandler{
 }
 
 type RegisterResponse struct{
-	Token string `json:"token"`
-	Email string `json:"email"`
+	Status string `json:"status"`
 }
 
 func (ch *CustomerHandler) Create(w http.ResponseWriter, r *http.Request){
@@ -67,8 +66,7 @@ func (ch *CustomerHandler) Create(w http.ResponseWriter, r *http.Request){
 	})
 
 	data := RegisterResponse{
-		Token: tokenRegister,
-		Email: cus.CustEmail,
+		Status: "Register Succedeed",
 	}
 
 	err = json.NewEncoder(w).Encode(data)
@@ -79,6 +77,11 @@ func (ch *CustomerHandler) Create(w http.ResponseWriter, r *http.Request){
 
 	if err := models.AddEmailTokens(ch.db, tokenRegister, cus.CustEmail); err != nil{
 		helpers.HTTPError(w, http.StatusBadRequest, "Email Token Failed")
+		return 
+	}
+
+	if err := models.AddAccountsWhileRegister(ch.db, AccNum); err != nil{
+		helpers.HTTPError(w, http.StatusBadRequest, "Account Failed")
 		return 
 	}
 }

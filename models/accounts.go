@@ -21,3 +21,13 @@ func GetMainAccount(db *sql.DB, accNum string) (Accounts, error) {
 	}
 	return acc, nil
 }
+
+func AddAccountsWhileRegister(db *sql.DB, AccNum string) error {
+	Create := time.Now()
+	Ammount := 0
+	_, err := db.Exec("INSERT into accounts(account_num, account_balance, created_at) values ($1, $2, $3)", AccNum,
+			Ammount,
+			Create,
+		)
+		return err
+}

@@ -27,7 +27,8 @@ func LoadConfig(file string) (models.Config, error) {
 		return models.Config{}, err
 	}
 	return cfg, err
-  
+}
+
 func CheckBalance(target string, accNumber string, amount int, db *sql.DB) (status bool) {
 	if target == "MAIN" {
 		sourceBalance, err := database.GetBalanceAcc(accNumber, db)

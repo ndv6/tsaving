@@ -17,15 +17,15 @@ import (
 func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 	chiRouter := chi.NewRouter()
 	ch := customers.NewCustomerHandler(jwt, db)
-	va := virtual_accounts.NewVAHandler(db)
+	va := virtual_accounts.NewVAHandler(jwt, db)
 	// Home endpoint
 	chiRouter.Get("/", home.HomeHandler)
 	chiRouter.Post("/register", ch.Create)
 	chiRouter.Post("/login", customers.LoginHandler(jwt, db))
 
 	// VAC transactions API endpoints
-	chiRouter.Post("/vac/to_main", va.VacToMain)
-	chiRouter.Get("/vac/list", va.VacList)
+	chiRouter.With(jwt.AuthMiddleware).Post("/vac/to_main", va.VacToMain)
+	chiRouter.With(jwt.AuthMiddleware).Get("/vac/list", va.VacList)
 
 	// Url endpoint not found
 	// Email verification endpoint

@@ -6,9 +6,12 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"time"
 
 	"github.com/ndv6/tsaving/database"
 	helper "github.com/ndv6/tsaving/helpers"
+	"github.com/ndv6/tsaving/models"
+	"github.com/ndv6/tsaving/tokens"
 )
 
 type InputVa struct {
@@ -22,15 +25,16 @@ type VAResponse struct {
 }
 
 type VAHandler struct {
-	db *sql.DB
+	jwt *tokens.JWT
+	db  *sql.DB
 }
 
-func NewVAHandler(db *sql.DB) *VAHandler {
-	return &VAHandler{db}
+func NewVAHandler(jwt *tokens.JWT, db *sql.DB) *VAHandler {
+	return &VAHandler{jwt, db}
 }
 
 func (va *VAHandler) VacToMain(w http.ResponseWriter, r *http.Request) {
-
+	token := va.jwt.GetToken(r)
 	//ambil input dari jsonnya (no rek VAC dan saldo input)
 	b, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -47,7 +51,7 @@ func (va *VAHandler) VacToMain(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// cek rekening
-	err = database.CheckAccountVA(va.db, VirAcc.VaNum, 4)
+	err = database.CheckAccountVA(va.db, VirAcc.VaNum, token.CustId)
 	if err != nil {
 		helper.HTTPError(w, http.StatusBadRequest, err.Error())
 		return
@@ -80,13 +84,32 @@ func (va *VAHandler) VacToMain(w http.ResponseWriter, r *http.Request) {
 		helper.HTTPError(w, http.StatusBadRequest, "unable to encode response")
 		return
 	}
+
+	logDesc := models.LogDescriptionVaToMainTemplate(VirAcc.BalanceChange, VirAcc.VaNum, token.AccountNum)
+
+	//inpu transaction log
+	tLogs := models.TransactionLogs{
+		AccountNum:  token.AccountNum,
+		DestAccount: VirAcc.VaNum,
+		TranAmount:  VirAcc.BalanceChange,
+		Description: logDesc,
+		CreatedAt:   time.Now(),
+	}
+
+	err = models.TransactionLog(va.db, tLogs)
+	if err != nil {
+		helper.HTTPError(w, http.StatusBadRequest, "transaction log failed")
+		return
+	}
+
 	return
 
 }
 
 func (va *VAHandler) VacList(w http.ResponseWriter, r *http.Request) {
 
-	res, err := database.GetListVA(va.db, 4)
+	token := va.jwt.GetToken(r)
+	res, err := database.GetListVA(va.db, token.CustId)
 
 	if err != nil {
 		helper.HTTPError(w, http.StatusBadRequest, "id must be integer")

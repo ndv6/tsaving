@@ -44,7 +44,7 @@ func (vh VaHandler) DeleteVac(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cust, err := database.GetCustomerById(vh.Db)
+	cust, err := database.GetCustomerById(vh.Db, vh.Jwt.GetToken(r).CustId)
 	if err != nil {
 		helpers.HTTPError(w, http.StatusBadRequest, "User not found")
 		return

@@ -8,8 +8,8 @@ import (
 	"github.com/ndv6/tsaving/models"
 )
 
-func GetBalanceAcc(accNum string, db *sql.DB) (acc models.Accounts, err error) {
-	err = db.QueryRow("SELECT account_balance FROM accounts WHERE account_num = ($1) ", accNum).Scan(&acc.AccountBalance)
+func GetBalanceAcc(accNum string, db *sql.DB) (balance int, err error) {
+	err = db.QueryRow("SELECT account_balance FROM accounts WHERE account_num = ($1) ", accNum).Scan(&balance)
 	return
 }
 

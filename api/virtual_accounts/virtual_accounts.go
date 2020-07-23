@@ -35,7 +35,7 @@ func (va *VAHandler) AddBalanceVA(w http.ResponseWriter, r *http.Request) {
 	token := va.jwt.GetToken(r)
 	err := json.NewDecoder(r.Body).Decode(&vac)
 	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, "unable to parse json request")
+		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 	//check if va number is exist and valid to its owner
@@ -57,7 +57,7 @@ func (va *VAHandler) AddBalanceVA(w http.ResponseWriter, r *http.Request) {
 	}
 	err = json.NewEncoder(w).Encode(response)
 	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, "unable to encode response")
+		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 

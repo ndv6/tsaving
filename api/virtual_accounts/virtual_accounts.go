@@ -15,7 +15,7 @@ type AddBalanceVARequest struct {
 	VaBalance int    `json:"va_balance"`
 }
 
-type AddBalanceVAResponse struct {
+type VAResponse struct {
 	Status       int    `json:"status"`
 	Notification string `json:"notification"`
 }
@@ -38,18 +38,18 @@ func (va *VAHandler) AddBalanceVA(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//cek balance 2008210001 ini perlu diupdate ambilnya dari token
-	status := helpers.CheckBalance("MAIN", "2008210001", vac.VaBalance, va.db)
-	if !status {
-		helpers.HTTPError(w, http.StatusBadRequest, "insufficient balance")
-		return
-	}
+	// status := helpers.CheckBalance("MAIN", "2008210001", vac.VaBalance, va.db)
+	// if !status {
+	// 	helpers.HTTPError(w, http.StatusBadRequest, "insufficient balance")
+	// 	return
+	// }
 	//perlu diupdate ambil dari token
 	updateBalanceVA := database.TransferFromMainToVa("2008210001", vac.VaNum, vac.VaBalance, va.db)
 	if updateBalanceVA != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, "add balance to virtual account failed")
+		helpers.HTTPError(w, http.StatusBadRequest, updateBalanceVA.Error())
 		return
 	}
-	response := AddBalanceVAResponse{
+	response := VAResponse{
 		Status:       1,
 		Notification: fmt.Sprintf("successfully add balance to your virtual account : %v", vac.VaBalance),
 	}

@@ -2,7 +2,9 @@ package database
 
 import (
 	"database/sql"
+	"errors"
 
+	"github.com/ndv6/tsaving/helpers"
 	"github.com/ndv6/tsaving/models"
 )
 
@@ -29,10 +31,12 @@ func TransferFromMainToVa(accNum, vaNum string, amount int, db *sql.DB) (err err
 	if err != nil {
 		return
 	}
+	sourceBalanceInt := int(sourceBalance)
+
+	status := helpers.CheckBalance("MAIN", sourceBalanceInt, vac.VaBalance, va.db)
 	//check balance here
-	var sourceBalanceVA float32
-	err = tx.QueryRow("SELECT va_balance FROM virtual_accounts WHERE va_num = $1 FOR UPDATE", vaNum).Scan(&sourceBalanceVA)
-	if err != nil {
+	if sourceBalanceInt < amount || amount <= 0 {
+		err = errors.New("insufficient balance")
 		return
 	}
 

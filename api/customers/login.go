@@ -41,15 +41,9 @@ func LoginHandler(jwt *tokens.JWT, db *sql.DB) http.HandlerFunc {
 		}
 
 		_, tokenLogin, _ := jwt.Encode(&tokens.Token{
-<<<<<<< HEAD
-			CustId : objCustomer.CustId,
-			AccountNum : objCustomer.AccountNum,
-			Expired: time.Now().Add(120 * time.Minute),
-=======
 			CustId:     objCustomer.CustId,
 			AccountNum: objCustomer.AccountNum,
 			Expired:    time.Now().Add(120 * time.Minute),
->>>>>>> fix develop
 		})
 
 		data := LoginResponse{

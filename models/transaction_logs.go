@@ -35,12 +35,12 @@ func TransactionLog(db *sql.DB, log TransactionLogs) error {
 func ListTransactionLog(db *sql.DB, id int) (list []HistoryTransaction, err error) {
 	accNumber, err := GetAccNumber(db, id)
 	if err != nil {
-		return list, err
+		return
 	}
 
 	rows, err := db.Query("SELECT account_num, dest_account, tran_amount, description, created_at FROM transaction_logs WHERE account_num = $1", accNumber)
 	if err != nil {
-		return list, err
+		return
 	}
 
 	defer rows.Close()
@@ -48,7 +48,7 @@ func ListTransactionLog(db *sql.DB, id int) (list []HistoryTransaction, err erro
 		var ht HistoryTransaction
 		err = rows.Scan(&ht.AccountNum, &ht.DestAccount, &ht.TranAmount, &ht.Description, &ht.CreatedAt)
 		if err != nil {
-			return list, err
+			return
 		}
 		list = append(list, ht)
 	}

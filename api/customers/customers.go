@@ -1,6 +1,8 @@
 package customers
 
-import(
+import (
+	"database/sql"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"math/rand"
@@ -62,7 +64,6 @@ func (ch *CustomerHandler) GetProfile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fmt.Fprintln(w, string(res))
-<<<<<<< HEAD
 }
 
 func (ch *CustomerHandler) Create(w http.ResponseWriter, r *http.Request) {
@@ -120,6 +121,3 @@ func (ch *CustomerHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
-=======
-}
->>>>>>> develop

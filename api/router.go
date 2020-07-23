@@ -5,10 +5,10 @@ import (
 
 	"github.com/ndv6/tsaving/api/email"
 
+	"github.com/ndv6/tsaving/api/customers"
 	"github.com/ndv6/tsaving/api/home"
 	"github.com/ndv6/tsaving/api/not_found"
 	"github.com/ndv6/tsaving/tokens"
-	"github.com/ndv6/tsaving/api/customers"
 
 	"github.com/go-chi/chi"
 )
@@ -20,6 +20,11 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 	chiRouter.Get("/", home.HomeHandler)
 	chiRouter.Post("/register", ch.Create)
 	chiRouter.Post("/login", customers.LoginHandler(jwt, db))
+
+	//customer endpoint
+	chiRouter.With(jwt.AuthMiddleware).Get("/customers/getprofile", ch.GetProfile)
+	chiRouter.With(jwt.AuthMiddleware).Post("/customers/updateprofile", ch.UpdateProfile)
+	chiRouter.With(jwt.AuthMiddleware).Post("/customers/updatephoto", ch.UpdatePhoto)
 
 	// Email verification endpoint
 	chiRouter.Post("/email/verify-email-token", email.VerifyEmailToken(db))

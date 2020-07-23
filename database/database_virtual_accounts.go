@@ -7,11 +7,8 @@ import (
 	"github.com/ndv6/tsaving/models"
 )
 
-func GetBalanceVA(vaNum string, db *sql.DB) (va models.VirtualAccounts, err error) {
-	err = db.QueryRow("SELECT va_balance FROM virtual_accounts WHERE va_num = ($1) ", vaNum).Scan(&va.VaBalance)
-	if err != nil {
-		return
-	}
+func GetBalanceVA(vaNum string, db *sql.DB) (balance int, err error) {
+	err = db.QueryRow("SELECT va_balance FROM virtual_accounts WHERE va_num = ($1) ", vaNum).Scan(&balance)
 	return
 }
 
@@ -121,7 +118,7 @@ func CheckBalance(target string, accNumber string, amount int, db *sql.DB) (stat
 		if err != nil {
 			return
 		}
-		if sourceBalance.AccountBalance < amount || amount <= 0 {
+		if sourceBalance < amount || amount <= 0 {
 			return
 		}
 		status = true
@@ -131,7 +128,7 @@ func CheckBalance(target string, accNumber string, amount int, db *sql.DB) (stat
 		if err != nil {
 			return
 		}
-		if sourceBalance.VaBalance < amount || amount <= 0 {
+		if sourceBalance < amount || amount <= 0 {
 			return
 		}
 		status = true

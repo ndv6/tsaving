@@ -31,7 +31,7 @@ CREATE SEQUENCE accounts_account_id_seq INCREMENT 1 MINVALUE 1 MAXVALUE 21474836
 CREATE TABLE "public"."accounts" (
     "account_id" integer DEFAULT nextval('accounts_account_id_seq') NOT NULL,
     "account_num" character varying(10),
-    "account_balance" numeric(100,2),
+    "account_balance" integer,
     "created_at" timestamp,
     CONSTRAINT "accounts_account_num_key" UNIQUE ("account_num"),
     CONSTRAINT "accounts_pkey" PRIMARY KEY ("account_id"),
@@ -77,10 +77,9 @@ CREATE TABLE "public"."transaction_logs" (
     "tl_id" integer DEFAULT nextval('transaction_logs_tl_id_seq') NOT NULL,
     "account_num" character varying(10),
     "dest_account" character varying(20),
-    "tran_amount" numeric(100,2),
+    "tran_amount" integer,
     "description" character varying(200) NOT NULL,
     "created_at" timestamp,
-    CONSTRAINT "transaction_logs_des_account_key" UNIQUE ("dest_account"),
     CONSTRAINT "transaction_logs_pkey" PRIMARY KEY ("tl_id"),
     CONSTRAINT "transaction_logs_account_num_fkey" FOREIGN KEY (account_num) REFERENCES accounts(account_num) NOT DEFERRABLE
 ) WITH (oids = false);
@@ -94,7 +93,7 @@ CREATE TABLE "public"."virtual_accounts" (
     "va_id" integer DEFAULT nextval('virtual_accounts_va_id_seq') NOT NULL,
     "va_num" character varying(13),
     "account_num" character varying(10),
-    "va_balance" numeric(100,2),
+    "va_balance" integer,
     "va_color" character varying(15),
     "va_label" character varying(100),
     "created_at" timestamp,
@@ -105,4 +104,4 @@ CREATE TABLE "public"."virtual_accounts" (
 ) WITH (oids = false);
 
 
--- 2020-07-21 15:26:13.584233+00
+-- 2020-07-23 03:47:48.142343+00

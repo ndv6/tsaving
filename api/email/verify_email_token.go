@@ -39,7 +39,7 @@ func VerifyEmailToken(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		err = db.QueryRow("SELECT et_id, token, email FROM email_token WHERE token=$1 AND email=$2", et.Token, et.Email).Scan(&et.Et_id, &et.Token, &et.Email)
+		err = db.QueryRow("SELECT et_id, token, email FROM email_token WHERE token=$1 AND email=$2", et.Token, et.Email).Scan(&et.EtId, &et.Token, &et.Email)
 		if err != nil {
 			helpers.HTTPError(w, http.StatusBadRequest, "Unable to verify email token: "+err.Error())
 			return
@@ -52,7 +52,7 @@ func VerifyEmailToken(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		err = DeleteVerifiedEmailTokenById(et.Et_id, db)
+		err = DeleteVerifiedEmailTokenById(et.EtId, db)
 		if err != nil {
 			helpers.HTTPError(w, http.StatusBadRequest, "Unable to delete verified email: "+err.Error())
 			return

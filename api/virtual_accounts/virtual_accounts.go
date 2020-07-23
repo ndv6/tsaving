@@ -64,7 +64,6 @@ func (vah *VirtualAccHandler) Create(w http.ResponseWriter, r *http.Request) {
 	// generate va number
 	res, err := database.GetListVANum(am.AccountNum, vah.db)
 	if err != nil {
-		fmt.Println(err)
 		helper.HTTPError(w, http.StatusBadRequest, "unable to get virtual account list")
 		return
 	}
@@ -75,7 +74,6 @@ func (vah *VirtualAccHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 	lastVaNum, err := strconv.Atoi(suffixVaNum)
 	if err != nil {
-		log.Println(err)
 		return
 	}
 
@@ -96,8 +94,8 @@ func (vah *VirtualAccHandler) Create(w http.ResponseWriter, r *http.Request) {
 	vam, err = database.CreateVA(newVaNum, vac.AccountNum, vac.VaColor, vac.VaLabel, vah.db)
 
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprint(w, "failed insert data to db")
+		helper.HTTPError(w, http.StatusBadRequest, "failed insert data to db")
+		return
 	}
 
 	fmt.Fprintf(w, "VA Number: %v Created!\n", vam.VaNum)
@@ -127,8 +125,7 @@ func (vah *VirtualAccHandler) Edit(w http.ResponseWriter, r *http.Request) {
 	vam, err = database.UpdateVA(vac.VaNumber, vac.VaColor, vac.VaLabel, vah.db)
 
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprint(w, "failed insert data to db")
+		helper.HTTPError(w, http.StatusBadRequest, "failed insert data to db")
 		return
 	}
 

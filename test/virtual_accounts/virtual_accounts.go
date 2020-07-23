@@ -4,26 +4,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ndv6/tsaving/api/virtual_accounts"
 	"github.com/ndv6/tsaving/models"
 )
 
 var cust_id = 1
-
-var InputVac = []virtual_accounts.InputVac{
-	{
-		10000,
-		"2009110001",
-	},
-	{
-		100000,
-		"2009110002",
-	},
-	{
-		100000,
-		"2009110001",
-	},
-}
 
 var Acc = []models.Accounts{
 	{
@@ -48,6 +32,7 @@ var Cust = []models.Customers{
 		"Jalan Dr. Satrio 88, Jakarta",
 		"081293829092",
 		"lyra@gmail.com",
+		"lyra.jpg",
 		"lyra",
 		true,
 		"web",
@@ -61,6 +46,7 @@ var Cust = []models.Customers{
 		"Jalan Kuningan, Jakarta",
 		"08192839209",
 		"taylor@gmail.com",
+		"taylor.jpg",
 		"taylor",
 		true,
 		"android",
@@ -114,17 +100,17 @@ var VirAcc = []models.VirtualAccounts{
 
 func TestVacToMain(t *testing.T) {
 
-	// ini dibikin skenario, kalau inputnya begini, dan hasilnya oke, nanti akan keluar oke.
-	res := VacToMain()
-	if len(res) != 2 {
-		t.Fatalf("Expect 2 Events, got: %v", len(res))
-	}
-	if res[0].Name != "Training REST" {
-		t.Fatalf("Expected event : Training REST, got : %v", res[0].Name)
-	}
-	if res[1].Name != "Training Android" {
-		t.Fatalf("Expected event : Training Android, got : %v", res[1].Name)
-	}
+	// // ini dibikin skenario, kalau inputnya begini, dan hasilnya oke, nanti akan keluar oke.
+	// res := VacToMain()
+	// if len(res) != 2 {
+	// 	t.Fatalf("Expect 2 Events, got: %v", len(res))
+	// }
+	// if res[0].Name != "Training REST" {
+	// 	t.Fatalf("Expected event : Training REST, got : %v", res[0].Name)
+	// }
+	// if res[1].Name != "Training Android" {
+	// 	t.Fatalf("Expected event : Training Android, got : %v", res[1].Name)
+	// }
 
 }
 
@@ -142,7 +128,14 @@ func VacToMain() {
 
 }
 
-func CheckAccountVA() {
+func CheckAccountVA(AccVa string) (status bool) {
+	var AccountNumber = GetAccountById()
+	for _, v := range VirAcc {
+		if v.VaNum == AccVa && v.AccountNum == AccountNumber {
+			return true
+		}
+	}
+	return
 
 }
 
@@ -168,10 +161,46 @@ func GetAccountById() (AccountNumber string) {
 	return
 }
 
-func UpdateVac() {
+func CheckVaColor(VaColor string, VaAccount string) (status bool) {
+	for _, v := range VirAcc {
+		if v.VaNum == AccVa && v.AccountNum == AccountNumber {
+			return true
+		}
+	}
+	return
+
+}
+
+func CheckVaLabel(VaLabel string, VaAccount string) (status bool) {
+	var AccountNumber = GetAccountById()
+	for _, v := range VirAcc {
+		if v.VaNum == AccVa && v.AccountNum == AccountNumber {
+			return true
+		}
+	}
+	return
+
+}
+
+func UpdateVac(t *testing.T) {
 	var VaColor = "red"
 	var VaLabel = "holiday"
 	var VaAccount = "2009110001001"
+
+	var status = CheckAccountVA(VaAccount)
+	if status != true {
+		t.Fatalf("Invalid VA Number")
+	}
+
+	var status = CheckVaColor(VaColor, VaAccount)
+	if status != true {
+		t.Fatalf("Invalid VA Color")
+	}
+
+	status = CheckVaLabel(VaLabel)
+	if status != true {
+		t.Fatalf("Invalid VA Label")
+	}
 
 	res := []models.VirtualAccounts{}
 	for _, v := range VirAcc {

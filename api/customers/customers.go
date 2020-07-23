@@ -4,14 +4,14 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"math/rand"
-	"net/http"
-	"time"
-
 	"github.com/ndv6/tsaving/helpers"
 	"github.com/ndv6/tsaving/models"
 	"github.com/ndv6/tsaving/tokens"
+	"io/ioutil"
+	"math/rand"
+	"net/http"
+	"regexp"
+	"time"
 )
 
 type RegisterResponse struct {
@@ -65,6 +65,12 @@ func (ch *CustomerHandler) GetProfile(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Fprintln(w, string(res))
 }
+
+type StatusResult struct {
+	Status string `json:"status"`
+}
+
+var emailRegex = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 
 func (ch *CustomerHandler) Create(w http.ResponseWriter, r *http.Request) {
 	b, err := ioutil.ReadAll(r.Body)
@@ -120,4 +126,123 @@ func (ch *CustomerHandler) Create(w http.ResponseWriter, r *http.Request) {
 		helpers.HTTPError(w, http.StatusBadRequest, "Email Token Failed")
 		return
 	}
+}
+
+func (ch *CustomerHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
+	tokens := ch.jwt.GetToken(r)
+	err := tokens.Valid()
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	requestedBody, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, "Unable to read the requested body")
+		return
+	}
+
+	var cus models.Customers
+	err = json.Unmarshal(requestedBody, &cus)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, "Invalid json type")
+		return
+	}
+
+	//check if email address is valid
+	isValid := isEmailValid(cus.CustEmail)
+	if isValid {
+		isExist, err := models.IsEmailExist(ch.db, cus.CustEmail, cus.CustId)
+		if err != nil {
+			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+			return
+		}
+		if isExist {
+			helpers.HTTPError(w, http.StatusBadRequest, "Email already taken")
+			return
+		}
+	} else {
+		helpers.HTTPError(w, http.StatusBadRequest, "Invalid email")
+		return
+	}
+
+	err = models.UpdateProfile(ch.db, cus)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, "Error updating customer data"+err.Error())
+	}
+
+	result := StatusResult{
+		Status: "success",
+	}
+
+	res, err := json.Marshal(result)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	fmt.Fprintln(w, string(res))
+}
+
+func (ch *CustomerHandler) UpdatePhoto(w http.ResponseWriter, r *http.Request) {
+	tokens := ch.jwt.GetToken(r)
+	err := tokens.Valid()
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	// Parse our multipart form, 10 << 20 specifies a maximum upload of 10 MB files.
+	r.ParseMultipartForm(10 << 20)
+	// FormFile returns the first file for the given key `myFile`
+	file, _, err := r.FormFile("myPhoto")
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, "Error Retrieving the File")
+		return
+	}
+	defer file.Close()
+
+	// Create a temporary file within our temp-images directory with particular naming pattern
+	folderLocation := "temp-images"
+	newFileName := tokens.AccountNum + ".png"
+	tempFile, err := ioutil.TempFile(folderLocation, newFileName)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	defer tempFile.Close()
+
+	// read all of the contents of our uploaded file into a byte array
+	fileBytes, err := ioutil.ReadAll(file)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	// write this byte array to our temporary file
+	tempFile.Write(fileBytes)
+
+	pictPath := folderLocation + newFileName
+	err = models.UpdateCustomerPicture(ch.db, pictPath, tokens.CustId)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, "Error updating customer picure"+err.Error())
+	}
+
+	result := StatusResult{
+		Status: "success",
+	}
+
+	res, err := json.Marshal(result)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	fmt.Fprintln(w, string(res))
+}
+
+func isEmailValid(e string) bool {
+	if len(e) < 4 || len(e) > 64 {
+		return false
+	}
+	return emailRegex.MatchString(e)
 }

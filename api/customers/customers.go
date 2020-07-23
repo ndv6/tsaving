@@ -14,6 +14,15 @@ import (
 	"time"
 )
 
+type RegisterResponse struct {
+	Token string `json:"token"`
+	Email string `json:"email"`
+}
+
+type GetProfileResult struct {
+	Customers models.Customers `json:"customers"`
+	Accounts  models.Accounts  `json:"accounts"`
+}
 type CustomerHandler struct {
 	jwt *tokens.JWT
 	db  *sql.DB
@@ -23,9 +32,38 @@ func NewCustomerHandler(jwt *tokens.JWT, db *sql.DB) *CustomerHandler {
 	return &CustomerHandler{jwt, db}
 }
 
-type RegisterResponse struct {
-	Token string `json:"token"`
-	Email string `json:"email"`
+func (ch *CustomerHandler) GetProfile(w http.ResponseWriter, r *http.Request) {
+	token := ch.jwt.GetToken(r)
+	err := token.Valid()
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	cus, err := models.GetProfile(ch.db, token.CustId)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	acc, err := models.GetMainAccount(ch.db, cus.AccountNum)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	result := GetProfileResult{
+		Customers: cus,
+		Accounts:  acc,
+	}
+
+	res, err := json.Marshal(result)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	fmt.Fprintln(w, string(res))
 }
 
 type StatusResult struct {
@@ -88,45 +126,6 @@ func (ch *CustomerHandler) Create(w http.ResponseWriter, r *http.Request) {
 		helpers.HTTPError(w, http.StatusBadRequest, "Email Token Failed")
 		return
 	}
-}
-
-type GetProfileResult struct {
-	Customers models.Customers `json:"customers"`
-	Accounts  models.Accounts  `json:"accounts"`
-}
-
-func (ch *CustomerHandler) GetProfile(w http.ResponseWriter, r *http.Request) {
-	token := ch.jwt.GetToken(r)
-	err := token.Valid()
-	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
-		return
-	}
-
-	cus, err := models.GetProfile(ch.db, token.CustId)
-	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
-		return
-	}
-
-	acc, err := models.GetMainAccount(ch.db, cus.AccountNum)
-	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
-		return
-	}
-
-	result := GetProfileResult{
-		Customers: cus,
-		Accounts:  acc,
-	}
-
-	res, err := json.Marshal(result)
-	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
-		return
-	}
-
-	fmt.Fprintln(w, string(res))
 }
 
 func (ch *CustomerHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {

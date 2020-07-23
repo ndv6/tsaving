@@ -3,6 +3,7 @@ package customers
 import (
 	"database/sql"
 	"encoding/json"
+	"log"
 	"net/http"
 	"time"
 
@@ -36,6 +37,7 @@ func LoginHandler(jwt *tokens.JWT, db *sql.DB) http.HandlerFunc {
 		Pass := helpers.HashString(l.CustPassword)
 		objCustomer, err := models.LoginCustomer(db, l.CustEmail, Pass)
 		if err != nil {
+			log.Println(err)
 			helpers.HTTPError(w, http.StatusBadRequest, "Wrong Email or Password")
 			return
 		}

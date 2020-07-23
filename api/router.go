@@ -10,6 +10,7 @@ import (
 
 	"github.com/ndv6/tsaving/api/home"
 	"github.com/ndv6/tsaving/api/not_found"
+	"github.com/ndv6/tsaving/api/virtual_accounts"
 	"github.com/ndv6/tsaving/tokens"
 
 	"github.com/go-chi/chi"
@@ -22,12 +23,17 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 	ph := database.NewPartnerHandler(db)
 	ah := database.NewAccountHandler(db)
 	ch := customers.NewCustomerHandler(jwt, db)
-
+	va := virtual_accounts.NewVAHandler(jwt, db)
 	// Home endpoint
 	chiRouter.Get("/", home.HomeHandler)
 	chiRouter.Post("/register", ch.Create)
 	chiRouter.Post("/login", customers.LoginHandler(jwt, db))
 
+	// VAC transactions API endpoints
+	chiRouter.With(jwt.AuthMiddleware).Post("/vac/to_main", va.VacToMain)
+	chiRouter.With(jwt.AuthMiddleware).Get("/vac/list", va.VacList)
+
+	// Url endpoint not found
 	// Get transaction history
 	chiRouter.With(jwt.AuthMiddleware).Get("/transaction/history", ch.HistoryTransactionHandler(db))
 

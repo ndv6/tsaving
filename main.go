@@ -13,6 +13,8 @@ import (
 
 func main() {
 	config, err := helpers.LoadConfig("configs/configs.json")
+	jwt := tokens.New([]byte(config.SecretKey))
+
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -21,8 +23,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	jwt := tokens.New([]byte(config.SecretKey))
 
 	fmt.Println("Server is now accepting request from port " + config.Port)
 	err = http.ListenAndServe("127.0.0.1:"+config.Port, api.Router(jwt, db))

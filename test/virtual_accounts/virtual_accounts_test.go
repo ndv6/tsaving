@@ -17,7 +17,7 @@ type PayloadAddBalanceVAC struct {
 }
 
 var listPayload = []PayloadAddBalanceVAC{
-	{"12345678", "12345678001", 0},
+	{"12345678", "12345678001", 20000},
 	{"12345678", "12345678001", 40000},
 	{"12345678", "12345678001", 50000},
 }
@@ -25,6 +25,7 @@ var listPayload = []PayloadAddBalanceVAC{
 func TestActiveEvents(t *testing.T) {
 	var caseNum int = 1
 	for _, v := range listPayload {
+
 		if v.AccNum != DbAccNum {
 			t.Fatalf("Found Error at case %v : account number '%v' not exist", caseNum, v.AccNum)
 		}

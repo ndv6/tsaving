@@ -6,13 +6,13 @@ import (
 	"fmt"
 	"net/http"
 
-	helpers "github.com/ndv6/tsaving/helpers"
+	"github.com/ndv6/tsaving/database"
+	"github.com/ndv6/tsaving/helpers"
 )
 
 type AddBalanceVARequest struct {
-	VaNum      string `json:"va_num"`
-	VaBalance  int    `json:"va_balance"`
-	AccountNum string `json:"account_num"`
+	VaNum     string `json:"va_num"`
+	VaBalance int    `json:"va_balance"`
 }
 
 type AddBalanceVAResponse struct {
@@ -37,22 +37,26 @@ func (va *VAHandler) AddBalanceVA(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//cek balance
-	status := helpers.CheckBalance("MAIN", vac.AccountNum, vac.VaBalance, va.db)
+	//cek balance 2008210001 ini perlu diupdate ambilnya dari token
+	status := helpers.CheckBalance("MAIN", "2008210001", vac.VaBalance, va.db)
 	if !status {
 		helpers.HTTPError(w, http.StatusBadRequest, "insufficient balance")
 		return
 	}
-	token := AddBalanceVAResponse{
+	//perlu diupdate ambil dari token
+	updateBalanceVA := database.TransferFromMainToVa("2008210001", vac.VaNum, vac.VaBalance, va.db)
+	if updateBalanceVA != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, "add balance to virtual account failed")
+		return
+	}
+	response := AddBalanceVAResponse{
 		Status:       1,
 		Notification: fmt.Sprintf("successfully add balance to your virtual account : %v", vac.VaBalance),
 	}
-	err = json.NewEncoder(w).Encode(token)
+	err = json.NewEncoder(w).Encode(response)
 	if err != nil {
 		helpers.HTTPError(w, http.StatusBadRequest, "unable to encode response")
 		return
 	}
-
-	// json.NewEncoder(w).Encode({"status" : 1})
 
 }

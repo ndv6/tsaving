@@ -1,0 +1,23 @@
+package models
+
+import (
+	"database/sql"
+	"time"
+)
+
+type Accounts struct {
+	AccountId      int       `json:"account_id"`
+	AccountNum     string    `json:"account_num"`
+	AccountBalance int       `json:"account_balance"`
+	CreatedAt      time.Time `json:"created_at"`
+}
+
+func GetMainAccount(db *sql.DB, accNum string) (Accounts, error) {
+	var acc Accounts
+	row := db.QueryRow("SELECT account_id, account_num, account_balance, created_at FROM accounts WHERE account_num = $1", accNum)
+	err := row.Scan(&acc.AccountId, &acc.AccountNum, &acc.AccountBalance, &acc.CreatedAt)
+	if err != nil {
+		return Accounts{}, err
+	}
+	return acc, nil
+}

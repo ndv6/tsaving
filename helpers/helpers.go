@@ -8,11 +8,26 @@ import (
 	"net/http"
 
 	"github.com/ndv6/tsaving/database"
+	"github.com/ndv6/tsaving/models"
+	"os"
 )
 
 func HTTPError(w http.ResponseWriter, status int, errorMessage string) {
 	w.WriteHeader(status)
 	json.NewEncoder(w).Encode(map[string]string{"error": errorMessage})
+}
+
+func LoadConfig(file string) (models.Config, error) {
+	var cfg models.Config
+	fm, err := os.Open(file)
+	if err != nil {
+		return models.Config{}, err
+	}
+	err = json.NewDecoder(fm).Decode(&cfg)
+	if err != nil {
+		return models.Config{}, err
+	}
+	return cfg, err
 }
 
 func CheckBalance(target string, accNumber string, amount int, db *sql.DB) (status bool) {

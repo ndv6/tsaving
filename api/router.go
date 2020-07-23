@@ -3,8 +3,6 @@ package api
 import (
 	"database/sql"
 
-	"github.com/ndv6/tsaving/tokens"
-
 	"github.com/ndv6/tsaving/api/vac"
 
 	"github.com/ndv6/tsaving/api/customers"

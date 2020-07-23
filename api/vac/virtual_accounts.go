@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/ndv6/tsaving/tokens"
 
@@ -44,7 +45,7 @@ func (vh VaHandler) DeleteVac(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cust, err := database.GetCustomerById(vh.Db, vh.Jwt.GetToken(r).CustId)
+	cust, err := database.GetCustomerById(vh.Db, token.CustId)
 	if err != nil {
 		helpers.HTTPError(w, http.StatusBadRequest, "User not found")
 		return
@@ -69,17 +70,17 @@ func (vh VaHandler) DeleteVac(w http.ResponseWriter, r *http.Request) {
 			DestAccount: vac.VaNum,
 			TranAmount:  vac.VaBalance,
 			Description: models.LogDescriptionVaToMainTemplate(vac.VaBalance, vac.VaNum, vac.AccountNum),
+			CreatedAt:   time.Now(),
 		})
 		if err != nil {
 			helpers.HTTPError(w, http.StatusBadRequest, "Fail to create log transaction")
 			return
 		}
-	} else {
-		err = database.DeleteVacById(vh.Db, vac.VaId)
-		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, "Fail to delete virtual account")
-			return
-		}
+	}
+	err = database.DeleteVacById(vh.Db, vac.VaId)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, "Fail to delete virtual account")
+		return
 	}
 
 	fmt.Fprintf(w, "Success deleting VAC and reverting %d amount of balance to main account", vac.VaBalance)

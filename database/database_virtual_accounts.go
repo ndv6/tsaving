@@ -2,6 +2,7 @@ package database
 
 import (
 	"database/sql"
+	"fmt"
 
 	"github.com/ndv6/tsaving/models"
 )
@@ -18,8 +19,10 @@ func GetBalanceVA(vaNum string, db *sql.DB) (va models.VirtualAccounts, err erro
 
 func RevertVacBalanceToMainAccount(db *sql.DB, va models.VirtualAccounts) (err error) {
 	acc, err := GetAccountByAccountNum(db, va.AccountNum)
+	fmt.Println(err)
 	if err == nil {
 		_, err = db.Exec("UPDATE accounts SET account_balance=$1 WHERE account_id=$2;", acc.AccountBalance+va.VaBalance, acc.AccountId)
+		fmt.Println(err)
 	}
 	return
 }
@@ -30,12 +33,12 @@ func DeleteVacById(db *sql.DB, vId int) (err error) {
 }
 
 func GetAccountByAccountNum(db *sql.DB, accountNum string) (acc models.Accounts, err error) {
-	err = db.QueryRow("SELECT account_id, account_num, account_balance, created_at FROM accounts WHERE account_num=$1", accountNum).Scan(&acc.AccountId, &acc.AccountNum, &acc.AccountBalance, &acc.CreatedAt)
+	err = db.QueryRow("SELECT account_id, account_num, account_balance FROM accounts WHERE account_num=$1", accountNum).Scan(&acc.AccountId, &acc.AccountNum, &acc.AccountBalance)
 	return
 }
 
 func GetCustomerById(db *sql.DB, id int) (cust models.Customers, err error) {
-	err = db.QueryRow("SELECT cust_id, account_num, email FROM customers WHERE cust_id=$1;", id).Scan(&cust.CustId, &cust.AccountNum, &cust.CustEmail)
+	err = db.QueryRow("SELECT cust_id, account_num, cust_email FROM customers WHERE cust_id=3;").Scan(&cust.CustId, &cust.AccountNum, &cust.CustEmail)
 	return
 }
 

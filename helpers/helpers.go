@@ -2,13 +2,12 @@ package helpers
 
 import (
 	"crypto/sha256"
-	"database/sql"
 	"encoding/hex"
 	"encoding/json"
 	"net/http"
 	"os"
+
 	"github.com/ndv6/tsaving/models"
-	"github.com/ndv6/tsaving/database"
 )
 
 //untuk ngehandle error"
@@ -28,7 +27,7 @@ func LoadConfig(file string) (models.Config, error) {
 		return models.Config{}, err
 	}
 	return cfg, err
-  
+}
 
 func HashString(toHash string) string {
 	hashed := sha256.Sum256([]byte(toHash))

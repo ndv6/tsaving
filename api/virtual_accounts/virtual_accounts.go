@@ -7,15 +7,19 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/ndv6/tsaving/models"
-
 	"github.com/ndv6/tsaving/database"
+	"github.com/ndv6/tsaving/helpers"
 	helper "github.com/ndv6/tsaving/helpers"
 )
 
 type InputVac struct {
 	BalanceChange float64 `json:"balance_change"`
 	VacNumber     string  `json:"va_num"`
+}
+
+type AddBalanceVAResponse struct {
+	Status       int    `json:"status"`
+	Notification string `json:"notification"`
 }
 
 type VAHandler struct {
@@ -52,8 +56,6 @@ func (va *VAHandler) VacToMain(w http.ResponseWriter, r *http.Request) {
 
 	//cek input apakah melebihi saldo
 	var BalanceChange int = int(VirAcc.BalanceChange)
-	fmt.Println(VirAcc.BalanceChange)
-	fmt.Println(VirAcc.VacNumber)
 	returnValue := helper.CheckBalance("VA", VirAcc.VacNumber, BalanceChange, va.db)
 	if returnValue == false {
 		helper.HTTPError(w, http.StatusBadRequest, "your input is bigger than virtual account balance.")
@@ -76,15 +78,15 @@ func (va *VAHandler) VacToMain(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// get virtual account info, status
-	var VaObj models.VirtualAccounts
-	var MaObj models.Accounts
-	VaObj, err = database.GetVaStatus(va.db, VirAcc.VacNumber)
-	MaObj, err = database.GetBalanceAcc(AccountNumber, va.db)
-
-	fmt.Fprintf(w, "%v VA Balance: %v, ", VaObj.VaLabel, VaObj.VaBalance)
-	fmt.Fprintf(w, "Main Account Balance: %v", MaObj.AccountBalance)
-
+	response := AddBalanceVAResponse{
+		Status:       1,
+		Notification: fmt.Sprintf("successfully move balance to your main account : %v", VirAcc.BalanceChange),
+	}
+	err = json.NewEncoder(w).Encode(response)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, "unable to encode response")
+		return
+	}
 	return
 
 }

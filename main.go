@@ -24,10 +24,9 @@ func main() {
 		log.Fatal(err)
 	}
 
-	jwt = tokens.New([]byte(config.SecretKey))
-
+	jwtSecret := tokens.New([]byte(config.SecretKey))
 	fmt.Println("Server is now accepting request from port " + config.Port)
-	err = http.ListenAndServe("127.0.0.1:"+config.Port, api.Router(jwt, db))
+	err = http.ListenAndServe("127.0.0.1:"+config.Port, api.Router(jwtSecret, db))
 	if err != nil {
 		log.Fatal("Can not listen to port 8000: ", err)
 	}

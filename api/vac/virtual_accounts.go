@@ -2,8 +2,11 @@ package vac
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"net/http"
+
+	"github.com/ndv6/tsaving/tokens"
 
 	"github.com/ndv6/tsaving/database"
 	"github.com/ndv6/tsaving/helpers"
@@ -12,13 +15,36 @@ import (
 )
 
 type VaHandler struct {
-	Db *sql.DB
+	Db  *sql.DB
+	Jwt *tokens.JWT
+}
+
+func NewVaHandler(db *sql.DB, jwt *tokens.JWT) *VaHandler {
+	return &VaHandler{
+		Db:  db,
+		Jwt: jwt,
+	}
+}
+
+type DeleteVacRequest struct {
+	VaNum string `json:"va_num"`
 }
 
 func (vh VaHandler) DeleteVac(w http.ResponseWriter, r *http.Request) {
-	// decode jwt to get id
+	token := vh.Jwt.GetToken(r)
+	err := token.Valid()
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+	}
 
-	cust, err := database.GetCustomerById(vh.Db, 1)
+	var reqBody DeleteVacRequest
+	err = json.NewDecoder(r.Body).Decode(&reqBody)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, "Unable to decode request body")
+		return
+	}
+
+	cust, err := database.GetCustomerById(vh.Db)
 	if err != nil {
 		helpers.HTTPError(w, http.StatusBadRequest, "User not found")
 		return

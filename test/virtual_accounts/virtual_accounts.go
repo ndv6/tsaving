@@ -2,14 +2,16 @@ package virtualaccounts
 
 import (
 	"testing"
-	"time"
 )
 
+func VacToMain() {
+
+}
 
 func TestVacToMain(t *testing.T) {
 
 	// ini dibikin skenario, kalau inputnya begini, dan hasilnya oke, nanti akan keluar oke.
-	res := (le, time.Date(2020, 07, 03, 0, 0, 0, 0, time.UTC))
+	res := VacToMain()
 	if len(res) != 2 {
 		t.Fatalf("Expect 2 Events, got: %v", len(res))
 	}

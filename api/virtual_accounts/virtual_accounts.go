@@ -8,7 +8,6 @@ import (
 	"net/http"
 
 	"github.com/ndv6/tsaving/database"
-	"github.com/ndv6/tsaving/helpers"
 	helper "github.com/ndv6/tsaving/helpers"
 )
 
@@ -86,7 +85,7 @@ func (va *VAHandler) VacToMain(w http.ResponseWriter, r *http.Request) {
 	}
 	err = json.NewEncoder(w).Encode(response)
 	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, "unable to encode response")
+		helper.HTTPError(w, http.StatusBadRequest, "unable to encode response")
 		return
 	}
 	return

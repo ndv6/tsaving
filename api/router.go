@@ -26,6 +26,11 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 	// Email verification endpoint
 	chiRouter.Post("/email/verify-email-token", email.VerifyEmailToken(db))
 
+	// Customer Endpoint
+	chiRouter.With(jwt.AuthMiddleware).Get("/customers/getprofile", ch.GetProfile)
+	chiRouter.With(jwt.AuthMiddleware).Post("/customers/updateprofile", ch.UpdateProfile)
+	chiRouter.With(jwt.AuthMiddleware).Post("/customers/updatephoto", ch.UpdatePhoto)
+
 	// Not found endpoint
 	chiRouter.NotFound(not_found.NotFoundHandler)
 	return chiRouter

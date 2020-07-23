@@ -39,11 +39,6 @@ func VerifyEmailToken(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, "Unable to verify email token: "+err.Error())
-			return
-		}
-
 		err = db.QueryRow("SELECT et_id, token, email FROM email_token WHERE token=$1 AND email=$2", et.Token, et.Email).Scan(&et.Et_id, &et.Token, &et.Email)
 		if err != nil {
 			helpers.HTTPError(w, http.StatusBadRequest, "Unable to verify email token: "+err.Error())

@@ -11,11 +11,11 @@ import (
 	"github.com/ndv6/tsaving/models"
 )
 
-type VacHandler struct {
+type VaHandler struct {
 	Db *sql.DB
 }
 
-func (vh VacHandler) DeleteVac(w http.ResponseWriter, r *http.Request) {
+func (vh VaHandler) DeleteVac(w http.ResponseWriter, r *http.Request) {
 	// decode jwt to get id
 
 	cust, err := database.GetCustomerById(vh.Db, 1)
@@ -32,7 +32,7 @@ func (vh VacHandler) DeleteVac(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if vac.VaBalance > 0 {
-		err = database.RevertBalanceToAccount(vh.Db, vac)
+		err = database.RevertVacBalanceToMainAccount(vh.Db, vac)
 		if err != nil {
 			helpers.HTTPError(w, http.StatusBadRequest, "Fail to revert balance to main account")
 			return
@@ -51,7 +51,7 @@ func (vh VacHandler) DeleteVac(w http.ResponseWriter, r *http.Request) {
 	} else {
 		err = database.DeleteVacById(vh.Db, vac.VaId)
 		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, "Fail to revert balance to main account")
+			helpers.HTTPError(w, http.StatusBadRequest, "Fail to delete virtual account")
 			return
 		}
 	}

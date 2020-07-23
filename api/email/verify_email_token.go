@@ -7,20 +7,11 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	"github.com/ndv6/tsaving/database"
 	"github.com/ndv6/tsaving/helpers"
 
 	"github.com/ndv6/tsaving/models"
 )
-
-func DeleteVerifiedEmailToken(id int, db *sql.DB) (err error) {
-	_, err = db.Exec("DELETE FROM email_token WHERE et_id=$1;", id)
-	return
-}
-
-func UpdateCustomerVerificationStatus(email string, db *sql.DB) (err error) {
-	_, err = db.Exec("UPDATE CUSTOMERS SET is_verified = TRUE WHERE cust_email = $1;", email)
-	return
-}
 
 func VerifyEmailToken(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -44,20 +35,20 @@ func VerifyEmailToken(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		err = db.QueryRow("SELECT et_id, token, email FROM email_token WHERE token=$1 AND email=$2", et.Token, et.Email).Scan(&et.Et_id, &et.Token, &et.Email)
+		et, err = database.GetEmailTokenByTokenAndEmail(db, et.Token, et.Email)
 		if err != nil {
 			helpers.HTTPError(w, http.StatusBadRequest, "Unable to verify email token: "+err.Error())
 			return
 		}
 
-		err = UpdateCustomerVerificationStatus(et.Email, db)
+		err = database.UpdateCustomerVerificationStatus(et.Email, db)
 
 		if err != nil {
 			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
 			return
 		}
 
-		err = DeleteVerifiedEmailToken(et.Et_id, db)
+		err = database.DeleteVerifiedEmailToken(et.Et_id, db)
 		if err != nil {
 			helpers.HTTPError(w, http.StatusBadRequest, "Unable to delete verified email: "+err.Error())
 			return

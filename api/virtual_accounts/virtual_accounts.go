@@ -37,12 +37,6 @@ func (va *VAHandler) AddBalanceVA(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//cek balance 2008210001 ini perlu diupdate ambilnya dari token
-	// status := helpers.CheckBalance("MAIN", "2008210001", vac.VaBalance, va.db)
-	// if !status {
-	// 	helpers.HTTPError(w, http.StatusBadRequest, "insufficient balance")
-	// 	return
-	// }
 	//perlu diupdate ambil dari token
 	updateBalanceVA := database.TransferFromMainToVa("2008210001", vac.VaNum, vac.VaBalance, va.db)
 	if updateBalanceVA != nil {

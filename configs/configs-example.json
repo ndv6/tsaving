@@ -1,5 +1,6 @@
 {
     "port": "-",
+    "SECRET_KEY": "-",
     "database": {
         "username": "postgres",
         "password": "-",

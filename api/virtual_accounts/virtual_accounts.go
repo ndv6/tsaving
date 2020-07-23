@@ -17,7 +17,7 @@ type InputVac struct {
 	VacNumber     string  `json:"va_num"`
 }
 
-type AddBalanceVAResponse struct {
+type VAResponse struct {
 	Status       int    `json:"status"`
 	Notification string `json:"notification"`
 }
@@ -78,7 +78,7 @@ func (va *VAHandler) VacToMain(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := AddBalanceVAResponse{
+	response := VAResponse{
 		Status:       1,
 		Notification: fmt.Sprintf("successfully move balance to your main account : %v", VirAcc.BalanceChange),
 	}

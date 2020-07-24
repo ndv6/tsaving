@@ -27,7 +27,6 @@ type VirtualAccHandler struct {
 }
 
 func NewVirtualAccHandler(jwt *tokens.JWT, db *sql.DB) *VirtualAccHandler {
-	// return &VirtualAccHandler{jwt, db}
 	return &VirtualAccHandler{jwt, db}
 }
 
@@ -51,7 +50,6 @@ func (vah *VirtualAccHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 	// initialize model
 	var vam models.VirtualAccounts
-	// var am models.Accounts
 
 	// validasi
 	am, err := models.GetMainAccount(vah.db, token.AccountNum)
@@ -59,9 +57,6 @@ func (vah *VirtualAccHandler) Create(w http.ResponseWriter, r *http.Request) {
 		helper.HTTPError(w, http.StatusBadRequest, "unable to validate account. please try again and make sure account is correct")
 		return
 	}
-
-	// generate random va number
-	// vaNum := valAccNum + strconv.Itoa(rand.Intn(999)) // combine account number with random number (0-999)
 
 	// generate va number
 	res, err := database.GetListVANum(token.AccountNum, vah.db)

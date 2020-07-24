@@ -23,7 +23,7 @@ type HistoryTransaction struct {
 	CreatedAt   time.Time `json:"created_at"`
 }
 
-func TransactionLog(db *sql.DB, log TransactionLogs) error {
+func CreateTransactionLog(db *sql.DB, log TransactionLogs) error {
 	_, err := db.Exec("INSERT INTO transaction_logs (account_num, dest_account, tran_amount, description, created_at) VALUES ($1, $2, $3, $4, $5);",
 		log.AccountNum,
 		log.DestAccount,
@@ -36,6 +36,15 @@ func TransactionLog(db *sql.DB, log TransactionLogs) error {
 func LogDescriptionVaToMainTemplate(amount int, vaNum, accountNum string) string {
 	return fmt.Sprintf("Transfer %d from Virtual Account %s to Main Account %s", amount, vaNum, accountNum)
 }
+
+func LogDescriptionPartnerToMainTemplate(amount, partnerId int, accountNum string) string {
+	return fmt.Sprintf("Transfer %d from Partner %d to Main Account %s", amount, partnerId, accountNum)
+}
+
+func LogDescriptionMainToVaTemplate(amount int, accountNum, vaNum string) string {
+	return fmt.Sprintf("Transfer %d from Main Account %s to Virtual Account %s", amount, accountNum, vaNum)
+}
+
 func ListTransactionLog(db *sql.DB, id int) (list []HistoryTransaction, err error) {
 	accNumber, err := GetAccNumber(db, id)
 	if err != nil {

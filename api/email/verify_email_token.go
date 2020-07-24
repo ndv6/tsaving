@@ -35,9 +35,8 @@ func VerifyEmailToken(db *sql.DB) http.HandlerFunc {
 			helpers.HTTPError(w, http.StatusBadRequest, "Unable to verify email token: "+err.Error())
 			return
 		}
-
+    
 		err = database.UpdateCustomerVerificationStatusByEmail(et.Email, db)
-
 		if err != nil {
 			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
 			return
@@ -53,6 +52,7 @@ func VerifyEmailToken(db *sql.DB) http.HandlerFunc {
 			Email:  et.Email,
 			Status: "verified",
 		})
+    
 		if err != nil {
 			helpers.HTTPError(w, http.StatusBadRequest, "Unable to parse to json")
 			return

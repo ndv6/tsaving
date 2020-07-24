@@ -230,9 +230,8 @@ func (va *VAHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 	// validasi
 	am, err := models.GetMainAccount(va.db, token.AccountNum)
-	fmt.Println(token.AccountNum)
 	if err != nil {
-		helper.HTTPError(w, http.StatusBadRequest, err.Error())
+		helper.HTTPError(w, http.StatusBadRequest, "validate account failed, make sure account number is correct")
 		return
 	}
 

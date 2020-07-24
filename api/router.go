@@ -56,8 +56,8 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 
 	// Customer Endpoint
 	chiRouter.With(jwt.AuthMiddleware).Get(constants.GetUserProfileEndpoint, ch.GetProfile)
-	chiRouter.With(jwt.AuthMiddleware).Post(constants.GetUserProfileEndpoint, ch.UpdateProfile)
-	chiRouter.With(jwt.AuthMiddleware).Post(constants.GetUserProfileEndpoint, ch.UpdatePhoto)
+	chiRouter.With(jwt.AuthMiddleware).Post(constants.UpdateUserProfileEndpoint, ch.UpdateProfile)
+	chiRouter.With(jwt.AuthMiddleware).Post(constants.UpdateUserPhotoEndpoint, ch.UpdatePhoto)
 
 	// Main account transactions endpoint
 	chiRouter.Post(constants.DepositEndpoint, customers.DepositToMainAccount(ph, ah))

@@ -96,7 +96,7 @@ func (va *VAHandler) VacToMain(w http.ResponseWriter, r *http.Request) {
 		CreatedAt:   time.Now(),
 	}
 
-	err = models.TransactionLog(va.db, tLogs)
+	err = models.CreateTransactionLog(va.db, tLogs)
 	if err != nil {
 		helper.HTTPError(w, http.StatusBadRequest, "transaction log failed")
 		return

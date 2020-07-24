@@ -2,6 +2,7 @@ package models
 
 import (
 	"database/sql"
+	"log"
 	"time"
 )
 
@@ -15,8 +16,11 @@ type Accounts struct {
 func GetMainAccount(db *sql.DB, accNum string) (Accounts, error) {
 	var acc Accounts
 	row := db.QueryRow("SELECT account_id, account_num, account_balance, created_at FROM accounts WHERE account_num = $1", accNum)
-	err := row.Scan(&acc.AccountId, &acc.AccountNum, &acc.AccountBalance, &acc.CreatedAt)
+	var balance float32
+	err := row.Scan(&acc.AccountId, &acc.AccountNum, &balance, &acc.CreatedAt)
+	acc.AccountBalance = int(balance)
 	if err != nil {
+		log.Println(err)
 		return Accounts{}, err
 	}
 	return acc, nil

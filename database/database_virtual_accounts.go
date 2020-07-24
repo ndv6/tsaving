@@ -2,7 +2,6 @@ package database
 
 import (
 	"database/sql"
-	"fmt"
 
 	"github.com/ndv6/tsaving/models"
 )
@@ -19,10 +18,9 @@ func GetBalanceVA(vaNum string, db *sql.DB) (va models.VirtualAccounts, err erro
 
 func RevertVacBalanceToMainAccount(db *sql.DB, va models.VirtualAccounts) (err error) {
 	acc, err := GetAccountByAccountNum(db, va.AccountNum)
-	fmt.Println(err)
+
 	if err == nil {
 		_, err = db.Exec("UPDATE accounts SET account_balance=$1 WHERE account_id=$2;", acc.AccountBalance+va.VaBalance, acc.AccountId)
-		fmt.Println(err)
 	}
 	return
 }

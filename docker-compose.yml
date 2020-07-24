@@ -1,0 +1,36 @@
+version: "3"
+
+services: 
+    postgres:
+        image: postgres:12.3-alpine
+        volumes:
+            - ts_pq:/var/lib/postgresql/data
+        ports:
+            - "5432:5432"
+        environment:
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: password
+            POSTGRES_DB: db_tsaving
+
+    tsaving_app:
+        image: golang:1.14.4-alpine
+        volumes:
+            - .:/go/src/github.com/ndv6/tsaving
+        working_dir: /go/src/github.com/ndv6/tsaving
+        depends_on: 
+            - postgres
+        ports: 
+            - "8000:8000"
+        command: go run main.go
+
+    tsaving_adminer:
+        image: adminer
+        ports:
+            - "8080:8080"
+        environment:
+            ADMINER_DEFAULT_DB_DRIVER: pgsql
+            ADMINER_DEFAULT_SERVER: postgres
+            ADMINER_DEFAULT_USER: postgres
+            ADMINER_DEFAULT_PASSWORD: password
+volumes:
+    ts_pq: {}

@@ -3,7 +3,19 @@
 2. Create database on Postgres:
     CREATE DATABASE db_tsaving;
 3. Import to Postgres db_tsaving.sql
+4. Set configs file
 
+# To start using docker:
+- First time running docker:
+    1. run docker-compose up -d
+    2. Open adminer on localhost:8080
+    3. Login
+    4. Go to sql command and type "CREATE DATABASE db_tsaving;" then execute
+    5. Import database/db_tsaving.sql
+    6. run docker-compose down
+    7. re run docker-compose up -d
+- Second time and counting:
+    1. run docker-compose up -d
 
 # Naming Convention:
 `snake_case` for file names, folder names

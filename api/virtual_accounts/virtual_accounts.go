@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/ndv6/tsaving/database"
+	"github.com/ndv6/tsaving/helpers"
 	helper "github.com/ndv6/tsaving/helpers"
 	"github.com/ndv6/tsaving/models"
 	"github.com/ndv6/tsaving/tokens"
@@ -29,8 +30,67 @@ type VAHandler struct {
 	db  *sql.DB
 }
 
+type DeleteVacRequest struct {
+	VaNum string `json:"va_num"`
+}
+
 func NewVAHandler(jwt *tokens.JWT, db *sql.DB) *VAHandler {
 	return &VAHandler{jwt, db}
+}
+
+func (vh VAHandler) DeleteVac(w http.ResponseWriter, r *http.Request) {
+	token := vh.jwt.GetToken(r)
+	err := token.Valid()
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+	}
+
+	var reqBody DeleteVacRequest
+	err = json.NewDecoder(r.Body).Decode(&reqBody)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, "Unable to decode request body")
+		return
+	}
+
+	cust, err := database.GetCustomerById(vh.db, token.CustId)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, "User not found")
+		return
+	}
+
+	vac, err := database.GetVacByAccountNum(vh.db, cust.AccountNum)
+
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, "Virtual account not found")
+		return
+	}
+
+	if vac.VaBalance > 0 {
+		err = database.RevertVacBalanceToMainAccount(vh.db, vac)
+		if err != nil {
+			helpers.HTTPError(w, http.StatusBadRequest, "Fail to revert balance to main account")
+			return
+		}
+
+		err = models.CreateTransactionLog(vh.db, models.TransactionLogs{
+			AccountNum:  vac.AccountNum,
+			DestAccount: vac.VaNum,
+			TranAmount:  vac.VaBalance,
+			Description: models.LogDescriptionVaToMainTemplate(vac.VaBalance, vac.VaNum, vac.AccountNum),
+			CreatedAt:   time.Now(),
+		})
+		if err != nil {
+			helpers.HTTPError(w, http.StatusBadRequest, "Fail to create log transaction")
+			return
+		}
+	}
+	err = database.DeleteVacById(vh.db, vac.VaId)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, "Fail to delete virtual account")
+		return
+	}
+
+	fmt.Fprintf(w, "Success deleting VAC and reverting %d amount of balance to main account", vac.VaBalance)
 }
 
 func (va *VAHandler) VacToMain(w http.ResponseWriter, r *http.Request) {
@@ -96,7 +156,7 @@ func (va *VAHandler) VacToMain(w http.ResponseWriter, r *http.Request) {
 		CreatedAt:   time.Now(),
 	}
 
-	err = models.TransactionLog(va.db, tLogs)
+	err = models.CreateTransactionLog(va.db, tLogs)
 	if err != nil {
 		helper.HTTPError(w, http.StatusBadRequest, "transaction log failed")
 		return

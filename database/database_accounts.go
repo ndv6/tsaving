@@ -16,13 +16,8 @@ func NewAccountHandler(db *sql.DB) *AccountHandler {
 	}
 }
 
-func GetBalanceAcc(accNum string, db *sql.DB) (acc models.Accounts, err error) {
-	var balanceFloat float32
-	err = db.QueryRow("SELECT account_balance FROM accounts WHERE account_num = ($1) ", accNum).Scan(&balanceFloat)
-	if err != nil {
-		return
-	}
-	acc.AccountBalance = int(balanceFloat)
+func GetBalanceAcc(accNum string, db *sql.DB) (balance int, err error) {
+	err = db.QueryRow("SELECT account_balance FROM accounts WHERE account_num = ($1) ", accNum).Scan(&balance)
 	return
 }
 

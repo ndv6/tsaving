@@ -1,24 +1,35 @@
 package tokens
 
-import(
-	"net/http" 
-	"github.com/go-chi/jwtauth"
-	"encoding/json"
-	"github.com/ndv6/tsaving/helpers"
+import (
 	"context"
+	"encoding/json"
+	"fmt"
+	"net/http"
+
+	"github.com/go-chi/jwtauth"
+	"github.com/ndv6/tsaving/helpers"
 )
 
 type JWT struct {
 	*jwtauth.JWTAuth
 }
 
-func New(secret []byte) *JWT{
+func New(secret []byte) *JWT {
 	return &JWT{jwtauth.New("HS256", []byte("secret"), nil)}
 }
 
-func (j *JWT) Endcode(token Token) string{
+func (j *JWT) Encode(token Token) string {
 	_, tokenString, _ := j.JWTAuth.Encode(&token)
 	return tokenString
+}
+
+func (j *JWT) Decode(tokenString string) (token Token, err error) {
+	jwtToken, err := j.JWTAuth.Decode(tokenString)
+	fmt.Println(jwtToken.Claims)
+	if err != nil {
+		return
+	}
+	return
 }
 
 func (j *JWT) GetToken(r *http.Request) Token {
@@ -29,23 +40,23 @@ func (j *JWT) GetToken(r *http.Request) Token {
 	return token
 }
 
-func (j *JWT) AuthMiddleware(handler http.Handler) http.Handler{
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request){
+func (j *JWT) AuthMiddleware(handler http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		jwtToken, err := jwtauth.VerifyRequest(j.JWTAuth, r, TokenFromHeader)
-		if err != nil{
+		if err != nil {
 			helpers.HTTPError(w, http.StatusBadRequest, "Error Verifying Token")
 			return
 		}
 
 		var claims Token
 		b, err := json.Marshal(jwtToken.Claims) //Encode Token
-		if err != nil{
+		if err != nil {
 			helpers.HTTPError(w, http.StatusBadRequest, "Invalid Token")
 			return
 		}
 
 		err = json.Unmarshal(b, &claims)
-		if err != nil{
+		if err != nil {
 			helpers.HTTPError(w, http.StatusBadRequest, "Unable to Parse Token")
 			return
 		}
@@ -54,7 +65,7 @@ func (j *JWT) AuthMiddleware(handler http.Handler) http.Handler{
 		if err != nil {
 			helpers.HTTPError(w, http.StatusUnauthorized, "Token Expired")
 			return
-		} 
+		}
 
 		ctx := context.WithValue(r.Context(), "token", claims)
 		handler.ServeHTTP(w, r.WithContext(ctx))

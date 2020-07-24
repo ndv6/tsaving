@@ -107,7 +107,7 @@ func (ch *CustomerHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, tokenRegister, _ := ch.jwt.Encode(&tokens.Token{
+	tokenRegister := ch.jwt.Encode(tokens.Token{
 		AccountNum: AccNum,
 	})
 

@@ -19,12 +19,12 @@ func main() {
 		log.Fatal(err)
 	}
 
+	jwt := tokens.New([]byte(config.SecretKey))
+
 	db, err := database.GetDatabaseConnection(config.DbCfg)
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	jwt = tokens.New([]byte(config.SecretKey))
 
 	fmt.Println("Server is now accepting request from port " + config.Port)
 	err = http.ListenAndServe("127.0.0.1:"+config.Port, api.Router(jwt, db))

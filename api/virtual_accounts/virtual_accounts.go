@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/ndv6/tsaving/database"
 	helper "github.com/ndv6/tsaving/helpers"
@@ -21,24 +22,101 @@ type VirtualAcc struct {
 	VaLabel  string `json:"va_label"`
 }
 
-type VirtualAccHandler struct {
+type InputVa struct {
+	BalanceChange int    `json:"balance_change"`
+	VaNum         string `json:"va_num"`
+}
+
+type VAResponse struct {
+	Status       int    `json:"status"`
+	Notification string `json:"notification"`
+}
+
+type VAHandler struct {
 	jwt *tokens.JWT
 	db  *sql.DB
 }
 
-func NewVirtualAccHandler(jwt *tokens.JWT, db *sql.DB) *VirtualAccHandler {
-	return &VirtualAccHandler{jwt, db}
+func NewVAHandler(jwt *tokens.JWT, db *sql.DB) *VAHandler {
+	return &VAHandler{jwt, db}
 }
 
-func (vah *VirtualAccHandler) Create(w http.ResponseWriter, r *http.Request) {
-	// read request body
-
-	token := vah.jwt.GetToken(r)
-	req, err := ioutil.ReadAll(r.Body)
+func (va *VAHandler) VacToMain(w http.ResponseWriter, r *http.Request) {
+	token := va.jwt.GetToken(r)
+	//ambil input dari jsonnya (no rek VAC dan saldo input)
+	b, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		helper.HTTPError(w, http.StatusBadRequest, "unable to read request body")
 		return
 	}
+	var VirAcc InputVa
+	err = json.Unmarshal(b, &VirAcc)
+	if err != nil {
+		helper.HTTPError(w, http.StatusBadRequest, "unable to parse json request")
+		return
+	}
+
+	// cek rekening
+	err = database.CheckAccountVA(va.db, VirAcc.VaNum, token.CustId)
+	if err != nil {
+		helper.HTTPError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	//cek input apakah melebihi saldo
+	var BalanceChange int = VirAcc.BalanceChange
+	returnValue := database.CheckBalance("VA", VirAcc.VaNum, BalanceChange, va.db)
+	if returnValue == false {
+		helper.HTTPError(w, http.StatusBadRequest, "your input is bigger than virtual account balance.")
+		return
+	}
+
+	//get no rekening by rekening vac
+	AccountNumber, _ := database.GetAccountByVA(va.db, VirAcc.VaNum)
+
+	//update balance at both accounts
+	err = database.UpdateVacToMain(va.db, VirAcc.BalanceChange, VirAcc.VaNum, AccountNumber)
+	if err != nil {
+		helper.HTTPError(w, http.StatusBadRequest, "transfer error")
+		return
+	}
+
+	response := VAResponse{
+		Status:       1,
+		Notification: fmt.Sprintf("successfully move balance to your main account : %v", VirAcc.BalanceChange),
+	}
+	err = json.NewEncoder(w).Encode(response)
+	if err != nil {
+		helper.HTTPError(w, http.StatusBadRequest, "unable to encode response")
+		return
+	}
+
+	logDesc := models.LogDescriptionVaToMainTemplate(VirAcc.BalanceChange, VirAcc.VaNum, token.AccountNum)
+
+	//inpu transaction log
+	tLogs := models.TransactionLogs{
+		AccountNum:  token.AccountNum,
+		DestAccount: VirAcc.VaNum,
+		TranAmount:  VirAcc.BalanceChange,
+		Description: logDesc,
+		CreatedAt:   time.Now(),
+	}
+
+	err = models.TransactionLog(va.db, tLogs)
+	if err != nil {
+		helper.HTTPError(w, http.StatusBadRequest, "transaction log failed")
+		return
+	}
+
+	return
+
+}
+
+func (va *VAHandler) Create(w http.ResponseWriter, r *http.Request) {
+	// read request body
+
+	token := va.jwt.GetToken(r)
+	req, err := ioutil.ReadAll(r.Body)
 
 	// parse json request
 	var vac VirtualAcc
@@ -52,14 +130,15 @@ func (vah *VirtualAccHandler) Create(w http.ResponseWriter, r *http.Request) {
 	var vam models.VirtualAccounts
 
 	// validasi
-	am, err := models.GetMainAccount(vah.db, token.AccountNum)
+	am, err := models.GetMainAccount(va.db, token.AccountNum)
+	fmt.Println(token.AccountNum)
 	if err != nil {
-		helper.HTTPError(w, http.StatusBadRequest, "unable to validate account. please try again and make sure account is correct")
+		helper.HTTPError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	// generate va number
-	res, err := database.GetListVANum(token.AccountNum, vah.db)
+	res, err := database.GetListVANum(token.AccountNum, va.db)
 	if err != nil {
 		helper.HTTPError(w, http.StatusBadRequest, "unable to get virtual account list")
 		return
@@ -92,7 +171,7 @@ func (vah *VirtualAccHandler) Create(w http.ResponseWriter, r *http.Request) {
 	log.Println(newVaNum)
 
 	// insert to db
-	vam, err = database.CreateVA(newVaNum, token.AccountNum, vac.VaColor, vac.VaLabel, vah.db)
+	vam, err = database.CreateVA(newVaNum, token.AccountNum, vac.VaColor, vac.VaLabel, va.db)
 
 	if err != nil {
 		helper.HTTPError(w, http.StatusBadRequest, "failed insert data to db")
@@ -103,7 +182,7 @@ func (vah *VirtualAccHandler) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 // to edit VA
-func (vah *VirtualAccHandler) Edit(w http.ResponseWriter, r *http.Request) {
+func (va *VAHandler) Edit(w http.ResponseWriter, r *http.Request) {
 
 	// read request body
 	req, err := ioutil.ReadAll(r.Body)
@@ -123,7 +202,7 @@ func (vah *VirtualAccHandler) Edit(w http.ResponseWriter, r *http.Request) {
 	// update to db
 	fmt.Printf(vac.VaNumber + " " + " " + vac.VaColor + " " + vac.VaLabel)
 	var vam models.VirtualAccounts
-	vam, err = database.UpdateVA(vac.VaNumber, vac.VaColor, vac.VaLabel, vah.db)
+	vam, err = database.UpdateVA(vac.VaNumber, vac.VaColor, vac.VaLabel, va.db)
 
 	if err != nil {
 		helper.HTTPError(w, http.StatusBadRequest, "failed insert data to db")
@@ -131,4 +210,22 @@ func (vah *VirtualAccHandler) Edit(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fmt.Fprintf(w, "Virtual Account: %v Updated!\n", vam.VaNum)
+}
+
+func (va *VAHandler) VacList(w http.ResponseWriter, r *http.Request) {
+
+	token := va.jwt.GetToken(r)
+	res, err := database.GetListVA(va.db, token.CustId)
+
+	if err != nil {
+		helper.HTTPError(w, http.StatusBadRequest, "id must be integer")
+		return
+	}
+
+	err = json.NewEncoder(w).Encode(res)
+	if err != nil {
+		helper.HTTPError(w, http.StatusBadRequest, "unable to parse json request")
+		return
+	}
+
 }

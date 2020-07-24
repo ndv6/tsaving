@@ -4,14 +4,15 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"github.com/ndv6/tsaving/helpers"
-	"github.com/ndv6/tsaving/models"
-	"github.com/ndv6/tsaving/tokens"
 	"io/ioutil"
 	"math/rand"
 	"net/http"
 	"regexp"
 	"time"
+
+	"github.com/ndv6/tsaving/helpers"
+	"github.com/ndv6/tsaving/models"
+	"github.com/ndv6/tsaving/tokens"
 )
 
 type RegisterResponse struct {

@@ -135,6 +135,7 @@ func CheckBalance(target string, accNumber string, amount int, db *sql.DB) (stat
 		status = true
 	}
 	return
+
 }
 
 func CreateVA(vaNum string, accNum string, vaColor string, vaLabel string, db *sql.DB) (va models.VirtualAccounts, err error) {
@@ -184,6 +185,7 @@ func GetMaxVANum(accNum string, db *sql.DB) (maxId int, err error) {
 		return
 	}
 	return maxId, nil
+}
 func RevertVacBalanceToMainAccount(db *sql.DB, va models.VirtualAccounts) (err error) {
 	acc, err := GetAccountByAccountNum(db, va.AccountNum)
 

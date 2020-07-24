@@ -89,7 +89,7 @@
 ```
 
 
-## 4. [POST] /vac/add_balance_va
+## 4. [POST] /vac/add_balance_vac
 ### **Description** : 
     Add balance from main account, to virtual accounts. Before update the balance check first if the balance sufficient
 

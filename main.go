@@ -20,6 +20,7 @@ func main() {
 	}
 
 	jwt := tokens.New([]byte(config.SecretKey))
+
 	db, err := database.GetDatabaseConnection(config.DbCfg)
 	if err != nil {
 		log.Fatal(err)

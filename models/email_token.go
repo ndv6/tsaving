@@ -19,3 +19,8 @@ type VerifiedEmailResponse struct {
 	Email  string `json:"email"`
 	Status string `json:"status"`
 }
+
+type VerifiedEmailResponse struct {
+	Email  string `json:"email"`
+	Status string `json:"status"`
+}

@@ -41,7 +41,7 @@ func LoginHandler(jwt *tokens.JWT, db *sql.DB) http.HandlerFunc {
 			helpers.HTTPError(w, http.StatusBadRequest, "Wrong Email or Password")
 			return
 		}
-		_, tokenLogin, _ := jwt.Encode(&tokens.Token{
+		_, tokenLogin, _ := jwt.JWTAuth.Encode(&tokens.Token{
 			CustId:     objCustomer.CustId,
 			AccountNum: objCustomer.AccountNum,
 			Expired:    time.Now().Add(120 * time.Minute),

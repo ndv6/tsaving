@@ -5,8 +5,6 @@ import (
 
 	"github.com/go-chi/chi/middleware"
 
-	"github.com/ndv6/tsaving/api/vac"
-
 	"github.com/ndv6/tsaving/api/customers"
 	"github.com/ndv6/tsaving/api/email"
 
@@ -22,7 +20,7 @@ import (
 
 func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 	chiRouter := chi.NewRouter()
-
+	vah := virtual_accounts.NewVAHandler(jwt, db)
 
 	chiRouter.Use(middleware.Logger)
 
@@ -36,12 +34,14 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 	chiRouter.Post("/register", ch.Create)
 	chiRouter.Post("/login", customers.LoginHandler(jwt, db))
 
+	// Virtual Account endpoint
+	chiRouter.With(jwt.AuthMiddleware).Post("/virtualaccount/create", vah.Create)
+	chiRouter.With(jwt.AuthMiddleware).Put("/virtualaccount/edit", vah.Edit)
 	// VAC transactions API endpoints
 	chiRouter.With(jwt.AuthMiddleware).Post("/vac/to_main", va.VacToMain)
 	chiRouter.With(jwt.AuthMiddleware).Get("/vac/list", va.VacList)
-  chiRouter.With(jwt.AuthMiddleware).Post("/vac/delete-vac", va.DeleteVac)
+	chiRouter.With(jwt.AuthMiddleware).Post("/vac/delete-vac", va.DeleteVac)
 
-	// Url endpoint not found
 	// Get transaction history
 	chiRouter.With(jwt.AuthMiddleware).Get("/transaction/history", ch.HistoryTransactionHandler(db))
 

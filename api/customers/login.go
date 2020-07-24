@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/ndv6/tsaving/constants"
+
 	"github.com/go-chi/jwtauth"
 	"github.com/ndv6/tsaving/helpers"
 	"github.com/ndv6/tsaving/models"
@@ -29,7 +31,7 @@ func LoginHandler(jwt *tokens.JWT, db *sql.DB) http.HandlerFunc {
 		var l LoginRequest // Ngambil dari body API
 		err := json.NewDecoder(r.Body).Decode(&l)
 		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, "Unable parse Request") //Format JSON Tidak Sesuai
+			helpers.HTTPError(w, http.StatusBadRequest, constants.CannotParseRequest) //Format JSON Tidak Sesuai
 			return
 		}
 
@@ -38,7 +40,7 @@ func LoginHandler(jwt *tokens.JWT, db *sql.DB) http.HandlerFunc {
 		objCustomer, err := models.LoginCustomer(db, l.CustEmail, Pass)
 		if err != nil {
 			log.Println(err)
-			helpers.HTTPError(w, http.StatusBadRequest, "Wrong Email or Password")
+			helpers.HTTPError(w, http.StatusBadRequest, constants.UnauthorizedUser)
 			return
 		}
 		_, tokenLogin, _ := jwt.JWTAuth.Encode(&tokens.Token{
@@ -53,7 +55,7 @@ func LoginHandler(jwt *tokens.JWT, db *sql.DB) http.HandlerFunc {
 
 		err = json.NewEncoder(w).Encode(data)
 		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, "Unable to Encode response")
+			helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
 			return
 		}
 	}

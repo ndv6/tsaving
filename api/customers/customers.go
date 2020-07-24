@@ -11,6 +11,8 @@ import (
 	"regexp"
 	"time"
 
+	"github.com/ndv6/tsaving/constants"
+
 	"github.com/ndv6/tsaving/helpers"
 	"github.com/ndv6/tsaving/models"
 	"github.com/ndv6/tsaving/tokens"
@@ -76,29 +78,27 @@ func (ch *CustomerHandler) GetProfile(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, string(res))
 }
 
-var emailRegex = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
-
 func (ch *CustomerHandler) Create(w http.ResponseWriter, r *http.Request) {
 	b, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, "Unable Request Body")
+		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotReadRequest)
 		return
 	}
 	var cus models.Customers
 	err = json.Unmarshal(b, &cus)
 
 	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, "Unable to parse JSON Request")
+		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotParseRequest)
 		return
 	}
 
 	if len(cus.CustPassword) < 6 {
-		helpers.HTTPError(w, http.StatusBadRequest, "Password Min 6 Character")
+		helpers.HTTPError(w, http.StatusBadRequest, constants.InvalidPassword)
 		return
 	}
 
 	date := time.Now()
-	now := date.Format("060102")
+	now := date.Format(constants.DateFormat)
 	rand.Seed(time.Now().UnixNano())
 	randomNumber := rand.Intn(9999)
 
@@ -109,7 +109,7 @@ func (ch *CustomerHandler) Create(w http.ResponseWriter, r *http.Request) {
 	Pass := helpers.HashString(cus.CustPassword)
 
 	if err := models.RegisterCustomer(ch.db, cus, AccNum, Pass); err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, "Unable to Register, Your Phone Number Or Email Has Been Used")
+		helpers.HTTPError(w, http.StatusBadRequest, constants.NotUniquePhoneNumberAndEmail)
 		return
 	}
 
@@ -124,17 +124,17 @@ func (ch *CustomerHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 	err = json.NewEncoder(w).Encode(data)
 	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, "Unable to Encode response")
+		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
 		return
 	}
 
 	if err := models.AddEmailTokens(ch.db, tokenRegister, cus.CustEmail); err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, "Email Token Failed")
+		helpers.HTTPError(w, http.StatusInternalServerError, constants.InsertTokenFailed)
 		return
 	}
 
 	if err := models.AddAccountsWhileRegister(ch.db, AccNum); err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, "Account Failed")
+		helpers.HTTPError(w, http.StatusInternalServerError, constants.CreateAccountFailed)
 		return
 	}
 
@@ -144,14 +144,14 @@ func (ch *CustomerHandler) Create(w http.ResponseWriter, r *http.Request) {
 	})
 
 	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, "Unable to Parse JSON Email")
+		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotParseTnotifRequest)
 		return
 	}
 
-	_, err = http.Post("http://localhost:8082/sendMail", "application/json", bytes.NewBuffer(requestBody))
+	_, err = http.Post(constants.TnotifLocalhost+constants.TnotifEndpoint, constants.ApplicationJson, bytes.NewBuffer(requestBody))
 
 	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, "Can't Send Email")
+		helpers.HTTPError(w, http.StatusBadRequest, constants.ErrorWhenCallingTnotif)
 		return
 	}
 
@@ -161,7 +161,7 @@ func (ch *CustomerHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 	err = json.NewEncoder(w).Encode(dataemail)
 	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, "Fail Email Response")
+		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeTnotifResponse)
 		return
 	}
 }
@@ -176,14 +176,14 @@ func (ch *CustomerHandler) UpdateProfile(w http.ResponseWriter, r *http.Request)
 
 	requestedBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, "Unable to read the requested body")
+		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotReadRequest)
 		return
 	}
 
 	var cus models.Customers
 	err = json.Unmarshal(requestedBody, &cus)
 	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, "Invalid json type")
+		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotParseRequest)
 		return
 	}
 
@@ -196,21 +196,21 @@ func (ch *CustomerHandler) UpdateProfile(w http.ResponseWriter, r *http.Request)
 			return
 		}
 		if isExist {
-			helpers.HTTPError(w, http.StatusBadRequest, "Email already taken")
+			helpers.HTTPError(w, http.StatusBadRequest, constants.NotUniquePhoneNumberAndEmail)
 			return
 		}
 	} else {
-		helpers.HTTPError(w, http.StatusBadRequest, "Invalid email")
+		helpers.HTTPError(w, http.StatusBadRequest, constants.InvalidUserEmail)
 		return
 	}
 
 	err = models.UpdateProfile(ch.db, cus)
 	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, "Error updating customer data"+err.Error())
+		helpers.HTTPError(w, http.StatusBadRequest, constants.UpdateUserDataFailed+err.Error())
 	}
 
 	result := StatusResult{
-		Status: "success",
+		Status: constants.Success,
 	}
 
 	res, err := json.Marshal(result)
@@ -233,16 +233,16 @@ func (ch *CustomerHandler) UpdatePhoto(w http.ResponseWriter, r *http.Request) {
 	// Parse our multipart form, 10 << 20 specifies a maximum upload of 10 MB files.
 	r.ParseMultipartForm(10 << 20)
 	// FormFile returns the first file for the given key `myFile`
-	file, _, err := r.FormFile("myPhoto")
+	file, _, err := r.FormFile(constants.UserPhotoFileName)
 	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, "Error Retrieving the File")
+		helpers.HTTPError(w, http.StatusBadRequest, constants.RetrieveUserFileFailed)
 		return
 	}
 	defer file.Close()
 
 	// Create a temporary file within our temp-images directory with particular naming pattern
-	folderLocation := "temp-images"
-	newFileName := tokens.AccountNum + ".png"
+	folderLocation := constants.UserPhotoFolderName
+	newFileName := tokens.AccountNum + constants.UserPhotoFileExtension
 	tempFile, err := ioutil.TempFile(folderLocation, newFileName)
 	if err != nil {
 		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
@@ -262,11 +262,11 @@ func (ch *CustomerHandler) UpdatePhoto(w http.ResponseWriter, r *http.Request) {
 	pictPath := folderLocation + newFileName
 	err = models.UpdateCustomerPicture(ch.db, pictPath, tokens.CustId)
 	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, "Error updating customer picure"+err.Error())
+		helpers.HTTPError(w, http.StatusBadRequest, constants.UpdateUserDataFailed+err.Error())
 	}
 
 	result := StatusResult{
-		Status: "success",
+		Status: constants.Success,
 	}
 
 	res, err := json.Marshal(result)
@@ -279,6 +279,8 @@ func (ch *CustomerHandler) UpdatePhoto(w http.ResponseWriter, r *http.Request) {
 }
 
 func isEmailValid(e string) bool {
+	emailRegex := regexp.MustCompile(constants.EmailRegex)
+
 	if len(e) < 4 || len(e) > 64 {
 		return false
 	}

@@ -60,7 +60,7 @@ func DepositToMainAccount(partner PartnerInterface, trx Transactor) http.Handler
 
 		isValidAuthCode, err := isValidPartnerAuthCode(request, partner)
 		if !isValidAuthCode || err != nil {
-			helpers.HTTPError(w, http.StatusUnauthorized, constants.UnauthorizedRequest)
+			helpers.HTTPError(w, http.StatusUnauthorized, constants.UnauthorizedDepositRequest)
 			return
 		}
 

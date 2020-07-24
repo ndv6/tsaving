@@ -7,6 +7,8 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	"github.com/ndv6/tsaving/constants"
+
 	"github.com/ndv6/tsaving/database"
 	"github.com/ndv6/tsaving/helpers"
 
@@ -32,10 +34,10 @@ func VerifyEmailToken(db *sql.DB) http.HandlerFunc {
 
 		et, err = database.GetEmailTokenByTokenAndEmail(db, et.Token, et.Email)
 		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, "Unable to verify email token: "+err.Error())
+			helpers.HTTPError(w, http.StatusBadRequest, constants.VerifyEmailTokenFailed+err.Error())
 			return
 		}
-    
+
 		err = database.UpdateCustomerVerificationStatusByEmail(et.Email, db)
 		if err != nil {
 			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
@@ -44,17 +46,17 @@ func VerifyEmailToken(db *sql.DB) http.HandlerFunc {
 
 		err = database.DeleteVerifiedEmailTokenById(et.EtId, db)
 		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, "Unable to delete verified email: "+err.Error())
+			helpers.HTTPError(w, http.StatusBadRequest, constants.DeleteEmailTokenFailed+err.Error())
 			return
 		}
 
 		b, err := json.Marshal(models.VerifiedEmailResponse{
 			Email:  et.Email,
-			Status: "verified",
+			Status: constants.Verified,
 		})
-    
+
 		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, "Unable to parse to json")
+			helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
 			return
 		}
 		fmt.Fprintf(w, string(b))

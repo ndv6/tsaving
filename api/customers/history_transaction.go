@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/ndv6/tsaving/constants"
+
 	"github.com/ndv6/tsaving/helpers"
 
 	"github.com/ndv6/tsaving/models"
@@ -21,12 +23,12 @@ func (ch *CustomerHandler) HistoryTransactionHandler(db *sql.DB) http.HandlerFun
 
 		listHistoryTransaction, err := models.ListTransactionLog(db, token.CustId)
 		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, "Cannot get history transaction")
+			helpers.HTTPError(w, http.StatusBadRequest, constants.FailedToFetchHistoryTransaction)
 			return
 		}
 		err = json.NewEncoder(w).Encode(listHistoryTransaction)
 		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, "Can not parse response")
+			helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
 			return
 		}
 	})

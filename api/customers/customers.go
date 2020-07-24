@@ -138,36 +138,7 @@ func (ch *CustomerHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-<<<<<<< HEAD
-	requestBody, err := json.Marshal(map[string]string{
-		"email": cus.CustEmail,
-		"token": tokenRegister,
-	})
-
-	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotParseTnotifRequest)
-		return
-	}
-
-	_, err = http.Post(constants.TnotifLocalhost+constants.TnotifEndpoint, constants.ApplicationJson, bytes.NewBuffer(requestBody))
-
-	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, constants.ErrorWhenCallingTnotif)
-		return
-	}
-
-	dataemail := EmailResponse{
-		Email: cus.CustEmail,
-	}
-
-	err = json.NewEncoder(w).Encode(dataemail)
-	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeTnotifResponse)
-		return
-	}
-=======
 	ch.sendMail(w, tokenRegister, cus.CustEmail)
->>>>>>> 70a6c1c322bef822e8eef123848405f305ce2e92
 }
 
 func (ch *CustomerHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
@@ -311,12 +282,8 @@ func (ch *CustomerHandler) UpdatePhoto(w http.ResponseWriter, r *http.Request) {
 }
 
 func isEmailValid(e string) bool {
-<<<<<<< HEAD
 	emailRegex := regexp.MustCompile(constants.EmailRegex)
 
-=======
-	emailRegex := regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
->>>>>>> 70a6c1c322bef822e8eef123848405f305ce2e92
 	if len(e) < 4 || len(e) > 64 {
 		return false
 	}

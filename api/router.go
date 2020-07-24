@@ -3,6 +3,8 @@ package api
 import (
 	"database/sql"
 
+	"github.com/go-chi/chi/middleware"
+
 	"github.com/ndv6/tsaving/api/vac"
 
 	"github.com/ndv6/tsaving/api/customers"
@@ -16,6 +18,8 @@ import (
 
 func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 	chiRouter := chi.NewRouter()
+
+	chiRouter.Use(middleware.Logger)
 	ch := customers.NewCustomerHandler(jwt, db)
 	// Home endpoint
 	chiRouter.Get("/", home.HomeHandler)

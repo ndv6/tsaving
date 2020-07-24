@@ -281,7 +281,7 @@
 }
 ```
 
-## 11. [POST] /customers/updateprofile
+## 11. [PUT] /customers/updateprofile
 ### **Description** : 
     Update customer profile information
 
@@ -316,7 +316,7 @@
     {"status":"success"}
 ```
 
-## 12. [POST] /customers/updatephoto
+## 12. [PATCH] /customers/updatephoto
 ### **Description** : 
     Upload customer photo & update image path
 

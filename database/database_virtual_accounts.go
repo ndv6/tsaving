@@ -207,7 +207,7 @@ func GetAccountByAccountNum(db *sql.DB, accountNum string) (acc models.Accounts,
 }
 
 func GetCustomerById(db *sql.DB, id int) (cust models.Customers, err error) {
-	err = db.QueryRow("SELECT cust_id, account_num, cust_email FROM customers WHERE cust_id=3;").Scan(&cust.CustId, &cust.AccountNum, &cust.CustEmail)
+	err = db.QueryRow("SELECT cust_id, account_num, cust_email FROM customers WHERE cust_id=$1;", id).Scan(&cust.CustId, &cust.AccountNum, &cust.CustEmail)
 	return
 }
 

@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"math/rand"
 	"net/http"
 	"regexp"
@@ -18,7 +17,8 @@ import (
 )
 
 type RegisterResponse struct {
-	Status string `json:"status"`
+	Token string `json:"token"`
+	Email string `json:"email"`
 }
 
 type EmailResponse struct {
@@ -118,7 +118,8 @@ func (ch *CustomerHandler) Create(w http.ResponseWriter, r *http.Request) {
 	})
 
 	data := RegisterResponse{
-		Status: "Register Succedeed",
+		Token: tokenRegister,
+		Email: cus.CustEmail,
 	}
 
 	err = json.NewEncoder(w).Encode(data)
@@ -147,16 +148,10 @@ func (ch *CustomerHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp, err := http.Post("http://localhost:8082/sendMail", "application/json", bytes.NewBuffer(requestBody))
+	_, err = http.Post("http://localhost:8082/sendMail", "application/json", bytes.NewBuffer(requestBody))
 
 	if err != nil {
 		helpers.HTTPError(w, http.StatusBadRequest, "Can't Send Email")
-		return
-	}
-
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, "False Body")
 		return
 	}
 
@@ -166,12 +161,9 @@ func (ch *CustomerHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 	err = json.NewEncoder(w).Encode(dataemail)
 	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, "Unable to Encode response")
+		helpers.HTTPError(w, http.StatusBadRequest, "Fail Email Response")
 		return
 	}
-
-	log.Println(string(body))
-
 }
 
 func (ch *CustomerHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {

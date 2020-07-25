@@ -5,12 +5,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"strconv"
 	"time"
 
+	"github.com/go-chi/chi"
 	"github.com/ndv6/tsaving/database"
+	"github.com/ndv6/tsaving/helpers"
 	helper "github.com/ndv6/tsaving/helpers"
 	"github.com/ndv6/tsaving/models"
 	"github.com/ndv6/tsaving/tokens"
@@ -37,8 +38,67 @@ type VAHandler struct {
 	db  *sql.DB
 }
 
+type DeleteVacRequest struct {
+	VaNum string `json:"va_num"`
+}
+
 func NewVAHandler(jwt *tokens.JWT, db *sql.DB) *VAHandler {
 	return &VAHandler{jwt, db}
+}
+
+func (vh VAHandler) DeleteVac(w http.ResponseWriter, r *http.Request) {
+	token := vh.jwt.GetToken(r)
+	err := token.Valid()
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+	}
+
+	var reqBody DeleteVacRequest
+	err = json.NewDecoder(r.Body).Decode(&reqBody)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, "Unable to decode request body")
+		return
+	}
+
+	cust, err := database.GetCustomerById(vh.db, token.CustId)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, "User not found")
+		return
+	}
+
+	vac, err := database.GetVacByAccountNum(vh.db, cust.AccountNum)
+
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, "Virtual account not found")
+		return
+	}
+
+	if vac.VaBalance > 0 {
+		err = database.RevertVacBalanceToMainAccount(vh.db, vac)
+		if err != nil {
+			helpers.HTTPError(w, http.StatusBadRequest, "Fail to revert balance to main account")
+			return
+		}
+
+		err = models.CreateTransactionLog(vh.db, models.TransactionLogs{
+			AccountNum:  vac.AccountNum,
+			DestAccount: vac.VaNum,
+			TranAmount:  vac.VaBalance,
+			Description: models.LogDescriptionVaToMainTemplate(vac.VaBalance, vac.VaNum, vac.AccountNum),
+			CreatedAt:   time.Now(),
+		})
+		if err != nil {
+			helpers.HTTPError(w, http.StatusBadRequest, "Fail to create log transaction")
+			return
+		}
+	}
+	err = database.DeleteVacById(vh.db, vac.VaId)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, "Fail to delete virtual account")
+		return
+	}
+
+	fmt.Fprintf(w, "Success deleting VAC and reverting %d amount of balance to main account", vac.VaBalance)
 }
 
 func (va *VAHandler) VacToMain(w http.ResponseWriter, r *http.Request) {
@@ -102,7 +162,7 @@ func (va *VAHandler) VacToMain(w http.ResponseWriter, r *http.Request) {
 		CreatedAt:   time.Now(),
 	}
 
-	err = models.TransactionLog(va.db, tLogs)
+	err = models.CreateTransactionLog(va.db, tLogs)
 	if err != nil {
 		helper.HTTPError(w, http.StatusBadRequest, "transaction log failed")
 		return
@@ -111,10 +171,12 @@ func (va *VAHandler) VacToMain(w http.ResponseWriter, r *http.Request) {
 	return
 
 }
-
 func (va *VAHandler) Create(w http.ResponseWriter, r *http.Request) {
-	// read request body
 
+	// set response header
+	w.Header().Set("Content-Type", "application/json")
+
+	// read request body
 	token := va.jwt.GetToken(r)
 	req, err := ioutil.ReadAll(r.Body)
 
@@ -131,9 +193,8 @@ func (va *VAHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 	// validasi
 	am, err := models.GetMainAccount(va.db, token.AccountNum)
-	fmt.Println(token.AccountNum)
 	if err != nil {
-		helper.HTTPError(w, http.StatusBadRequest, err.Error())
+		helper.HTTPError(w, http.StatusBadRequest, "validate account failed, make sure account number is correct")
 		return
 	}
 
@@ -144,7 +205,6 @@ func (va *VAHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Println(res)
 	suffixVaNum := "000"
 	// get the last of VaNum
 	if len(res) > 0 {
@@ -154,6 +214,7 @@ func (va *VAHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 	lastVaNum, err := strconv.Atoi(suffixVaNum)
 	if err != nil {
+		helper.HTTPError(w, http.StatusBadRequest, "error generating va number")
 		return
 	}
 
@@ -166,9 +227,6 @@ func (va *VAHandler) Create(w http.ResponseWriter, r *http.Request) {
 		newSuffix = strconv.Itoa(lastVaNum + 1)
 	}
 	newVaNum := am.AccountNum + newSuffix
-	log.Println(newSuffix)
-	log.Println(am.AccountNum)
-	log.Println(newVaNum)
 
 	// insert to db
 	vam, err = database.CreateVA(newVaNum, token.AccountNum, vac.VaColor, vac.VaLabel, va.db)
@@ -178,11 +236,29 @@ func (va *VAHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Fprintf(w, "VA Number: %v Created!\n", vam.VaNum)
+	response := VAResponse{
+		Status:       1,
+		Notification: fmt.Sprintf("successfully create virtual account! virtual account number : %v", vam.VaNum),
+	}
+
+	// set response http status
+	w.WriteHeader(http.StatusCreated)
+
+	err = json.NewEncoder(w).Encode(response)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, "unable to encode response")
+		return
+	}
 }
 
 // to edit VA
-func (va *VAHandler) Edit(w http.ResponseWriter, r *http.Request) {
+func (va *VAHandler) Update(w http.ResponseWriter, r *http.Request) {
+
+	// set response header
+	w.Header().Set("Content-Type", "application/json")
+
+	// get va number in url
+	vaNumber := chi.URLParam(r, "va_num")
 
 	// read request body
 	req, err := ioutil.ReadAll(r.Body)
@@ -199,17 +275,32 @@ func (va *VAHandler) Edit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// update to db
-	fmt.Printf(vac.VaNumber + " " + " " + vac.VaColor + " " + vac.VaLabel)
+	// validasi
 	var vam models.VirtualAccounts
-	vam, err = database.UpdateVA(vac.VaNumber, vac.VaColor, vac.VaLabel, va.db)
+	vam, err = database.GetVaNumber(va.db, vaNumber)
+	if err != nil {
+		helper.HTTPError(w, http.StatusBadRequest, "validate va number failed, make sure va number is correct")
+		return
+	}
+
+	// update to db
+	vam, err = database.UpdateVA(vam.VaNum, vac.VaColor, vac.VaLabel, va.db)
 
 	if err != nil {
 		helper.HTTPError(w, http.StatusBadRequest, "failed insert data to db")
 		return
 	}
 
-	fmt.Fprintf(w, "Virtual Account: %v Updated!\n", vam.VaNum)
+	response := VAResponse{
+		Status:       1,
+		Notification: fmt.Sprintf("successfully edit your virtual account! virtual account number : %v", vam.VaNum),
+	}
+
+	err = json.NewEncoder(w).Encode(response)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, "unable to encode response")
+		return
+	}
 }
 
 func (va *VAHandler) VacList(w http.ResponseWriter, r *http.Request) {

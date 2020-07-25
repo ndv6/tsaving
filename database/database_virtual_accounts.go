@@ -184,6 +184,8 @@ func GetMaxVANum(accNum string, db *sql.DB) (maxId int, err error) {
 		return
 	}
 	return maxId, nil
+}
+
 func RevertVacBalanceToMainAccount(db *sql.DB, va models.VirtualAccounts) (err error) {
 	acc, err := GetAccountByAccountNum(db, va.AccountNum)
 
@@ -210,5 +212,10 @@ func GetCustomerById(db *sql.DB, id int) (cust models.Customers, err error) {
 
 func GetVacByAccountNum(db *sql.DB, accountNum string) (va models.VirtualAccounts, err error) {
 	err = db.QueryRow("SELECT va_id, va_num, account_num, va_balance FROM virtual_accounts WHERE account_num=$1", accountNum).Scan(&va.VaId, &va.VaNum, &va.AccountNum, &va.VaBalance)
+	return
+}
+
+func GetVaNumber(db *sql.DB, vaNum string) (va models.VirtualAccounts, err error) {
+	err = db.QueryRow("SELECT va_num FROM virtual_accounts WHERE va_num=$1", vaNum).Scan(&va.VaNum)
 	return
 }

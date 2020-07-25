@@ -5,8 +5,6 @@ import (
 
 	"github.com/go-chi/chi/middleware"
 
-	"github.com/ndv6/tsaving/api/vac"
-
 	"github.com/ndv6/tsaving/api/customers"
 	"github.com/ndv6/tsaving/api/email"
 
@@ -22,8 +20,6 @@ import (
 
 func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 	chiRouter := chi.NewRouter()
-	vah := virtual_accounts.NewVAHandler(jwt, db)
-
 
 	chiRouter.Use(middleware.Logger)
 
@@ -32,18 +28,20 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 	ah := database.NewAccountHandler(db)
 	ch := customers.NewCustomerHandler(jwt, db)
 	va := virtual_accounts.NewVAHandler(jwt, db)
+
 	// Home endpoint
 	chiRouter.Get("/", home.HomeHandler)
 	chiRouter.Post("/register", ch.Create)
 	chiRouter.Post("/login", customers.LoginHandler(jwt, db))
 
 	// Virtual Account endpoint
-	chiRouter.With(jwt.AuthMiddleware).Post("/virtualaccount/create", vah.Create)
-	chiRouter.With(jwt.AuthMiddleware).Put("/virtualaccount/edit", vah.Edit)
+	chiRouter.With(jwt.AuthMiddleware).Post("/me/va/create", va.Create)
+	chiRouter.With(jwt.AuthMiddleware).Put("/me/va/{va_num}/update", va.Update)
+
 	// VAC transactions API endpoints
 	chiRouter.With(jwt.AuthMiddleware).Post("/vac/to_main", va.VacToMain)
 	chiRouter.With(jwt.AuthMiddleware).Get("/vac/list", va.VacList)
-  chiRouter.With(jwt.AuthMiddleware).Post("/vac/delete-vac", va.DeleteVac)
+	chiRouter.With(jwt.AuthMiddleware).Post("/vac/delete-vac", va.DeleteVac)
 
 	// Url endpoint not found
 	// Get transaction history

@@ -29,7 +29,6 @@ type PartnerInterface interface {
 
 type Transactor interface {
 	DepositToMainAccountDatabaseAccessor(balanceToAdd int, accountNumber string, log models.TransactionLogs) error
-	LogTransaction(log models.TransactionLogs) error
 }
 
 //This is an API that partner bank(s) will call when one of our customers make a deposit through our bank, made by Vici

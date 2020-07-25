@@ -52,7 +52,6 @@ func VerifyEmailToken(db *sql.DB) http.HandlerFunc {
 			Email:  et.Email,
 			Status: "verified",
 		})
-
 		if err != nil {
 			helpers.HTTPError(w, http.StatusBadRequest, "Unable to parse to json")
 			return

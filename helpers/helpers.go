@@ -16,6 +16,10 @@ func HTTPError(w http.ResponseWriter, status int, errorMessage string) {
 	json.NewEncoder(w).Encode(map[string]string{"error": errorMessage})
 }
 
+func HashString(toHash string) string {
+	hashed := sha256.Sum256([]byte(toHash))
+	return hex.EncodeToString(hashed[:])
+}
 func LoadConfig(file string) (models.Config, error) {
 	var cfg models.Config
 	fm, err := os.Open(file)
@@ -27,9 +31,4 @@ func LoadConfig(file string) (models.Config, error) {
 		return models.Config{}, err
 	}
 	return cfg, err
-}
-
-func HashString(toHash string) string {
-	hashed := sha256.Sum256([]byte(toHash))
-	return hex.EncodeToString(hashed[:])
 }

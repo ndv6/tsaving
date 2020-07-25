@@ -89,7 +89,7 @@
 ```
 
 
-## 4. [POST] /vac/add_balance_va
+## 4. [POST] /vac/add_balance_vac
 ### **Description** : 
     Add balance from main account, to virtual accounts. Before update the balance check first if the balance sufficient
 
@@ -281,7 +281,7 @@
 }
 ```
 
-## 11. [POST] /customers/updateprofile
+## 11. [PUT] /customers/updateprofile
 ### **Description** : 
     Update customer profile information
 
@@ -316,7 +316,7 @@
     {"status":"success"}
 ```
 
-## 12. [POST] /customers/updatephoto
+## 12. [PATCH] /customers/updatephoto
 ### **Description** : 
     Upload customer photo & update image path
 

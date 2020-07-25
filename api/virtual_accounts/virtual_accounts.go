@@ -179,8 +179,9 @@ func (va *VAHandler) VacToMain(w http.ResponseWriter, r *http.Request) {
 }
 
 func (va *VAHandler) AddBalanceVA(w http.ResponseWriter, r *http.Request) {
-	var vac AddBalanceVARequest
 	token := va.jwt.GetToken(r)
+
+	var vac AddBalanceVARequest
 	err := json.NewDecoder(r.Body).Decode(&vac)
 	if err != nil {
 		helpers.HTTPError(w, http.StatusBadRequest, "unable to parse json request")
@@ -230,8 +231,9 @@ func (va *VAHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 	// validasi
 	am, err := models.GetMainAccount(va.db, token.AccountNum)
+	fmt.Println(token.AccountNum)
 	if err != nil {
-		helper.HTTPError(w, http.StatusBadRequest, "validate account failed, make sure account number is correct")
+		helper.HTTPError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 

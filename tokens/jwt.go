@@ -3,6 +3,7 @@ package tokens
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/go-chi/jwtauth"
@@ -17,9 +18,18 @@ func New(secret []byte) *JWT {
 	return &JWT{jwtauth.New("HS256", []byte("secret"), nil)}
 }
 
-func (j *JWT) Endcode(token Token) string {
+func (j *JWT) Encode(token Token) string {
 	_, tokenString, _ := j.JWTAuth.Encode(&token)
 	return tokenString
+}
+
+func (j *JWT) Decode(tokenString string) (token Token, err error) {
+	jwtToken, err := j.JWTAuth.Decode(tokenString)
+	fmt.Println(jwtToken.Claims)
+	if err != nil {
+		return
+	}
+	return
 }
 
 func (j *JWT) GetToken(r *http.Request) Token {

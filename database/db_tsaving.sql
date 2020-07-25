@@ -1,20 +1,5 @@
 -- Adminer 4.7.7 PostgreSQL dump
 
-DROP TABLE IF EXISTS "accounts";
-DROP SEQUENCE IF EXISTS accounts_account_id_seq;
-CREATE SEQUENCE accounts_account_id_seq INCREMENT 1 MINVALUE 1 MAXVALUE 2147483647 START 1 CACHE 1;
-
-CREATE TABLE "public"."accounts" (
-    "account_id" integer DEFAULT nextval('accounts_account_id_seq') NOT NULL,
-    "account_num" character varying(10),
-    "account_balance" integer,
-    "created_at" timestamp,
-    CONSTRAINT "accounts_account_num_key" UNIQUE ("account_num"),
-    CONSTRAINT "accounts_pkey" PRIMARY KEY ("account_id"),
-    CONSTRAINT "account_fk" FOREIGN KEY (account_num) REFERENCES customers(account_num) NOT DEFERRABLE
-) WITH (oids = false);
-
-
 DROP TABLE IF EXISTS "customers";
 DROP SEQUENCE IF EXISTS customers_cust_id_seq;
 CREATE SEQUENCE customers_cust_id_seq INCREMENT 1 MINVALUE 1 MAXVALUE 2147483647 START 1 CACHE 1;
@@ -36,6 +21,21 @@ CREATE TABLE "public"."customers" (
     CONSTRAINT "customers_cust_email_key" UNIQUE ("cust_email"),
     CONSTRAINT "customers_cust_phone_key" UNIQUE ("cust_phone"),
     CONSTRAINT "customers_pkey" PRIMARY KEY ("cust_id")
+) WITH (oids = false);
+
+
+DROP TABLE IF EXISTS "accounts";
+DROP SEQUENCE IF EXISTS accounts_account_id_seq;
+CREATE SEQUENCE accounts_account_id_seq INCREMENT 1 MINVALUE 1 MAXVALUE 2147483647 START 1 CACHE 1;
+
+CREATE TABLE "public"."accounts" (
+    "account_id" integer DEFAULT nextval('accounts_account_id_seq') NOT NULL,
+    "account_num" character varying(10),
+    "account_balance" integer,
+    "created_at" timestamp,
+    CONSTRAINT "accounts_account_num_key" UNIQUE ("account_num"),
+    CONSTRAINT "accounts_pkey" PRIMARY KEY ("account_id"),
+    CONSTRAINT "account_fk" FOREIGN KEY (account_num) REFERENCES customers(account_num) NOT DEFERRABLE
 ) WITH (oids = false);
 
 

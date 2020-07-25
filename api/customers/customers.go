@@ -11,6 +11,7 @@ import (
 	"regexp"
 	"time"
 
+	"github.com/ndv6/tsaving/constants"
 	"github.com/ndv6/tsaving/helpers"
 	"github.com/ndv6/tsaving/models"
 	"github.com/ndv6/tsaving/tokens"
@@ -154,7 +155,7 @@ func (ch *CustomerHandler) UpdateProfile(w http.ResponseWriter, r *http.Request)
 
 	requestedBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, "Unable to read the requested body")
+		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotReadRequest)
 		return
 	}
 
@@ -266,7 +267,7 @@ func (ch *CustomerHandler) UpdatePhoto(w http.ResponseWriter, r *http.Request) {
 	pictPath := folderLocation + newFileName
 	err = models.UpdateCustomerPicture(ch.db, pictPath, tokens.CustId)
 	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, "Error updating customer picure"+err.Error())
+		helpers.HTTPError(w, http.StatusBadRequest, "Error updating customer picture"+err.Error())
 	}
 
 	result := StatusResult{
@@ -292,7 +293,7 @@ func (ch *CustomerHandler) UpdatePassword(w http.ResponseWriter, r *http.Request
 
 	requestedBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, "Unable to read the requested body")
+		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotReadRequest)
 		return
 	}
 

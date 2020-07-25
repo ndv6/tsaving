@@ -1,5 +1,20 @@
 -- Adminer 4.7.7 PostgreSQL dump
 
+DROP TABLE IF EXISTS "accounts";
+DROP SEQUENCE IF EXISTS accounts_account_id_seq;
+CREATE SEQUENCE accounts_account_id_seq INCREMENT 1 MINVALUE 1 MAXVALUE 2147483647 START 1 CACHE 1;
+
+CREATE TABLE "public"."accounts" (
+    "account_id" integer DEFAULT nextval('accounts_account_id_seq') NOT NULL,
+    "account_num" character varying(10),
+    "account_balance" integer,
+    "created_at" timestamp,
+    CONSTRAINT "accounts_account_num_key" UNIQUE ("account_num"),
+    CONSTRAINT "accounts_pkey" PRIMARY KEY ("account_id"),
+    CONSTRAINT "account_fk" FOREIGN KEY (account_num) REFERENCES customers(account_num) NOT DEFERRABLE
+) WITH (oids = false);
+
+
 DROP TABLE IF EXISTS "customers";
 DROP SEQUENCE IF EXISTS customers_cust_id_seq;
 CREATE SEQUENCE customers_cust_id_seq INCREMENT 1 MINVALUE 1 MAXVALUE 2147483647 START 1 CACHE 1;
@@ -21,20 +36,6 @@ CREATE TABLE "public"."customers" (
     CONSTRAINT "customers_cust_email_key" UNIQUE ("cust_email"),
     CONSTRAINT "customers_cust_phone_key" UNIQUE ("cust_phone"),
     CONSTRAINT "customers_pkey" PRIMARY KEY ("cust_id")
-) WITH (oids = false);
-
-DROP TABLE IF EXISTS "accounts";
-DROP SEQUENCE IF EXISTS accounts_account_id_seq;
-CREATE SEQUENCE accounts_account_id_seq INCREMENT 1 MINVALUE 1 MAXVALUE 2147483647 START 1 CACHE 1;
-
-CREATE TABLE "public"."accounts" (
-    "account_id" integer DEFAULT nextval('accounts_account_id_seq') NOT NULL,
-    "account_num" character varying(10),
-    "account_balance" integer,
-    "created_at" timestamp,
-    CONSTRAINT "accounts_account_num_key" UNIQUE ("account_num"),
-    CONSTRAINT "accounts_pkey" PRIMARY KEY ("account_id"),
-    CONSTRAINT "account_fk" FOREIGN KEY (account_num) REFERENCES customers(account_num) NOT DEFERRABLE
 ) WITH (oids = false);
 
 
@@ -65,22 +66,21 @@ CREATE TABLE "public"."partners" (
     CONSTRAINT "partners_secret_key" UNIQUE ("secret")
 ) WITH (oids = false);
 
-INSERT INTO "partners" ("partner_id", "client_id", "secret") VALUES
-(1,	1,	'SVG2020');
 
 DROP TABLE IF EXISTS "transaction_logs";
-DROP SEQUENCE IF EXISTS transaction_logs_tl_id_seq;
-CREATE SEQUENCE transaction_logs_tl_id_seq INCREMENT 1 MINVALUE 1 MAXVALUE 2147483647 START 1 CACHE 1;
+DROP SEQUENCE IF EXISTS transaction_logs_tl_id_seq1;
+CREATE SEQUENCE transaction_logs_tl_id_seq1 INCREMENT 1 MINVALUE 1 MAXVALUE 2147483647 START 1 CACHE 1;
 
 CREATE TABLE "public"."transaction_logs" (
-    "tl_id" integer DEFAULT nextval('transaction_logs_tl_id_seq') NOT NULL,
+    "tl_id" integer DEFAULT nextval('transaction_logs_tl_id_seq1') NOT NULL,
     "account_num" character varying(10),
+    "from_account" character varying(20),
     "dest_account" character varying(20),
     "tran_amount" integer,
-    "description" character varying(200) NOT NULL,
+    "description" text,
     "created_at" timestamp,
     CONSTRAINT "transaction_logs_pkey" PRIMARY KEY ("tl_id"),
-    CONSTRAINT "transaction_logs_account_num_fkey" FOREIGN KEY (account_num) REFERENCES accounts(account_num) NOT DEFERRABLE
+    CONSTRAINT "fk_account" FOREIGN KEY (account_num) REFERENCES customers(account_num) NOT DEFERRABLE
 ) WITH (oids = false);
 
 
@@ -99,8 +99,8 @@ CREATE TABLE "public"."virtual_accounts" (
     "updated_at" timestamp,
     CONSTRAINT "virtual_accounts_pkey" PRIMARY KEY ("va_id"),
     CONSTRAINT "virtual_accounts_va_num_key" UNIQUE ("va_num"),
-    CONSTRAINT "virtual_accounts_account_num_fkey" FOREIGN KEY (account_num) REFERENCES accounts(account_num) NOT DEFERRABLE
+    CONSTRAINT "virtual_accounts_account_num_fkey" FOREIGN KEY (account_num) REFERENCES customers(account_num) NOT DEFERRABLE
 ) WITH (oids = false);
 
 
--- 2020-07-23 07:05:30.389713+00
+-- 2020-07-25 10:06:53.514544+00

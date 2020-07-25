@@ -9,6 +9,7 @@ import (
 type TransactionLogs struct {
 	TlId        int       `json:"tl_id"`
 	AccountNum  string    `json:"account_num"`
+	FromAccount string    `json:"from_account"`
 	DestAccount string    `json:"dest_account"`
 	TranAmount  int       `json:"tran_amount"`
 	Description string    `json:"description"`
@@ -17,6 +18,7 @@ type TransactionLogs struct {
 
 type HistoryTransaction struct {
 	AccountNum  string    `json:"account_num"`
+	FromAccount string    `json:"from_account"`
 	DestAccount string    `json:"dest_account"`
 	TranAmount  int       `json:"tran_amount"`
 	Description string    `json:"description"`
@@ -27,9 +29,11 @@ type Execer interface {
 	Exec(string, ...interface{}) (sql.Result, error)
 }
 
+// which one to use?
 func CreateTransactionLog(db *sql.DB, log TransactionLogs) error {
-	_, err := db.Exec("INSERT INTO transaction_logs (account_num, dest_account, tran_amount, description, created_at) VALUES ($1, $2, $3, $4, $5);",
+	_, err := db.Exec("INSERT INTO transaction_logs (account_num, from_account, dest_account, tran_amount, description, created_at) VALUES ($1, $2, $3, $4, $5);",
 		log.AccountNum,
+		log.FromAccount,
 		log.DestAccount,
 		log.TranAmount,
 		log.Description,
@@ -37,9 +41,11 @@ func CreateTransactionLog(db *sql.DB, log TransactionLogs) error {
 	return err
 }
 
-func TransactionLog(db Execer, log TransactionLogs) error {
-	_, err := db.Exec("INSERT INTO transaction_logs (account_num, dest_account, tran_amount, description, created_at) VALUES ($1, $2, $3, $4, $5);",
+// which one to use?
+func TransactioLnog(db Execer, log TransactionLogs) error {
+	_, err := db.Exec("INSERT INTO transaction_logs (account_num, from_account, dest_account, tran_amount, description, created_at) VALUES ($1, $2, $3, $4, $5);",
 		log.AccountNum,
+		log.FromAccount,
 		log.DestAccount,
 		log.TranAmount,
 		log.Description,

@@ -6,6 +6,8 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	"github.com/ndv6/tsaving/constants"
+
 	"github.com/ndv6/tsaving/database"
 	"github.com/ndv6/tsaving/helpers"
 
@@ -55,25 +57,21 @@ func VerifyEmailToken(eh database.EmailHandler) http.HandlerFunc {
 
 		err = eh.UpdateCustomerVerificationStatusByEmail(et.Email)
 		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+			helpers.HTTPError(w, http.StatusNotFound, UpdateEmailStatusFailed)
 			return
 		}
 
 		err = eh.DeleteVerifiedEmailTokenById(et.EtId)
 		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, UpdateEmailStatusFailed)
+			helpers.HTTPError(w, http.StatusNotFound, DeleteEmailTokenFailed)
 			return
 		}
 
-		b, err := json.Marshal(models.VerifiedEmailResponse{
-			Email:  et.Email,
-			Status: "verified",
-		})
+		w, resp, err := helpers.NewResponseBuilder(w, true, "Email has been successfully verified", models.VerifiedEmailResponse{Email: et.Email})
 		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, CannotEncodeResponse)
-			return
+			helpers.HTTPError(w, http.StatusInternalServerError, constants.CannotEncodeResponse)
 		}
-		fmt.Fprintf(w, string(b))
+		fmt.Fprintf(w, resp)
 		return
 	}
 }

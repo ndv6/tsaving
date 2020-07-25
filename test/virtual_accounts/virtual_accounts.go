@@ -2,10 +2,8 @@ package virtualaccounts
 
 import (
 	"testing"
-	"time"
 
 	"github.com/ndv6/tsaving/api/virtual_accounts"
-	"github.com/ndv6/tsaving/models"
 )
 
 var cust_id = 1
@@ -198,3 +196,4 @@ func GetAccountById() (AccountNumber string) {
 func CheckBalance() {
 	return
 }
+

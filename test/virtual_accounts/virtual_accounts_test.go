@@ -2,6 +2,8 @@ package virtual_accounts
 
 import (
 	"testing"
+
+	"github.com/ndv6/tsaving/api/virtual_accounts"
 )
 
 const (
@@ -38,4 +40,25 @@ func TestActiveEvents(t *testing.T) {
 		caseNum++
 	}
 
+}
+
+// unit testing created by Joseph
+var (
+	// length 12
+	invalidVa = "200725347100"
+	validVa   = "2007253471001"
+)
+
+func TestVaNumValid(t *testing.T) {
+	res := virtual_accounts.CheckVaNumValid(validVa)
+	if !res {
+		t.Fatalf("Va Num Valid Testing: Expected %v Got %v", true, res)
+	}
+}
+
+func TestVaNumInvalid(t *testing.T) {
+	res := virtual_accounts.CheckVaNumValid(invalidVa)
+	if res {
+		t.Fatalf("Va Num Invalid Testing: Expected %v Got %v", false, res)
+	}
 }

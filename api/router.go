@@ -42,7 +42,8 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 	// VAC transactions API endpoints
 	chiRouter.With(jwt.AuthMiddleware).Post("/vac/to_main", va.VacToMain)
 	chiRouter.With(jwt.AuthMiddleware).Get("/vac/list", va.VacList)
-	chiRouter.With(jwt.AuthMiddleware).Post("/vac/delete-vac", va.DeleteVac)
+	// chiRouter.With(jwt.AuthMiddleware).Post("/vac//delete-vac", va.DeleteVac)
+	chiRouter.With(jwt.AuthMiddleware).Delete("/me/va/{va_num}", va.DeleteVac)
 
 	// Get transaction history
 	chiRouter.With(jwt.AuthMiddleware).Get("/transaction/history", ch.HistoryTransactionHandler(db))

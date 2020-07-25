@@ -142,32 +142,16 @@ func (va *VAHandler) VacToMain(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := VAResponse{
-		Status:  "sucess",
-		Message: fmt.Sprintf("successfully move balance to your main account : %v", VirAcc.BalanceChange),
-	}
-	err = json.NewEncoder(w).Encode(response)
 	if err != nil {
 		helper.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
 		return
 	}
-
-	logDesc := models.LogDescriptionVaToMainTemplate(VirAcc.BalanceChange, vaNum, token.AccountNum)
-
-	//inpu transaction log
-	tLogs := models.TransactionLogs{
-		AccountNum:  token.AccountNum,
-		DestAccount: vaNum,
-		TranAmount:  VirAcc.BalanceChange,
-		Description: logDesc,
-		CreatedAt:   time.Now(),
-	}
-
-	err = models.CreateTransactionLog(va.db, tLogs)
+	_, res, err := helpers.NewResponseBuilder(w, true, fmt.Sprintf("successfully move balance to your main account : %v", VirAcc.BalanceChange), nil)
 	if err != nil {
-		helper.HTTPError(w, http.StatusBadRequest, constants.InitLogFailed)
+		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
 		return
 	}
+	fmt.Fprint(w, string(res))
 
 	return
 

@@ -52,6 +52,23 @@ func UpdateVacToMain(db *sql.DB, balanceInput int, vacNum string, accountNum str
 		tx.Rollback()
 		return
 	}
+
+	logDesc := models.LogDescriptionVaToMainTemplate(balanceInput, vacNum, accountNum)
+
+	//inpu transaction log
+	tLogs := models.TransactionLogs{
+		AccountNum:  accountNum,
+		DestAccount: vacNum,
+		TranAmount:  balanceInput,
+		Description: logDesc,
+		CreatedAt:   time.Now(),
+	}
+
+	err = models.TransactionLog(db, tLogs)
+	if err != nil {
+		tx.Rollback()
+		return
+	}
 	tx.Commit()
 	return
 }

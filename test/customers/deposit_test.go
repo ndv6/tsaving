@@ -44,10 +44,6 @@ func (trx testTransactor) DepositToMainAccountDatabaseAccessor(balanceToAdd int,
 	return nil
 }
 
-func (trx testTransactor) LogTransaction(log models.TransactionLogs) error {
-	return nil
-}
-
 type testPartnerInterface struct {
 }
 

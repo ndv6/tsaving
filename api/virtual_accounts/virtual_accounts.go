@@ -29,7 +29,6 @@ type VirtualAcc struct {
 
 type InputVa struct {
 	BalanceChange int `json:"balance_change"`
-	// VaNum         string `json:"va_num"`
 }
 
 type AddBalanceVARequest struct {
@@ -196,7 +195,7 @@ func (va *VAHandler) AddBalanceVA(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response := VAResponse{
-		Status:  1,
+		Status:  "sucess",
 		Message: fmt.Sprintf("successfully add balance to your virtual account : %v", vac.VaBalance),
 	}
 	err = json.NewEncoder(w).Encode(response)

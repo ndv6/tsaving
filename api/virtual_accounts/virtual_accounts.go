@@ -10,11 +10,12 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/ndv6/tsaving/database"
 	"github.com/ndv6/tsaving/helpers"
 	helper "github.com/ndv6/tsaving/helpers"
 	"github.com/ndv6/tsaving/models"
 	"github.com/ndv6/tsaving/tokens"
+
+	"github.com/ndv6/tsaving/database"
 )
 
 type VirtualAcc struct {
@@ -26,6 +27,11 @@ type VirtualAcc struct {
 type InputVa struct {
 	BalanceChange int    `json:"balance_change"`
 	VaNum         string `json:"va_num"`
+}
+
+type AddBalanceVARequest struct {
+	VaNum     string `json:"va_num"`
+	VaBalance int    `json:"va_balance"`
 }
 
 type VAResponse struct {
@@ -172,6 +178,39 @@ func (va *VAHandler) VacToMain(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func (va *VAHandler) AddBalanceVA(w http.ResponseWriter, r *http.Request) {
+	var vac AddBalanceVARequest
+	token := va.jwt.GetToken(r)
+	err := json.NewDecoder(r.Body).Decode(&vac)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, "unable to parse json request")
+		return
+	}
+	//check if va number is exist and valid to its owner
+	err = database.CheckAccountVA(va.db, vac.VaNum, token.CustId)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	updateBalanceVA := database.TransferFromMainToVa(token.AccountNum, vac.VaNum, vac.VaBalance, va.db)
+	if updateBalanceVA != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, updateBalanceVA.Error())
+		return
+	}
+
+	response := VAResponse{
+		Status:       1,
+		Notification: fmt.Sprintf("successfully add balance to your virtual account : %v", vac.VaBalance),
+	}
+	err = json.NewEncoder(w).Encode(response)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, "unable to encode response")
+		return
+	}
+
+}
+
 func (va *VAHandler) Create(w http.ResponseWriter, r *http.Request) {
 	// read request body
 
@@ -191,9 +230,8 @@ func (va *VAHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 	// validasi
 	am, err := models.GetMainAccount(va.db, token.AccountNum)
-	fmt.Println(token.AccountNum)
 	if err != nil {
-		helper.HTTPError(w, http.StatusBadRequest, err.Error())
+		helper.HTTPError(w, http.StatusBadRequest, "validate account failed, make sure account number is correct")
 		return
 	}
 

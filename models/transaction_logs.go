@@ -23,7 +23,21 @@ type HistoryTransaction struct {
 	CreatedAt   time.Time `json:"created_at"`
 }
 
+type Execer interface {
+	Exec(string, ...interface{}) (sql.Result, error)
+}
+
 func CreateTransactionLog(db *sql.DB, log TransactionLogs) error {
+	_, err := db.Exec("INSERT INTO transaction_logs (account_num, dest_account, tran_amount, description, created_at) VALUES ($1, $2, $3, $4, $5);",
+		log.AccountNum,
+		log.DestAccount,
+		log.TranAmount,
+		log.Description,
+		log.CreatedAt)
+	return err
+}
+
+func TransactionLog(db Execer, log TransactionLogs) error {
 	_, err := db.Exec("INSERT INTO transaction_logs (account_num, dest_account, tran_amount, description, created_at) VALUES ($1, $2, $3, $4, $5);",
 		log.AccountNum,
 		log.DestAccount,

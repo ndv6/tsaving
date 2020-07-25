@@ -81,3 +81,13 @@ func IsEmailExist(db *sql.DB, email string, id int) (bool, error) {
 	}
 	return res, nil
 }
+
+func IsEmailChanged(db *sql.DB, email string, id int) (bool, error) {
+	var res bool
+	row := db.QueryRow("SELECT EXISTS(SELECT 1 FROM customers WHERE cust_email = $1 AND cust_id = $2)", email, id)
+	err := row.Scan(&res)
+	if err != nil {
+		return true, err
+	}
+	return !res, nil
+}

@@ -202,7 +202,7 @@ func DeleteVacById(db *sql.DB, vId int) (err error) {
 }
 
 func GetAccountByAccountNum(db *sql.DB, accountNum string) (acc models.Accounts, err error) {
-	err = db.QueryRow("SELECT account_id, account_num, account_balance FROM accounts WHERE account_num=$1", accountNum).Scan(&acc.AccountId, &acc.AccountNum, &acc.AccountBalance)
+	err = db.QueryRow("SELECT account_id, account_num, account_balance FROM accounts WHERE account_num=$1 FOR UPDATE;", accountNum).Scan(&acc.AccountId, &acc.AccountNum, &acc.AccountBalance)
 	return
 }
 
@@ -212,6 +212,6 @@ func GetCustomerById(db *sql.DB, id int) (cust models.Customers, err error) {
 }
 
 func GetVacByAccountNum(db *sql.DB, accountNum string) (va models.VirtualAccounts, err error) {
-	err = db.QueryRow("SELECT va_id, va_num, account_num, va_balance FROM virtual_accounts WHERE account_num=$1", accountNum).Scan(&va.VaId, &va.VaNum, &va.AccountNum, &va.VaBalance)
+	err = db.QueryRow("SELECT va_id, va_num, account_num, va_balance FROM virtual_accounts WHERE account_num=$1 FOR UPDATE;", accountNum).Scan(&va.VaId, &va.VaNum, &va.AccountNum, &va.VaBalance)
 	return
 }

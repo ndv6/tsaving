@@ -10,12 +10,21 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/go-chi/chi"
+
 	"github.com/ndv6/tsaving/helpers"
 	helper "github.com/ndv6/tsaving/helpers"
 	"github.com/ndv6/tsaving/models"
 	"github.com/ndv6/tsaving/tokens"
 
 	"github.com/ndv6/tsaving/database"
+)
+
+const (
+	InvalidVaNumber      = "Virtual Account number is invalid"
+	CannotReadRequest    = "Cannot read request body"
+	CannotParseRequest   = "Unable to parse request"
+	CannotEncodeResponse = "Failed to encode response."
 )
 
 type VirtualAcc struct {
@@ -52,6 +61,14 @@ func NewVAHandler(jwt *tokens.JWT, db *sql.DB) *VAHandler {
 	return &VAHandler{jwt, db}
 }
 
+func checkVaNumValid(va_num string) bool {
+	if len(va_num) == 13 {
+		return true
+	}
+	return false
+}
+
+// Delete VAC made by Joseph
 func (vh VAHandler) DeleteVac(w http.ResponseWriter, r *http.Request) {
 	token := vh.jwt.GetToken(r)
 	err := token.Valid()
@@ -59,12 +76,25 @@ func (vh VAHandler) DeleteVac(w http.ResponseWriter, r *http.Request) {
 		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
 	}
 
-	var reqBody DeleteVacRequest
-	err = json.NewDecoder(r.Body).Decode(&reqBody)
-	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, "Unable to decode request body")
+	va_num := chi.URLParam(r, "va_num")
+	if !checkVaNumValid(va_num) {
+		helpers.HTTPError(w, http.StatusBadRequest, InvalidVaNumber)
 		return
 	}
+
+	// this commented code is no longer needed since we parse it from url, if i forget to delete it when it comes to PR please notify me
+	// var reqBody DeleteVacRequest
+	// err = json.NewDecoder(r.Body).Decode(&reqBody)
+	// if err != nil {
+	// 	helpers.HTTPError(w, http.StatusBadRequest, "Unable to decode request body")
+	// 	return
+	// }
+
+	trx, err := vh.db.Begin()
+	if err != nil {
+		helpers.HTTPError(w, http.StatusInternalServerError, "Fail to start Transaction for Deleting VA")
+	}
+	defer trx.Rollback()
 
 	cust, err := database.GetCustomerById(vh.db, token.CustId)
 	if err != nil {
@@ -72,6 +102,7 @@ func (vh VAHandler) DeleteVac(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// rest condition issue
 	vac, err := database.GetVacByAccountNum(vh.db, cust.AccountNum)
 
 	if err != nil {
@@ -79,6 +110,7 @@ func (vh VAHandler) DeleteVac(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// jangan simpen variabel di lokal
 	if vac.VaBalance > 0 {
 		err = database.RevertVacBalanceToMainAccount(vh.db, vac)
 		if err != nil {
@@ -104,7 +136,14 @@ func (vh VAHandler) DeleteVac(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Fprintf(w, "Success deleting VAC and reverting %d amount of balance to main account", vac.VaBalance)
+	err = trx.Commit()
+	if err != nil {
+		helpers.HTTPError(w, http.StatusInternalServerError, "Delete vac transaction failed to commit")
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+	return
 }
 
 func (va *VAHandler) VacToMain(w http.ResponseWriter, r *http.Request) {

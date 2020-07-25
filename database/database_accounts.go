@@ -89,6 +89,12 @@ func (ah *AccountHandler) DepositToMainAccountDatabaseAccessor(balanceToAdd int,
 
 	defer tx.Rollback()
 
+	/*  Initially, the two queries below are put in two different functions.
+	 *  But to ensure all deposits are properly logged, we put the two queries inside one transaction
+	 *  Because the *sql.Db here isn't received from function parameter (to ensure proper unit test can be run),
+	 *   we need to instantiate the sql.Tx inside the function body.
+	 *  Thus, the two queries needs to be inside one function
+	 */
 	_, err = tx.Exec("UPDATE accounts SET account_balance = account_balance + ($1) WHERE account_num = ($2)", balanceToAdd, accountNumber)
 	if err != nil {
 		return
@@ -105,7 +111,6 @@ func (ah *AccountHandler) DepositToMainAccountDatabaseAccessor(balanceToAdd int,
 		return
 	}
 
-	tx.Commit()
-
+	err = tx.Commit()
 	return
 }

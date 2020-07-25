@@ -1,3 +1,4 @@
+// Unit test for deposit API, made by Vici
 package customers
 
 import (
@@ -39,7 +40,7 @@ const (
 type testTransactor struct {
 }
 
-func (trx testTransactor) AddBalanceToMainAccount(amtToDeposit int, accNum string) error {
+func (trx testTransactor) DepositToMainAccountDatabaseAccessor(balanceToAdd int, accountNumber string, log models.TransactionLogs) error {
 	return nil
 }
 
@@ -123,7 +124,7 @@ func TestShouldDepositSuccess(t *testing.T) {
 		t.Fatalf("Expected: %v, Received: %v", http.StatusOK, status)
 	}
 
-	if errorMsg := trimResponseMessage(responseReader.Body.String()); errorMsg != constants.DepositSuccess {
-		t.Fatalf("Expected: %v, Received: %v", constants.DepositSuccess, errorMsg)
+	if errorMsg := trimResponseMessage(responseReader.Body.String()); errorMsg != constants.Success {
+		t.Fatalf("Expected: %v, Received: %v", constants.Success, errorMsg)
 	}
 }

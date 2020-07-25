@@ -51,7 +51,7 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 	chiRouter.With(jwt.AuthMiddleware).Post("/me/va/create", vah.Create)
 	chiRouter.With(jwt.AuthMiddleware).Put("/me/va/{va_num}/edit", vah.Edit)
 	chiRouter.With(jwt.AuthMiddleware).Post("/me/va/{va_num}/transfer-main", va.VacToMain)
-	chiRouter.With(jwt.AuthMiddleware).Post("/me/va/{va_num}/delete", va.DeleteVac)
+	chiRouter.With(jwt.AuthMiddleware).Delete("/me/va/{va_num}/delete", va.DeleteVac)
 
 	// History Endpoint
 	chiRouter.With(jwt.AuthMiddleware).Get("/me/transaction", ch.HistoryTransactionHandler(db))

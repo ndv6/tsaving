@@ -39,11 +39,7 @@ func (ch *CustomerHandler) HistoryTransactionHandler(db *sql.DB) http.HandlerFun
 			helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
 			return
 		}
-		// err = json.NewEncoder(w).Encode(listHistoryTransaction)
-		// if err != nil {
-		// 	helpers.HTTPError(w, http.StatusBadRequest, "Can not parse response")
-		// 	return
-		// }
+
 		fmt.Fprint(w, string(res))
 	})
 }

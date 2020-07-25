@@ -4,8 +4,11 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"os"
+
+	"github.com/ndv6/tsaving/constants"
 
 	"github.com/ndv6/tsaving/models"
 )
@@ -13,7 +16,11 @@ import (
 //untuk ngehandle error"
 func HTTPError(w http.ResponseWriter, status int, errorMessage string) {
 	w.WriteHeader(status)
-	json.NewEncoder(w).Encode(map[string]string{"error": errorMessage})
+	w, resp, err := NewResponseBuilder(w, false, errorMessage, make(map[string]string))
+	if err != nil {
+		json.NewEncoder(w).Encode(map[string]string{"error": constants.CannotEncodeResponse})
+	}
+	fmt.Fprintln(w, resp)
 }
 
 func HashString(toHash string) string {

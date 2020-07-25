@@ -20,4 +20,5 @@ const (
 	CannotEncodeResponse    = "Failed to encode response."
 	InsertFailed            = "Failed to insert to database."
 	InitLogFailed           = "Failed to insert log of this transaction."
+	TransferFailed          = "Failed to transfer to main account."
 )

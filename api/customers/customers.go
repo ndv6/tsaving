@@ -159,18 +159,18 @@ func (ch *CustomerHandler) UpdateProfile(w http.ResponseWriter, r *http.Request)
 		helpers.HTTPError(w, http.StatusBadRequest, "Invalid json type")
 		return
 	}
+	cus.CustId = userToken.CustId
 
 	//check if email address is valid
 	isValid := isEmailValid(cus.CustEmail)
-	isEmailChanged, err := models.IsEmailChanged(ch.db, cus.CustEmail, cus.CustId)
+	isEmailChanged, err := models.IsEmailChanged(ch.db, cus.CustEmail, userToken.CustId)
 	if isValid {
 		if err != nil {
 			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
 			return
 		}
-
 		if isEmailChanged {
-			isExist, err := models.IsEmailExist(ch.db, cus.CustEmail, cus.CustId)
+			isExist, err := models.IsEmailExist(ch.db, cus.CustEmail, userToken.CustId)
 			if err != nil {
 				helpers.HTTPError(w, http.StatusBadRequest, err.Error())
 				return
@@ -181,18 +181,16 @@ func (ch *CustomerHandler) UpdateProfile(w http.ResponseWriter, r *http.Request)
 			}
 			cus.IsVerified = false
 		}
-
 	} else {
 		helpers.HTTPError(w, http.StatusBadRequest, "Invalid email")
 		return
 	}
 
-	if len(cus.CustPassword) < 6 {
-		helpers.HTTPError(w, http.StatusBadRequest, "Password Min 6 Character")
+	isPhoneExist, err := models.IsPhoneExist(ch.db, cus.CustPhone, userToken.CustId)
+	if isPhoneExist {
+		helpers.HTTPError(w, http.StatusBadRequest, "Phone number already taken")
 		return
 	}
-
-	cus.CustPassword = helpers.HashString(cus.CustPassword)
 
 	err = models.UpdateProfile(ch.db, cus)
 	if err != nil {

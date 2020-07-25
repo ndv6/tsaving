@@ -12,7 +12,7 @@ var cust_id = 1
 var AccountVA = "2009110001001"
 var InputBalance = 1000000
 
-var InputVac = []virtual_accounts.InputVac{
+var InputVac = []virtual_accounts.InputVa{
 	{
 		10000,
 		"2009110001",
@@ -66,8 +66,8 @@ var Cust = []models.Customers{
 		"taylor@gmail.com",
 		"taylor.jpg",
 		"taylor",
-		"android",
 		true,
+		"android",
 		time.Now(),
 		time.Date(2009, 11, 17, 20, 34, 58, 651387237, time.UTC),
 	},
@@ -124,29 +124,11 @@ func TestVacToMain(t *testing.T) {
 		t.Fatal("Invalid Virtual Account Number")
 	}
 
-	err := CheckBalance()
-	if err != nil {
-		t.Fatal("Input is bigger than VA Balance")
-	}
-
 	AccountNumber := GetAccountById()
 
-	status = UpdateVacBalance(InputBalance, AccountVA)
+	status = UpdateVacToMainBalance(InputBalance, AccountVA)
 	if status != true {
 		t.Fatal("Update Failed")
-	}
-
-	status = UpdateMainBalance(InputBalance,AccountNumber)
-	if
-
-	if len(res) != 2 {
-		t.Fatalf("Expect 2 Events, got: %v", len(res))
-	}
-	if res[0].Name != "Training REST" {
-		t.Fatalf("Expected event : Training REST, got : %v", res[0].Name)
-	}
-	if res[1].Name != "Training Android" {
-		t.Fatalf("Expected event : Training Android, got : %v", res[1].Name)
 	}
 
 }
@@ -196,5 +178,9 @@ func GetAccountById() (AccountNumber string) {
 }
 
 func CheckBalance() {
+	return
+}
+
+func UpdateVacToMainBalance(InputBal int, AccountVA string) (status bool) {
 	return
 }

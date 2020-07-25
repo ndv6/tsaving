@@ -57,7 +57,7 @@ func GetProfile(db *sql.DB, id int) (Customers, error) {
 }
 
 func UpdateProfile(db *sql.DB, cus Customers) error {
-	_, err := db.Exec("UPDATE customers SET cust_name = $1, cust_address = $2, cust_phone = $3, cust_email = $4, cust_pict = $5, is_verified = $6, channel = $7, updated_at = NOW() WHERE cust_id = $8", cus.CustName, cus.CustAddress, cus.CustPhone, cus.CustEmail, cus.CustPict, cus.IsVerified, cus.Channel, cus.CustId)
+	_, err := db.Exec("UPDATE customers SET cust_name = $1, cust_address = $2, cust_phone = $3, cust_email = $4, is_verified = $5, channel = $6, updated_at = NOW() WHERE cust_id = $7", cus.CustName, cus.CustAddress, cus.CustPhone, cus.CustEmail, cus.IsVerified, cus.Channel, cus.CustId)
 	if err != nil {
 		return err
 	}
@@ -66,6 +66,14 @@ func UpdateProfile(db *sql.DB, cus Customers) error {
 
 func UpdateCustomerPicture(db *sql.DB, path string, id int) error {
 	_, err := db.Exec("UPDATE customers SET cust_pict = $1, updated_at = NOW() WHERE cust_id = $2", path, id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func UpdateCustomerPassword(db *sql.DB, pass string, id int) error {
+	_, err := db.Exec("UPDATE customers SET cust_password = $1, updated_at = NOW() WHERE cust_id = $2", pass, id)
 	if err != nil {
 		return err
 	}

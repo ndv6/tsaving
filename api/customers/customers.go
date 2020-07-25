@@ -33,9 +33,14 @@ type GetProfileResult struct {
 	Customers models.Customers `json:"customers"`
 	Accounts  models.Accounts  `json:"accounts"`
 }
+
 type CustomerHandler struct {
 	jwt *tokens.JWT
 	db  *sql.DB
+}
+
+type GetPasswordRequest struct {
+	Password string `json:"password"`
 }
 
 func NewCustomerHandler(jwt *tokens.JWT, db *sql.DB) *CustomerHandler {
@@ -275,6 +280,42 @@ func (ch *CustomerHandler) UpdatePhoto(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fmt.Fprintln(w, string(res))
+}
+
+func (ch *CustomerHandler) UpdatePassword(w http.ResponseWriter, r *http.Request) {
+	tokens := ch.jwt.GetToken(r)
+	err := tokens.Valid()
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	requestedBody, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, "Unable to read the requested body")
+		return
+	}
+
+	var newPass GetPasswordRequest
+	err = json.Unmarshal(requestedBody, &newPass)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, "Invalid json type")
+		return
+	}
+
+	if len(newPass.Password) < 6 {
+		helpers.HTTPError(w, http.StatusBadRequest, "Password Min 6 Character")
+		return
+	}
+
+	hashedPass := helpers.HashString(newPass.Password)
+
+	err = models.UpdateCustomerPassword(ch.db, hashedPass, tokens.CustId)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, "Error updating customer password"+err.Error())
+	}
+
+	fmt.Fprintln(w, "Update password success")
 }
 
 func isEmailValid(e string) bool {

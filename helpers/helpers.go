@@ -39,7 +39,7 @@ func LoadConfig(file string) (models.Config, error) {
 	return cfg, err
 }
 
-func NewResponseBuilder(status bool, message string, obj interface{}) (jsoned string, err error) {
+func NewResponseBuilder(w http.ResponseWriter, status bool, message string, obj interface{}) (rw http.ResponseWriter, jsoned string, err error) {
 	stat := "failed"
 	if status {
 		stat = "success"
@@ -53,8 +53,13 @@ func NewResponseBuilder(status bool, message string, obj interface{}) (jsoned st
 		Message: message,
 		Data:    obj,
 	})
+
 	if err != nil {
-		return
+		b = []byte(`{}`)
 	}
-	return string(b), nil
+	jsoned = string(b)
+
+	rw = w
+	rw.Header().Set("Content-Type", "application/json")
+	return
 }

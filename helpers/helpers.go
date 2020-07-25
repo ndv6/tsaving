@@ -10,6 +10,12 @@ import (
 	"github.com/ndv6/tsaving/models"
 )
 
+type ResponseBuilder struct {
+	Status  string      `json:"status"`
+	Message string      `json:"message"`
+	Data    interface{} `json:"data"`
+}
+
 //untuk ngehandle error"
 func HTTPError(w http.ResponseWriter, status int, errorMessage string) {
 	w.WriteHeader(status)
@@ -31,4 +37,24 @@ func LoadConfig(file string) (models.Config, error) {
 		return models.Config{}, err
 	}
 	return cfg, err
+}
+
+func NewResponseBuilder(status bool, message string, obj interface{}) (jsoned string, err error) {
+	stat := "failed"
+	if status {
+		stat = "success"
+	}
+	if obj == nil {
+		obj = make(map[string]string)
+	}
+
+	b, err := json.Marshal(ResponseBuilder{
+		Status:  stat,
+		Message: message,
+		Data:    obj,
+	})
+	if err != nil {
+		return
+	}
+	return string(b), nil
 }

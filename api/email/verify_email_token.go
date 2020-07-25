@@ -1,7 +1,6 @@
 package email
 
 import (
-	"database/sql"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -13,12 +12,25 @@ import (
 	"github.com/ndv6/tsaving/models"
 )
 
-func VerifyEmailToken(db *sql.DB) http.HandlerFunc {
+// this verify_email_token.go is made by Joseph
+
+// constantnya sebelu di merge nanti bakal gw adjust lagi jadi nvm it for now okay? :)
+const (
+	EmailTokenNotFound      = "Can not find requested email"
+	VerifyEmailFailed       = "Email fail to be verified with given token"
+	UpdateEmailStatusFailed = "Fail to change email status to verified"
+	VerifyEmailTokenFailed  = "Unable to verify email token: "
+	DeleteEmailTokenFailed  = "Unable to delete verified email"
+	CannotReadRequest       = "Cannot read request body"
+	CannotParseRequest      = "Unable to parse request"
+	CannotEncodeResponse    = "Failed to encode response."
+)
+
+func VerifyEmailToken(eh database.EmailHandler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		requestBody, err := ioutil.ReadAll(r.Body)
-
 		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+			helpers.HTTPError(w, http.StatusBadRequest, CannotReadRequest)
 			return
 		}
 
@@ -26,25 +38,30 @@ func VerifyEmailToken(db *sql.DB) http.HandlerFunc {
 
 		err = json.Unmarshal(requestBody, &et)
 		if err != nil {
+			helpers.HTTPError(w, http.StatusBadRequest, CannotParseRequest)
+			return
+		}
+
+		dbEt, err := eh.GetEmailTokenByEmail(et.Email)
+		if err != nil {
+			helpers.HTTPError(w, http.StatusNotFound, EmailTokenNotFound)
+			return
+		}
+
+		if et.Token != dbEt.Token {
+			helpers.HTTPError(w, http.StatusBadRequest, VerifyEmailFailed)
+			return
+		}
+
+		err = eh.UpdateCustomerVerificationStatusByEmail(et.Email)
+		if err != nil {
 			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
 			return
 		}
 
-		et, err = database.GetEmailTokenByTokenAndEmail(db, et.Token, et.Email)
+		err = eh.DeleteVerifiedEmailTokenById(et.EtId)
 		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, "Unable to verify email token: "+err.Error())
-			return
-		}
-
-		err = database.UpdateCustomerVerificationStatusByEmail(et.Email, db)
-		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
-			return
-		}
-
-		err = database.DeleteVerifiedEmailTokenById(et.EtId, db)
-		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, "Unable to delete verified email: "+err.Error())
+			helpers.HTTPError(w, http.StatusBadRequest, UpdateEmailStatusFailed)
 			return
 		}
 
@@ -53,7 +70,7 @@ func VerifyEmailToken(db *sql.DB) http.HandlerFunc {
 			Status: "verified",
 		})
 		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, "Unable to parse to json")
+			helpers.HTTPError(w, http.StatusBadRequest, CannotEncodeResponse)
 			return
 		}
 		fmt.Fprintf(w, string(b))

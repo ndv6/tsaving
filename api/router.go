@@ -21,6 +21,7 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 	chiRouter := chi.NewRouter()
 	vah := virtual_accounts.NewVAHandler(jwt, db)
 
+	// to log incoming requests
 	chiRouter.Use(middleware.Logger)
 
 	// Handler objects initialization
@@ -28,6 +29,8 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 	ah := database.NewAccountHandler(db)
 	ch := customers.NewCustomerHandler(jwt, db)
 	va := virtual_accounts.NewVAHandler(jwt, db)
+	eh := database.NewEmailHandler(db)
+
 	// Home endpoint
 	chiRouter.Get("/", home.HomeHandler)
 	chiRouter.With(jwt.AuthMiddleware).Put("/vac/add_balance_vac", va.AddBalanceVA)
@@ -48,7 +51,7 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 	chiRouter.With(jwt.AuthMiddleware).Get("/transaction/history", ch.HistoryTransactionHandler(db))
 
 	// Email verification endpoint
-	chiRouter.Post("/email/verify-email-token", email.VerifyEmailToken(db))
+	chiRouter.Post("/email/verify-email-token", email.VerifyEmailToken(eh))
 
 	// Customer Endpoint
 	chiRouter.With(jwt.AuthMiddleware).Get("/customers/getprofile", ch.GetProfile)
@@ -59,8 +62,6 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 	chiRouter.Post("/deposit", customers.DepositToMainAccount(ph, ah))
 
 	// Url endpoint not found
-	chiRouter.Post("/email/verify-email-token", email.VerifyEmailToken(db))
-
 	chiRouter.NotFound(not_found.NotFoundHandler)
 
 	return chiRouter

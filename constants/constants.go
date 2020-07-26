@@ -20,4 +20,12 @@ const (
 	CannotEncodeResponse    = "Failed to encode response."
 	InsertFailed            = "Failed to insert to database."
 	InitLogFailed           = "Failed to insert log of this transaction."
+	TransferToVAFailed      = "Failed tranfer to virtual account "
+	InvalidBalance          = "Insufficient balance"
+	InvalidVA               = "Invalid virtual account number"
+)
+
+//response messages
+const (
+	AddBalanceVASuccess = "Successfully add balance to your virtual account"
 )

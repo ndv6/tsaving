@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/ndv6/tsaving/constants"
 	"github.com/ndv6/tsaving/helpers"
 	helper "github.com/ndv6/tsaving/helpers"
 	"github.com/ndv6/tsaving/models"
@@ -184,32 +185,29 @@ func (va *VAHandler) AddBalanceVA(w http.ResponseWriter, r *http.Request) {
 	var vac AddBalanceVARequest
 	err := json.NewDecoder(r.Body).Decode(&vac)
 	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, "unable to parse json request")
+		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
 		return
 	}
 	//check if va number is exist and valid to its owner
 	err = database.CheckAccountVA(va.db, vac.VaNum, token.CustId)
 	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+		helper.HTTPError(w, http.StatusBadRequest, constants.InvalidVA)
 		return
 	}
 
 	updateBalanceVA := database.TransferFromMainToVa(token.AccountNum, vac.VaNum, vac.VaBalance, va.db)
 	if updateBalanceVA != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, updateBalanceVA.Error())
+		helpers.HTTPError(w, http.StatusBadRequest, constants.TransferToVAFailed)
 		return
 	}
 
-	response := VAResponse{
-		Status:       1,
-		Notification: fmt.Sprintf("successfully add balance to your virtual account : %v", vac.VaBalance),
-	}
-	err = json.NewEncoder(w).Encode(response)
+	_, res, err := helpers.NewResponseBuilder(w, true, constants.AddBalanceVASuccess, nil)
 	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, "unable to encode response")
+		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
 		return
 	}
 
+	fmt.Fprint(w, string(res))
 }
 
 func (va *VAHandler) Create(w http.ResponseWriter, r *http.Request) {

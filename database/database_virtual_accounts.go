@@ -5,6 +5,8 @@ import (
 	"errors"
 	"time"
 
+	"github.com/ndv6/tsaving/constants"
+
 	"github.com/ndv6/tsaving/models"
 )
 
@@ -93,7 +95,7 @@ func CheckAccountVA(db *sql.DB, VaNum string, id int) (err error) {
 		return
 	}
 	if !exist {
-		err = errors.New("invalid virtual account number")
+		err = errors.New(constants.InvalidVA)
 		return
 	}
 	return

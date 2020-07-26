@@ -33,21 +33,32 @@ const (
 	PhoneTaken              = "The phone number you entered is already taken"
 	TransferToVAFailed      = "Failed transfer to virtual account "
 	InvalidBalance          = "Insufficient balance"
+	TransferFailed          = "Failed to transfer to main account."
+	CannotTransferVaToMain  = "Failed to transfer from virtual account to main account."
+	InvalidVA               = "Invalid virtual account number"
+	InvalidVaNumber         = "Virtual Account number is invalid"
+	FailSqlTransaction      = "Sql Transaction failed to set begin"
+	VANotFound              = "Virtual account not found"
+	FailToRevertBalance     = "Reverting balance to main account failed"
+	TokenExpires            = "Token is already expire, please login to continue"
 	PasswordRequirement     = "Password Min 6 Character"
 	DupeEmailorPhone        = "Unable to Register, Your Phone Number Or Email Has Been Used"
 	EmailToken              = "Email Token Failed to Insert"
 	AccountFailed           = "Account Number Failed to Insert"
 	MailFailed              = "Register Success, but Cannot Send Mail"
-	InvalidVA               = "Invalid virtual account number"
+	EmailTokenNotFound      = "Can not find requested email"
+	VerifyEmailFailed       = "Email fail to be verified with given token"
+	UpdateEmailStatusFailed = "Fail to change email status to verified"
+	VerifyEmailTokenFailed  = "Unable to verify email token: "
+	DeleteEmailTokenFailed  = "Unable to delete verified email"
+	SuccessVerifyEmail      = "Email has been successfully verified"
 )
 
 //response messages
 const (
-	LoginSucceed           = "Login Succeed"
-	RegisterSucceed        = "Register Succeeded"
-	AddBalanceVASuccess    = "Successfully add balance to your virtual account"
-	TransferFailed         = "Failed to transfer to main account."
-	CannotTransferVaToMain = "Failed to transfer from virtual account to main account."
+	AddBalanceVASuccess = "Successfully add balance to your virtual account"
+	LoginSucceed        = "Login Succeed"
+	RegisterSucceed     = "Register Succeeded"
 )
 
 // Response messages

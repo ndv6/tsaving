@@ -226,15 +226,15 @@
 
 ## 13. [POST] /me/deposit
 ### **Description** : 
-    UAPI used by partner bank/our staff, in case of cash deposit, called when a customer makes a deposit to their account.
+    API used by partner bank/our staff, in case of cash deposit, called when a customer makes a deposit to their account.
 
 ### **Request** : 
 ```
 {
 	"balance_added": 1000000,
-    "account_number": "202007221",
-    "auth_code": "2bb34e46cf2d0c23bf2eca8564ff4ba34075d7847a1a224578cdbcc7eb72e13e",
-    "client_id": 1
+    	"account_number": "202007221",
+    	"auth_code": "2bb34e46cf2d0c23bf2eca8564ff4ba34075d7847a1a224578cdbcc7eb72e13e",
+    	"client_id": 1
 }
 ```
 

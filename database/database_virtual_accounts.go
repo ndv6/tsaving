@@ -3,8 +3,10 @@ package database
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"time"
 
+	"github.com/ndv6/tsaving/constants"
 	"github.com/ndv6/tsaving/models"
 )
 
@@ -29,26 +31,51 @@ func UpdateVacToMain(db *sql.DB, balanceInput int, vacNum string, accountNum str
 	if err != nil {
 		return
 	}
-	defer tx.Rollback()
 
-	var sourceBalance int
-	err = tx.QueryRow("SELECT va_balance FROM virtual_accounts WHERE account_num = $1 FOR UPDATE", accountNum).Scan(&sourceBalance)
+	var balanceVA int
+	err = tx.QueryRow("SELECT va_balance FROM virtual_accounts WHERE account_num = $1 FOR UPDATE", accountNum).Scan(&balanceVA)
 	if err != nil {
+		fmt.Print(err)
+		tx.Rollback()
 		return
 	}
 
-	status := CheckBalance("VA", vacNum, balanceInput, db)
-	if !status {
-		err = errors.New("insufficient balance")
+	if balanceVA < balanceInput {
+		err = errors.New(constants.InvalidBalance)
+		fmt.Print(err)
+		tx.Rollback()
 		return
 	}
 
 	_, err = tx.Exec("UPDATE accounts SET account_balance = account_balance + $1 WHERE account_num = $2", balanceInput, accountNum)
 	if err != nil {
+		fmt.Print(err)
+		tx.Rollback()
 		return
 	}
 	_, err = tx.Exec("UPDATE virtual_accounts SET va_balance = va_balance - $1 WHERE va_num = $2", balanceInput, vacNum)
 	if err != nil {
+		fmt.Print(err)
+		tx.Rollback()
+		return
+	}
+
+	logDesc := models.LogDescriptionVaToMainTemplate(balanceInput, vacNum, accountNum)
+
+	//inpu transaction log
+	tLogs := models.TransactionLogs{
+		AccountNum:  accountNum,
+		FromAccount: accountNum,
+		DestAccount: vacNum,
+		TranAmount:  balanceInput,
+		Description: logDesc,
+		CreatedAt:   time.Now(),
+	}
+
+	err = models.TransactionLog(tx, tLogs)
+	if err != nil {
+		fmt.Print(err)
+		tx.Rollback()
 		return
 	}
 	tx.Commit()
@@ -213,5 +240,10 @@ func GetCustomerById(db *sql.DB, id int) (cust models.Customers, err error) {
 
 func GetVacByAccountNum(db *sql.DB, accountNum string) (va models.VirtualAccounts, err error) {
 	err = db.QueryRow("SELECT va_id, va_num, account_num, va_balance FROM virtual_accounts WHERE account_num=$1", accountNum).Scan(&va.VaId, &va.VaNum, &va.AccountNum, &va.VaBalance)
+	return
+}
+
+func GetVaNumber(db *sql.DB, vaNum string) (va models.VirtualAccounts, err error) {
+	err = db.QueryRow("SELECT va_num FROM virtual_accounts WHERE va_num=$1", vaNum).Scan(&va.VaNum)
 	return
 }

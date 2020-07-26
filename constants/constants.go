@@ -33,6 +33,7 @@ const (
 	CannotParseURLParams    = "Failed to parse URL Params"
 	InvalidVA               = "Invalid virtual account number"
 	InvalidBalance          = "Insufficient balance"
+	TransferToVAFailed      = "Failed transfer to virtual account "
 )
 
 //response messages

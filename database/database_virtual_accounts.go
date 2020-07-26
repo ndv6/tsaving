@@ -3,8 +3,10 @@ package database
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"time"
 
+	"github.com/ndv6/tsaving/constants"
 	"github.com/ndv6/tsaving/models"
 )
 
@@ -33,22 +35,26 @@ func UpdateVacToMain(db *sql.DB, balanceInput int, vacNum string, accountNum str
 	var balanceVA int
 	err = tx.QueryRow("SELECT va_balance FROM virtual_accounts WHERE account_num = $1 FOR UPDATE", accountNum).Scan(&balanceVA)
 	if err != nil {
+		fmt.Print(err)
 		tx.Rollback()
 		return
 	}
 
 	if balanceVA < balanceInput {
+		err = errors.New(constants.InvalidBalance)
 		tx.Rollback()
 		return
 	}
 
 	_, err = tx.Exec("UPDATE accounts SET account_balance = account_balance + $1 WHERE account_num = $2", balanceInput, accountNum)
 	if err != nil {
+		fmt.Print(err)
 		tx.Rollback()
 		return
 	}
 	_, err = tx.Exec("UPDATE virtual_accounts SET va_balance = va_balance - $1 WHERE va_num = $2", balanceInput, vacNum)
 	if err != nil {
+		fmt.Print(err)
 		tx.Rollback()
 		return
 	}
@@ -66,6 +72,7 @@ func UpdateVacToMain(db *sql.DB, balanceInput int, vacNum string, accountNum str
 
 	err = models.TransactionLog(db, tLogs)
 	if err != nil {
+		fmt.Print(err)
 		tx.Rollback()
 		return
 	}

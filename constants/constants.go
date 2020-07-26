@@ -21,4 +21,7 @@ const (
 	InsertFailed            = "Failed to insert to database."
 	InitLogFailed           = "Failed to insert log of this transaction."
 	TransferFailed          = "Failed to transfer to main account."
+	CannotTransferVaToMain  = "Failed to transfer from virtual account to main account."
+	InvalidVA               = "Invalid virtual account number"
+	InvalidBalance          = "Insufficient balance"
 )

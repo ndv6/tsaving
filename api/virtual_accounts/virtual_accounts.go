@@ -128,7 +128,7 @@ func (va *VAHandler) VacToMain(w http.ResponseWriter, r *http.Request) {
 	// cek rekening
 	err = database.CheckAccountVA(va.db, vaNum, token.CustId)
 	if err != nil {
-		helper.HTTPError(w, http.StatusBadRequest, err.Error())
+		helper.HTTPError(w, http.StatusBadRequest, constants.InvalidVA)
 		return
 	}
 
@@ -138,14 +138,10 @@ func (va *VAHandler) VacToMain(w http.ResponseWriter, r *http.Request) {
 	//update balance at both accounts
 	err = database.UpdateVacToMain(va.db, VirAcc.BalanceChange, vaNum, AccountNumber)
 	if err != nil {
-		helper.HTTPError(w, http.StatusBadRequest, "transfer error")
+		helper.HTTPError(w, http.StatusBadRequest, constants.CannotTransferVaToMain)
 		return
 	}
 
-	if err != nil {
-		helper.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
-		return
-	}
 	_, res, err := helpers.NewResponseBuilder(w, true, fmt.Sprintf("successfully move balance to your main account : %v", VirAcc.BalanceChange), nil)
 	if err != nil {
 		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)

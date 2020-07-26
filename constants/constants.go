@@ -5,13 +5,12 @@ const (
 	Deposit = "DEPOSIT_TO_MAIN_ACCOUNT"
 )
 
-// Response message
+// Response status
 const (
 	DepositSuccess = "Deposit completed successfully"
 	DepositFailed  = "Failed to make deposit"
 )
 
-// Response status
 const (
 	Success = "SUCCESS"
 	Failed  = "FAILED"
@@ -25,7 +24,50 @@ const (
 	UnauthorizedRequest     = "Failed to recognize deposit source. Please use authorized banks to deposit."
 	CannotEncodeResponse    = "Failed to encode response."
 	InsertFailed            = "Failed to insert to database."
+	UpdateFailed            = "Failed to update to database."
 	InitLogFailed           = "Failed to insert log of this transaction."
+	CannotParseURLParams    = "Failed to parse URL Params"
+	MinimumPassword         = "The password must have at least 6 characters"
+	EmailTaken              = "The email you entered is already taken"
+	InvalidEmail            = "Invalid email address format"
+	PhoneTaken              = "The phone number you entered is already taken"
+	TransferToVAFailed      = "Failed transfer to virtual account "
+	InvalidBalance          = "Insufficient balance"
+	TransferFailed          = "Failed to transfer to main account."
+	CannotTransferVaToMain  = "Failed to transfer from virtual account to main account."
+	InvalidVA               = "Invalid virtual account number"
+	InvalidVaNumber         = "Virtual Account number is invalid"
+	FailSqlTransaction      = "Sql Transaction failed to set begin"
+	VANotFound              = "Virtual account not found"
+	FailToRevertBalance     = "Reverting balance to main account failed"
+	TokenExpires            = "Token is already expire, please login to continue"
+	PasswordRequirement     = "Password Min 6 Character"
+	DupeEmailorPhone        = "Unable to Register, Your Phone Number Or Email Has Been Used"
+	EmailToken              = "Email Token Failed to Insert"
+	AccountFailed           = "Account Number Failed to Insert"
+	MailFailed              = "Register Success, but Cannot Send Mail"
+	EmailTokenNotFound      = "Can not find requested email"
+	VerifyEmailFailed       = "Email fail to be verified with given token"
+	UpdateEmailStatusFailed = "Fail to change email status to verified"
+	VerifyEmailTokenFailed  = "Unable to verify email token: "
+	DeleteEmailTokenFailed  = "Unable to delete verified email"
+	SuccessVerifyEmail      = "Email has been successfully verified"
+)
+
+//response messages
+const (
+	AddBalanceVASuccess = "Successfully add balance to your virtual account"
+	LoginSucceed        = "Login Succeed"
+	RegisterSucceed     = "Register Succeeded"
+)
+
+// Response messages
+const (
+	GetListSuccess        = "Success to get the list data"
+	GetProfilSuccess      = "Get profile success"
+	UpdateProfileSuccess  = "Update profile success"
+	UpdatePasswordSuccess = "Update password success"
+	UpdatePhotoSuccess    = "Update photo success"
 )
 
 // Headers

@@ -1,11 +1,12 @@
 package email
 
 import (
-	"database/sql"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/ndv6/tsaving/constants"
 
 	"github.com/ndv6/tsaving/database"
 	"github.com/ndv6/tsaving/helpers"
@@ -13,12 +14,13 @@ import (
 	"github.com/ndv6/tsaving/models"
 )
 
-func VerifyEmailToken(db *sql.DB) http.HandlerFunc {
+// this verify_email_token.go is made by Joseph
+func VerifyEmailToken(eh database.EmailHandler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set(constants.ContentType, constants.Json)
 		requestBody, err := ioutil.ReadAll(r.Body)
-
 		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+			helpers.HTTPError(w, http.StatusBadRequest, constants.CannotReadRequest)
 			return
 		}
 
@@ -26,38 +28,39 @@ func VerifyEmailToken(db *sql.DB) http.HandlerFunc {
 
 		err = json.Unmarshal(requestBody, &et)
 		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+			helpers.HTTPError(w, http.StatusBadRequest, constants.CannotParseRequest)
 			return
 		}
 
-		et, err = database.GetEmailTokenByTokenAndEmail(db, et.Token, et.Email)
+		dbEt, err := eh.GetEmailTokenByEmail(et.Email)
 		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, "Unable to verify email token: "+err.Error())
-			return
-		}
-    
-		err = database.UpdateCustomerVerificationStatusByEmail(et.Email, db)
-		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+			helpers.HTTPError(w, http.StatusNotFound, constants.EmailTokenNotFound)
 			return
 		}
 
-		err = database.DeleteVerifiedEmailTokenById(et.EtId, db)
-		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, "Unable to delete verified email: "+err.Error())
+		if et.Token != dbEt.Token {
+			helpers.HTTPError(w, http.StatusBadRequest, constants.VerifyEmailFailed)
 			return
 		}
 
-		b, err := json.Marshal(models.VerifiedEmailResponse{
-			Email:  et.Email,
-			Status: "verified",
-		})
-    
+		err = eh.UpdateCustomerVerificationStatusByEmail(dbEt.Email)
 		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, "Unable to parse to json")
+			helpers.HTTPError(w, http.StatusNotFound, constants.UpdateEmailStatusFailed)
 			return
 		}
-		fmt.Fprintf(w, string(b))
+
+		err = eh.DeleteVerifiedEmailTokenById(dbEt.EtId)
+		if err != nil {
+			helpers.HTTPError(w, http.StatusNotFound, constants.DeleteEmailTokenFailed)
+			return
+		}
+
+		w, resp, err := helpers.NewResponseBuilder(w, true, constants.SuccessVerifyEmail, models.VerifiedEmailResponse{Email: et.Email})
+		if err != nil {
+			helpers.HTTPError(w, http.StatusInternalServerError, constants.CannotEncodeResponse)
+			return
+		}
+		fmt.Fprintf(w, resp)
 		return
 	}
 }

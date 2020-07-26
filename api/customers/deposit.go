@@ -62,13 +62,13 @@ func DepositToMainAccount(partner PartnerInterface, trx Transactor) http.Handler
 		log := models.TransactionLogs{
 			AccountNum:  request.AccountNumber,
 			DestAccount: request.AccountNumber,
+			FromAccount: strconv.Itoa(request.ClientId),
 			TranAmount:  request.BalanceAdded,
 			Description: constants.Deposit,
 			CreatedAt:   time.Now(),
 		}
 		err = trx.DepositToMainAccountDatabaseAccessor(request.BalanceAdded, request.AccountNumber, log)
 		if err != nil {
-			fmt.Println(err)
 			helpers.HTTPError(w, http.StatusInternalServerError, constants.InsertFailed)
 			return
 		}

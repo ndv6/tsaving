@@ -63,7 +63,7 @@ func TestShouldReturnBadRequestError(t *testing.T) {
 	partnerInterface := testPartnerInterface{}
 	transactor := testTransactor{}
 
-	mockRequest, err := http.NewRequest("POST", "/deposit", bytes.NewBuffer([]byte(testIncompleteRequest)))
+	mockRequest, err := http.NewRequest("POST", "/me/deposit", bytes.NewBuffer([]byte(testIncompleteRequest)))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -85,7 +85,7 @@ func TestShouldReturnUnauthorizedError(t *testing.T) {
 	partnerInterface := testPartnerInterface{}
 	transactor := testTransactor{}
 
-	mockRequest, err := http.NewRequest("POST", "/deposit", bytes.NewBuffer([]byte(testUnauthorizedRequest)))
+	mockRequest, err := http.NewRequest("POST", "/me/deposit", bytes.NewBuffer([]byte(testUnauthorizedRequest)))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -107,7 +107,7 @@ func TestShouldDepositSuccess(t *testing.T) {
 	partnerInterface := testPartnerInterface{}
 	transactor := testTransactor{}
 
-	mockRequest, err := http.NewRequest("POST", "/deposit", bytes.NewBuffer([]byte(testValidAuthorizedRequest)))
+	mockRequest, err := http.NewRequest("POST", "/me/deposit", bytes.NewBuffer([]byte(testValidAuthorizedRequest)))
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -52,41 +52,53 @@ func NewVAHandler(jwt *tokens.JWT, db *sql.DB) *VAHandler {
 	return &VAHandler{jwt, db}
 }
 
+// Delete VAC and checkVaNumValid made by Joseph
+// Delete VAC relies heavily on query logic so unit testing is not really the perfect choice
+// unless we create factory and interface that enables memory storage
+func CheckVaNumValid(vaNum string) bool {
+	if len(vaNum) == 13 {
+		return true
+	}
+	return false
+}
+
 func (vh VAHandler) DeleteVac(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set(constants.ContentType, constants.Json)
 	token := vh.jwt.GetToken(r)
 	err := token.Valid()
 	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
-	}
-
-	var reqBody DeleteVacRequest
-	err = json.NewDecoder(r.Body).Decode(&reqBody)
-	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, "Unable to decode request body")
+		helpers.HTTPError(w, http.StatusBadRequest, constants.TokenExpires)
 		return
 	}
 
-	cust, err := database.GetCustomerById(vh.db, token.CustId)
+	trx, err := vh.db.Begin()
 	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, "User not found")
+		helpers.HTTPError(w, http.StatusInternalServerError, constants.FailSqlTransaction)
+	}
+
+	vaNum := chi.URLParam(r, "va_num")
+	if !CheckVaNumValid(vaNum) {
+		helpers.HTTPError(w, http.StatusBadRequest, constants.InvalidVaNumber)
+		trx.Rollback()
 		return
 	}
 
-	vac, err := database.GetVacByAccountNum(vh.db, cust.AccountNum)
-
+	vac, err := database.GetVacByAccountNum(trx, token.AccountNum)
 	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, "Virtual account not found")
+		helpers.HTTPError(w, http.StatusNotFound, constants.VANotFound)
+		trx.Rollback()
+		return
+	}
+
+	err = database.RevertVacBalanceToMainAccount(trx, vac)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, constants.FailToRevertBalance)
+		trx.Rollback()
 		return
 	}
 
 	if vac.VaBalance > 0 {
-		err = database.RevertVacBalanceToMainAccount(vh.db, vac)
-		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, "Fail to revert balance to main account")
-			return
-		}
-
-		err = models.CreateTransactionLog(vh.db, models.TransactionLogs{
+		err = models.TransactionLog(trx, models.TransactionLogs{
 			AccountNum:  vac.AccountNum,
 			DestAccount: vac.VaNum,
 			TranAmount:  vac.VaBalance,
@@ -94,17 +106,19 @@ func (vh VAHandler) DeleteVac(w http.ResponseWriter, r *http.Request) {
 			CreatedAt:   time.Now(),
 		})
 		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, "Fail to create log transaction")
+			helpers.HTTPError(w, http.StatusInternalServerError, constants.InitLogFailed)
+			trx.Rollback()
 			return
 		}
 	}
-	err = database.DeleteVacById(vh.db, vac.VaId)
+
+	err = trx.Commit()
 	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, "Fail to delete virtual account")
-		return
+		helpers.HTTPError(w, http.StatusInternalServerError, constants.InsertFailed)
 	}
 
-	fmt.Fprintf(w, "Success deleting VAC and reverting %d amount of balance to main account", vac.VaBalance)
+	w.WriteHeader(http.StatusNoContent)
+	return
 }
 
 func (va *VAHandler) VacToMain(w http.ResponseWriter, r *http.Request) {

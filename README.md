@@ -71,7 +71,7 @@
 ```
 {
     "status": "FAILED",
-    "message": "",
+    "message": "Unable to Register, Your Phone Number Or Email Has Been Used",
     "data": {}  
 }
 ```
@@ -224,7 +224,7 @@
 }
 ```
 
-## 13. [POST] /me/deposit
+## 4. [POST] /me/deposit
 ### **Description** : 
     API used by partner bank/our staff, in case of cash deposit, called when a customer makes a deposit to their account.
 
@@ -254,7 +254,7 @@
 }
 ```
 
-## 4. [POST] /me/transfer-va
+## 5. [POST] /me/transfer-va
 ### **Description** : 
     Add balance from main account, to virtual accounts. Before update the balance check first if the balance sufficient
 
@@ -481,17 +481,34 @@
 ```
 {
     "status": "SUCCESS",
-    "message": "",
-    "data": {}  
+    "message": "Success to get the list data",
+    "data": [
+        {
+            "account_num": "2007233420",
+            "from_account": "2007233420",
+            "dest_account": "9908011234",
+            "tran_amount": 200000,
+            "description": "transfer_to_bank",
+            "created_at": "2020-07-23T10:16:34.026624Z"
+        },
+        {
+            "account_num": "2007233420",
+            "from_account": "1",
+            "dest_account": "2007233420",
+            "tran_amount": 200000,
+            "description": "deposit_from_customer",
+            "created_at": "2020-07-23T10:16:53.768798Z"
+        }
+    ]
 }
 ```
 
 ### **Response** : 
 ```
 {
-    "status": "FAILED",
-    "message": "",
-    "data": {}  
+    "status":"FAILED",
+    "message":"Error message",
+    "data":{}
 }
 ```
 

@@ -21,17 +21,18 @@ type EmailResponse struct {
 	Email string `json:"email"`
 }
 
-type StatusResult struct {
-	Status string `json:"status"`
-}
-
 type GetProfileResult struct {
 	Customers models.Customers `json:"customers"`
 	Accounts  models.Accounts  `json:"accounts"`
 }
+
 type CustomerHandler struct {
 	jwt *tokens.JWT
 	db  *sql.DB
+}
+
+type GetPasswordRequest struct {
+	Password string `json:"password"`
 }
 
 func NewCustomerHandler(jwt *tokens.JWT, db *sql.DB) *CustomerHandler {
@@ -39,6 +40,7 @@ func NewCustomerHandler(jwt *tokens.JWT, db *sql.DB) *CustomerHandler {
 }
 
 func (ch *CustomerHandler) GetProfile(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set(constants.ContentType, constants.Json)
 	token := ch.jwt.GetToken(r)
 	err := token.Valid()
 	if err != nil {
@@ -63,9 +65,9 @@ func (ch *CustomerHandler) GetProfile(w http.ResponseWriter, r *http.Request) {
 		Accounts:  acc,
 	}
 
-	res, err := json.Marshal(result)
+	_, res, err := helpers.NewResponseBuilder(w, true, constants.GetProfilSuccess, result)
 	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
 		return
 	}
 
@@ -74,8 +76,9 @@ func (ch *CustomerHandler) GetProfile(w http.ResponseWriter, r *http.Request) {
 
 func (ch *CustomerHandler) Create(w http.ResponseWriter, r *http.Request) { // Handle by Caesar Gusti
 	b, err := ioutil.ReadAll(r.Body)
+	w.Header().Set(constants.ContentType, constants.Json)
+
 	if err != nil {
-		w.Header().Set(constants.ContentType, constants.Json)
 		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotReadRequest)
 		return
 	}
@@ -83,13 +86,11 @@ func (ch *CustomerHandler) Create(w http.ResponseWriter, r *http.Request) { // H
 	err = json.Unmarshal(b, &cus)
 
 	if err != nil {
-		w.Header().Set(constants.ContentType, constants.Json)
 		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotParseRequest)
 		return
 	}
 
 	if len(cus.CustPassword) < 6 {
-		w.Header().Set(constants.ContentType, constants.Json)
 		helpers.HTTPError(w, http.StatusBadRequest, constants.PasswordRequirement)
 		return
 	}
@@ -106,7 +107,6 @@ func (ch *CustomerHandler) Create(w http.ResponseWriter, r *http.Request) { // H
 	Pass := helpers.HashString(cus.CustPassword)
 
 	if err := models.RegisterCustomer(ch.db, cus, AccNum, Pass); err != nil {
-		w.Header().Set(constants.ContentType, constants.Json)
 		helpers.HTTPError(w, http.StatusBadRequest, constants.DupeEmailorPhone)
 		return
 	}
@@ -116,19 +116,16 @@ func (ch *CustomerHandler) Create(w http.ResponseWriter, r *http.Request) { // H
 	})
 
 	if err := models.AddEmailTokens(ch.db, tokenRegister, cus.CustEmail); err != nil {
-		w.Header().Set(constants.ContentType, constants.Json)
 		helpers.HTTPError(w, http.StatusBadRequest, constants.EmailToken)
 		return
 	}
 
 	if err := models.AddAccountsWhileRegister(ch.db, AccNum); err != nil {
-		w.Header().Set(constants.ContentType, constants.Json)
 		helpers.HTTPError(w, http.StatusBadRequest, constants.AccountFailed)
 		return
 	}
 
 	if err := ch.sendMail(w, tokenRegister, cus.CustEmail); err != nil {
-		w.Header().Set(constants.ContentType, constants.Json)
 		helpers.HTTPError(w, http.StatusBadRequest, constants.MailFailed)
 		return
 	}
@@ -140,7 +137,6 @@ func (ch *CustomerHandler) Create(w http.ResponseWriter, r *http.Request) { // H
 	_, res, err := helpers.NewResponseBuilder(w, true, constants.RegisterSucceed, data)
 
 	if err != nil {
-		w.Header().Set(constants.ContentType, constants.Json)
 		helpers.HTTPError(w, http.StatusInternalServerError, constants.CannotEncodeResponse)
 		return
 	}
@@ -150,6 +146,7 @@ func (ch *CustomerHandler) Create(w http.ResponseWriter, r *http.Request) { // H
 }
 
 func (ch *CustomerHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set(constants.ContentType, constants.Json)
 	userToken := ch.jwt.GetToken(r)
 	err := userToken.Valid()
 	if err != nil {
@@ -159,54 +156,52 @@ func (ch *CustomerHandler) UpdateProfile(w http.ResponseWriter, r *http.Request)
 
 	requestedBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, "Unable to read the requested body")
+		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotReadRequest)
 		return
 	}
 
 	var cus models.Customers
 	err = json.Unmarshal(requestedBody, &cus)
 	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, "Invalid json type")
+		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotParseRequest)
 		return
 	}
+	cus.CustId = userToken.CustId
 
 	//check if email address is valid
 	isValid := isEmailValid(cus.CustEmail)
-	isEmailChanged, err := models.IsEmailChanged(ch.db, cus.CustEmail, cus.CustId)
+	isEmailChanged, err := models.IsEmailChanged(ch.db, cus.CustEmail, userToken.CustId)
 	if isValid {
 		if err != nil {
 			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
 			return
 		}
-
 		if isEmailChanged {
-			isExist, err := models.IsEmailExist(ch.db, cus.CustEmail, cus.CustId)
+			isExist, err := models.IsEmailExist(ch.db, cus.CustEmail, userToken.CustId)
 			if err != nil {
 				helpers.HTTPError(w, http.StatusBadRequest, err.Error())
 				return
 			}
 			if isExist {
-				helpers.HTTPError(w, http.StatusBadRequest, "Email already taken")
+				helpers.HTTPError(w, http.StatusBadRequest, constants.EmailTaken)
 				return
 			}
 			cus.IsVerified = false
 		}
-
 	} else {
-		helpers.HTTPError(w, http.StatusBadRequest, "Invalid email")
+		helpers.HTTPError(w, http.StatusBadRequest, constants.InvalidEmail)
 		return
 	}
 
-	if len(cus.CustPassword) < 6 {
-		helpers.HTTPError(w, http.StatusBadRequest, "Password Min 6 Character")
+	isPhoneExist, err := models.IsPhoneExist(ch.db, cus.CustPhone, userToken.CustId)
+	if isPhoneExist {
+		helpers.HTTPError(w, http.StatusBadRequest, constants.PhoneTaken)
 		return
 	}
-
-	cus.CustPassword = helpers.HashString(cus.CustPassword)
 
 	err = models.UpdateProfile(ch.db, cus)
 	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, "Error updating customer data"+err.Error())
+		helpers.HTTPError(w, http.StatusBadRequest, constants.UpdateFailed+err.Error())
 	}
 
 	if isEmailChanged {
@@ -217,16 +212,16 @@ func (ch *CustomerHandler) UpdateProfile(w http.ResponseWriter, r *http.Request)
 			helpers.HTTPError(w, http.StatusBadRequest, "Email Token Failed")
 			return
 		}
-		ch.sendMail(w, tokenRegister, cus.CustEmail)
+		if err := ch.sendMail(w, tokenRegister, cus.CustEmail); err != nil {
+			w.Header().Set(constants.ContentType, constants.Json)
+			helpers.HTTPError(w, http.StatusBadRequest, constants.MailFailed)
+			return
+		}
 	}
 
-	result := StatusResult{
-		Status: "success",
-	}
-
-	res, err := json.Marshal(result)
+	_, res, err := helpers.NewResponseBuilder(w, true, constants.UpdateProfileSuccess, nil)
 	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
 		return
 	}
 
@@ -234,6 +229,7 @@ func (ch *CustomerHandler) UpdateProfile(w http.ResponseWriter, r *http.Request)
 }
 
 func (ch *CustomerHandler) UpdatePhoto(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set(constants.ContentType, constants.Json)
 	tokens := ch.jwt.GetToken(r)
 	err := tokens.Valid()
 	if err != nil {
@@ -246,7 +242,7 @@ func (ch *CustomerHandler) UpdatePhoto(w http.ResponseWriter, r *http.Request) {
 	// FormFile returns the first file for the given key `myFile`
 	file, _, err := r.FormFile("myPhoto")
 	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, "Error Retrieving the File")
+		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotParseRequest)
 		return
 	}
 	defer file.Close()
@@ -273,16 +269,55 @@ func (ch *CustomerHandler) UpdatePhoto(w http.ResponseWriter, r *http.Request) {
 	pictPath := folderLocation + newFileName
 	err = models.UpdateCustomerPicture(ch.db, pictPath, tokens.CustId)
 	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, "Error updating customer picure"+err.Error())
+		helpers.HTTPError(w, http.StatusBadRequest, constants.UpdateFailed+err.Error())
 	}
 
-	result := StatusResult{
-		Status: "success",
+	_, res, err := helpers.NewResponseBuilder(w, true, constants.UpdatePhotoSuccess, nil)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
+		return
 	}
 
-	res, err := json.Marshal(result)
+	fmt.Fprintln(w, string(res))
+}
+
+func (ch *CustomerHandler) UpdatePassword(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set(constants.ContentType, constants.Json)
+	tokens := ch.jwt.GetToken(r)
+	err := tokens.Valid()
 	if err != nil {
 		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	requestedBody, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotReadRequest)
+		return
+	}
+
+	var newPass GetPasswordRequest
+	err = json.Unmarshal(requestedBody, &newPass)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotParseRequest)
+		return
+	}
+
+	if len(newPass.Password) < 6 {
+		helpers.HTTPError(w, http.StatusBadRequest, constants.MinimumPassword)
+		return
+	}
+
+	hashedPass := helpers.HashString(newPass.Password)
+
+	err = models.UpdateCustomerPassword(ch.db, hashedPass, tokens.CustId)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+	}
+
+	_, res, err := helpers.NewResponseBuilder(w, true, constants.UpdatePasswordSuccess, nil)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
 		return
 	}
 

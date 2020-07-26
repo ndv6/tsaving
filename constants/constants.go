@@ -36,11 +36,18 @@ const (
 	FailToRevertBalance     = "Reverting balance to main account failed"
 	TokenExpires            = "Token is already expire, please login to continue"
 	TransferToVAFailed      = "Failed transfer to virtual account"
+	PasswordRequirement     = "Password Min 6 Character"
+	DupeEmailorPhone        = "Unable to Register, Your Phone Number Or Email Has Been Used"
+	EmailToken              = "Email Token Failed to Insert"
+	AccountFailed           = "Account Number Failed to Insert"
+	MailFailed              = "Register Success, but Cannot Send Mail"
 )
 
 //response messages
 const (
 	AddBalanceVASuccess = "Successfully add balance to your virtual account"
+	LoginSucceed        = "Login Succeed"
+	RegisterSucceed     = "Register Succeeded"
 )
 
 // Response messages

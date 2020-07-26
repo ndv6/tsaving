@@ -22,10 +22,12 @@ func HTTPError(w http.ResponseWriter, status int, errorMessage string) {
 	fmt.Fprintln(w, resp)
 }
 
+// Function to hash string, made by Vici
 func HashString(toHash string) string {
 	hashed := sha256.Sum256([]byte(toHash))
 	return hex.EncodeToString(hashed[:])
 }
+
 func LoadConfig(file string) (models.Config, error) {
 	var cfg models.Config
 	fm, err := os.Open(file)

@@ -19,7 +19,6 @@ import (
 
 func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 	chiRouter := chi.NewRouter()
-	vah := virtual_accounts.NewVAHandler(jwt, db)
 
 	chiRouter.Use(middleware.Logger)
 
@@ -28,33 +27,35 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 	ah := database.NewAccountHandler(db)
 	ch := customers.NewCustomerHandler(jwt, db)
 	va := virtual_accounts.NewVAHandler(jwt, db)
+	eh := database.NewEmailHandler(db)
 
 	// Home Endpoint
 	chiRouter.Get("/", home.HomeHandler)
 
 	// Registration Endpoint
-	chiRouter.Post("/register", ch.Create)
-	chiRouter.Post("/verify-account", email.VerifyEmailToken(db))
+	chiRouter.Post("/register", ch.Create)                        //Caesar
+	chiRouter.Post("/verify-account", email.VerifyEmailToken(eh)) //Joseph
 
 	// Login Endpoint
-	chiRouter.Post("/login", customers.LoginHandler(jwt, db))
+	chiRouter.Post("/login", customers.LoginHandler(jwt, db)) //Caesar
 
 	// Customer Endpoint
-	chiRouter.With(jwt.AuthMiddleware).Get("/me/profile", ch.GetProfile)
-	chiRouter.With(jwt.AuthMiddleware).Put("/me/update", ch.UpdateProfile)
-	chiRouter.With(jwt.AuthMiddleware).Patch("/me/update-photo", ch.UpdatePhoto)
-	chiRouter.Post("/me/deposit", customers.DepositToMainAccount(ph, ah))
-	chiRouter.With(jwt.AuthMiddleware).Put("/me/transfer-va", va.AddBalanceVA)
+	chiRouter.With(jwt.AuthMiddleware).Get("/me/profile", ch.GetProfile)         //Andreas
+	chiRouter.With(jwt.AuthMiddleware).Put("/me/update", ch.UpdateProfile)       //Andreas
+	chiRouter.With(jwt.AuthMiddleware).Patch("/me/update-photo", ch.UpdatePhoto) //Andreas
+	// chiRouter.With(jwt.AuthMiddleware).Patch("/me/update-password", ch.UpdatePassword) //Andreas
+	chiRouter.Post("/me/deposit", customers.DepositToMainAccount(ph, ah))      //Vici
+	chiRouter.With(jwt.AuthMiddleware).Put("/me/transfer-va", va.AddBalanceVA) //David
 
 	// Virtual Account Endpoint
-	chiRouter.With(jwt.AuthMiddleware).Get("/me/va", va.VacList)
-	chiRouter.With(jwt.AuthMiddleware).Post("/me/va/create", vah.Create)
-	chiRouter.With(jwt.AuthMiddleware).Put("/me/va/{va_num}", vah.Edit)
-	chiRouter.With(jwt.AuthMiddleware).Post("/me/va/{va_num}/transfer-main", va.VacToMain)
-	chiRouter.With(jwt.AuthMiddleware).Delete("/me/va/{va_num}", va.DeleteVac)
+	chiRouter.With(jwt.AuthMiddleware).Get("/me/va", va.VacList)                           //Jocelyn
+	chiRouter.With(jwt.AuthMiddleware).Post("/me/va/create", va.Create)                    //Azizah
+	chiRouter.With(jwt.AuthMiddleware).Put("/me/va/{va_num}/update", va.Update)            //Azizah
+	chiRouter.With(jwt.AuthMiddleware).Post("/me/va/{va_num}/transfer-main", va.VacToMain) //Jocelyn
+	chiRouter.With(jwt.AuthMiddleware).Delete("/me/va/{va_num}", va.DeleteVac)             //Joseph
 
 	// History Endpoint
-	chiRouter.With(jwt.AuthMiddleware).Get("/me/transaction/{page}", ch.HistoryTransactionHandler(db))
+	chiRouter.With(jwt.AuthMiddleware).Get("/me/transaction/{page}", ch.HistoryTransactionHandler(db)) //Yuly
 
 	// Not Found Endpoint
 	chiRouter.NotFound(not_found.NotFoundHandler)

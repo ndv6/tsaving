@@ -6,17 +6,27 @@ import (
 	"github.com/ndv6/tsaving/models"
 )
 
-func DeleteVerifiedEmailTokenById(id int, db *sql.DB) (err error) {
-	_, err = db.Exec("DELETE FROM email_token WHERE et_id=$1;", id)
+// This email_token.go file is made by Joseph
+
+type EmailHandler struct {
+	Db *sql.DB
+}
+
+func NewEmailHandler(db *sql.DB) EmailHandler {
+	return EmailHandler{Db: db}
+}
+
+func (eh EmailHandler) DeleteVerifiedEmailTokenById(id int) (err error) {
+	_, err = eh.Db.Exec("DELETE FROM email_token WHERE et_id=$1;", id)
 	return
 }
 
-func UpdateCustomerVerificationStatusByEmail(email string, db *sql.DB) (err error) {
-	_, err = db.Exec("UPDATE CUSTOMERS SET is_verified = TRUE WHERE cust_email = $1;", email)
+func (eh EmailHandler) UpdateCustomerVerificationStatusByEmail(email string) (err error) {
+	_, err = eh.Db.Exec("UPDATE CUSTOMERS SET is_verified = TRUE WHERE cust_email = $1;", email)
 	return
 }
 
-func GetEmailTokenByTokenAndEmail(db *sql.DB, token, email string) (et models.EmailToken, err error) {
-	err = db.QueryRow("SELECT et_id, token, email FROM email_token WHERE token=$1 AND email=$2", token, email).Scan(&et.EtId, &et.Token, &et.Email)
+func (eh EmailHandler) GetEmailTokenByEmail(email string) (et models.EmailToken, err error) {
+	err = eh.Db.QueryRow("SELECT et_id, token, email FROM email_token WHERE email=$1", email).Scan(&et.EtId, &et.Token, &et.Email)
 	return
 }

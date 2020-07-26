@@ -32,8 +32,10 @@ const (
 
 //response messages
 const (
-	AddBalanceVASuccess  = "Successfully add balance to your virtual account"
-	CannotParseURLParams = "Failed to parse URL Params"
+	AddBalanceVASuccess    = "Successfully add balance to your virtual account"
+	CannotParseURLParams   = "Failed to parse URL Params"
+	TransferFailed         = "Failed to transfer to main account."
+	CannotTransferVaToMain = "Failed to transfer from virtual account to main account."
 )
 
 // Response messages

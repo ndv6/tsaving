@@ -242,7 +242,7 @@
 ```
 {
     "status": "SUCCESS",
-    "message": "",
+    "message": "Deposit completed successfully",
     "data": {}  
 }
 ```
@@ -250,9 +250,7 @@
 ### **Response** : 
 ```
 {
-    "status": "FAILED",
-    "message": "",
-    "data": {}  
+    "error": "<error_message>"
 }
 ```
 

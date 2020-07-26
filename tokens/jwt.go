@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/ndv6/tsaving/constants"
+
 	"github.com/go-chi/jwtauth"
 	"github.com/ndv6/tsaving/helpers"
 )
@@ -42,6 +44,7 @@ func (j *JWT) GetToken(r *http.Request) Token {
 
 func (j *JWT) AuthMiddleware(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set(constants.ContentType, constants.Json)
 		jwtToken, err := jwtauth.VerifyRequest(j.JWTAuth, r, TokenFromHeader)
 		if err != nil {
 			helpers.HTTPError(w, http.StatusBadRequest, "Error Verifying Token")

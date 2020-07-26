@@ -17,10 +17,6 @@ import (
 
 var JWT = jwtauth.New("HS256", []byte("secret"), nil)
 
-const (
-	LoginSucceed = "Login Succeed"
-)
-
 type LoginRequest struct {
 	CustEmail    string `json:"cust_email"`
 	CustPassword string `json:"cust_password"`
@@ -57,7 +53,7 @@ func LoginHandler(jwt *tokens.JWT, db *sql.DB) http.HandlerFunc { // Handle by C
 			Token: tokenLogin,
 		}
 
-		_, res, err := helpers.NewResponseBuilder(w, true, LoginSucceed, data)
+		_, res, err := helpers.NewResponseBuilder(w, true, constants.LoginSucceed, data)
 
 		if err != nil {
 			helpers.HTTPError(w, http.StatusInternalServerError, constants.CannotEncodeResponse)

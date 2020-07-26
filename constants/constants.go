@@ -41,6 +41,14 @@ const (
 // Response messages
 const (
 	GetListSuccess = "Success to get the list data"
+	// Customers
+	LoginSucceed        = "Login Succeed"
+	PasswordRequirement = "Password Min 6 Character"
+	DupeEmailorPhone    = "Unable to Register, Your Phone Number Or Email Has Been Used"
+	EmailToken          = "Email Token Failed to Insert"
+	AccountFailed       = "Account Number Failed to Insert"
+	MailFailed          = "Register Success, but Cannot Send Mail"
+	RegisterSucceed     = "Register Succeeded"
 )
 
 // Headers

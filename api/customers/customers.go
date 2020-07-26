@@ -17,15 +17,6 @@ import (
 	"github.com/ndv6/tsaving/tokens"
 )
 
-const (
-	PasswordRequirement = "Password Min 6 Character"
-	DupeEmailorPhone    = "Unable to Register, Your Phone Number Or Email Has Been Used"
-	EmailToken          = "Email Token Failed to Insert"
-	AccountFailed       = "Account Number Failed to Insert"
-	MailFailed          = "Register Success, but Cannot Send Mail"
-	RegisterSucceed     = "Register Succeeded"
-)
-
 type StatusResult struct {
 	Status string `json:"status"`
 }
@@ -92,7 +83,7 @@ func (ch *CustomerHandler) Create(w http.ResponseWriter, r *http.Request) { // H
 	}
 
 	if len(cus.CustPassword) < 6 {
-		helpers.HTTPError(w, http.StatusBadRequest, PasswordRequirement)
+		helpers.HTTPError(w, http.StatusBadRequest, constants.PasswordRequirement)
 		return
 	}
 
@@ -108,7 +99,7 @@ func (ch *CustomerHandler) Create(w http.ResponseWriter, r *http.Request) { // H
 	Pass := helpers.HashString(cus.CustPassword)
 
 	if err := models.RegisterCustomer(ch.db, cus, AccNum, Pass); err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, DupeEmailorPhone)
+		helpers.HTTPError(w, http.StatusBadRequest, constants.DupeEmailorPhone)
 		return
 	}
 
@@ -117,22 +108,22 @@ func (ch *CustomerHandler) Create(w http.ResponseWriter, r *http.Request) { // H
 	})
 
 	if err := models.AddEmailTokens(ch.db, tokenRegister, cus.CustEmail); err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, EmailToken)
+		helpers.HTTPError(w, http.StatusBadRequest, constants.EmailToken)
 		return
 	}
 
 	if err := models.AddAccountsWhileRegister(ch.db, AccNum); err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, AccountFailed)
+		helpers.HTTPError(w, http.StatusBadRequest, constants.AccountFailed)
 		return
 	}
 
 	err = ch.sendMail(w, tokenRegister, cus.CustEmail)
 	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, MailFailed)
+		helpers.HTTPError(w, http.StatusBadRequest, constants.MailFailed)
 		return
 	}
 
-	_, res, err := helpers.NewResponseBuilder(w, true, RegisterSucceed, nil)
+	_, res, err := helpers.NewResponseBuilder(w, true, constants.RegisterSucceed, nil)
 
 	if err != nil {
 		helpers.HTTPError(w, http.StatusInternalServerError, constants.CannotEncodeResponse)

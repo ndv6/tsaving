@@ -29,39 +29,36 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 	ah := database.NewAccountHandler(db)
 	ch := customers.NewCustomerHandler(jwt, db)
 	va := virtual_accounts.NewVAHandler(jwt, db)
-	eh := database.NewEmailHandler(db)
+	eh := database.EmailHandler{Db: db}
 
-	// Home endpoint
+	// Home Endpoint
 	chiRouter.Get("/", home.HomeHandler)
-	chiRouter.With(jwt.AuthMiddleware).Put("/vac/add_balance_vac", va.AddBalanceVA)
 
-	chiRouter.Get("/", home.HomeHandler)
+	// Registration Endpoint
 	chiRouter.Post("/register", ch.Create)
+	chiRouter.Post("/verify-account", email.VerifyEmailToken(eh))
+
+	// Login Endpoint
 	chiRouter.Post("/login", customers.LoginHandler(jwt, db))
 
-	// Virtual Account endpoint
-	chiRouter.With(jwt.AuthMiddleware).Post("/virtualaccount/create", vah.Create)
-	chiRouter.With(jwt.AuthMiddleware).Put("/virtualaccount/edit", vah.Edit)
-	// VAC transactions API endpoints
-	chiRouter.With(jwt.AuthMiddleware).Post("/vac/to_main", va.VacToMain)
-	chiRouter.With(jwt.AuthMiddleware).Get("/vac/list", va.VacList)
-	chiRouter.With(jwt.AuthMiddleware).Post("/vac/delete-vac", va.DeleteVac)
-
-	// Get transaction history
-	chiRouter.With(jwt.AuthMiddleware).Get("/transaction/history", ch.HistoryTransactionHandler(db))
-
-	// Email verification endpoint
-	chiRouter.Post("/email/verify-email-token", email.VerifyEmailToken(eh))
-
 	// Customer Endpoint
-	chiRouter.With(jwt.AuthMiddleware).Get("/customers/getprofile", ch.GetProfile)
-	chiRouter.With(jwt.AuthMiddleware).Put("/customers/updateprofile", ch.UpdateProfile)
-	chiRouter.With(jwt.AuthMiddleware).Patch("/customers/updatephoto", ch.UpdatePhoto)
+	chiRouter.With(jwt.AuthMiddleware).Get("/me/profile", ch.GetProfile)
+	chiRouter.With(jwt.AuthMiddleware).Put("/me/update", ch.UpdateProfile)
+	chiRouter.With(jwt.AuthMiddleware).Patch("/me/update-photo", ch.UpdatePhoto)
+	chiRouter.Post("/me/deposit", customers.DepositToMainAccount(ph, ah))
+	chiRouter.With(jwt.AuthMiddleware).Put("/me/transfer-va", va.AddBalanceVA)
 
-	// Main account transactions endpoint
-	chiRouter.Post("/deposit", customers.DepositToMainAccount(ph, ah))
+	// Virtual Account Endpoint
+	chiRouter.With(jwt.AuthMiddleware).Get("/me/va", va.VacList)
+	chiRouter.With(jwt.AuthMiddleware).Post("/me/va/create", vah.Create)
+	chiRouter.With(jwt.AuthMiddleware).Put("/me/va/{va_num}", vah.Edit)
+	chiRouter.With(jwt.AuthMiddleware).Post("/me/va/{va_num}/transfer-main", va.VacToMain)
+	chiRouter.With(jwt.AuthMiddleware).Delete("/me/va/{va_num}", va.DeleteVac)
 
-	// Url endpoint not found
+	// History Endpoint
+	chiRouter.With(jwt.AuthMiddleware).Get("/me/transaction/{page}", ch.HistoryTransactionHandler(db))
+
+	// Not Found Endpoint
 	chiRouter.NotFound(not_found.NotFoundHandler)
 
 	return chiRouter

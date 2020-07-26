@@ -71,7 +71,7 @@
 ```
 {
     "status": "FAILED",
-    "message": "",
+    "message": "Unable to Register, Your Phone Number Or Email Has Been Used",
     "data": {}  
 }
 ```
@@ -224,7 +224,7 @@
 }
 ```
 
-## 13. [POST] /me/deposit
+## 4. [POST] /me/deposit
 ### **Description** : 
     API used by partner bank/our staff, in case of cash deposit, called when a customer makes a deposit to their account.
 
@@ -254,7 +254,7 @@
 }
 ```
 
-## 4. [POST] /me/transfer-va
+## 5. [POST] /me/transfer-va
 ### **Description** : 
     Add balance from main account, to virtual accounts. Before update the balance check first if the balance sufficient
 

@@ -45,6 +45,7 @@ func NewCustomerHandler(jwt *tokens.JWT, db *sql.DB) *CustomerHandler {
 }
 
 func (ch *CustomerHandler) GetProfile(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set(constants.ContentType, constants.Json)
 	token := ch.jwt.GetToken(r)
 	err := token.Valid()
 	if err != nil {
@@ -142,6 +143,7 @@ func (ch *CustomerHandler) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ch *CustomerHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set(constants.ContentType, constants.Json)
 	userToken := ch.jwt.GetToken(r)
 	err := userToken.Valid()
 	if err != nil {
@@ -220,6 +222,7 @@ func (ch *CustomerHandler) UpdateProfile(w http.ResponseWriter, r *http.Request)
 }
 
 func (ch *CustomerHandler) UpdatePhoto(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set(constants.ContentType, constants.Json)
 	tokens := ch.jwt.GetToken(r)
 	err := tokens.Valid()
 	if err != nil {
@@ -272,6 +275,7 @@ func (ch *CustomerHandler) UpdatePhoto(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ch *CustomerHandler) UpdatePassword(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set(constants.ContentType, constants.Json)
 	tokens := ch.jwt.GetToken(r)
 	err := tokens.Valid()
 	if err != nil {

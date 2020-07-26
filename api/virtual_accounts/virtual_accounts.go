@@ -34,7 +34,7 @@ type AddBalanceVARequest struct {
 }
 
 type VAResponse struct {
-	Status       string `json:"status"`
+	Status       int    `json:"status"`
 	Notification string `json:"notification"`
 }
 
@@ -146,15 +146,15 @@ func (va *VAHandler) VacToMain(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// response := VAResponse{
-	// 	Status:       1,
-	// 	Notification: fmt.Sprintf("successfully move balance to your main account : %v", VirAcc.BalanceChange),
-	// }
-	// err = json.NewEncoder(w).Encode(response)
-	// if err != nil {
-	// 	helper.HTTPError(w, http.StatusBadRequest, "unable to encode response")
-	// 	return
-	// }
+	response := VAResponse{
+		Status:       1,
+		Notification: fmt.Sprintf("successfully move balance to your main account : %v", VirAcc.BalanceChange),
+	}
+	err = json.NewEncoder(w).Encode(response)
+	if err != nil {
+		helper.HTTPError(w, http.StatusBadRequest, "unable to encode response")
+		return
+	}
 
 	logDesc := models.LogDescriptionVaToMainTemplate(VirAcc.BalanceChange, VirAcc.VaNum, token.AccountNum)
 
@@ -198,15 +198,15 @@ func (va *VAHandler) AddBalanceVA(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// response := VAResponse{
-	// 	Status:       1,
-	// 	Notification: fmt.Sprintf("successfully add balance to your virtual account : %v", vac.VaBalance),
-	// }
-	// err = json.NewEncoder(w).Encode(response)
-	// if err != nil {
-	// 	helpers.HTTPError(w, http.StatusBadRequest, "unable to encode response")
-	// 	return
-	// }
+	response := VAResponse{
+		Status:       1,
+		Notification: fmt.Sprintf("successfully add balance to your virtual account : %v", vac.VaBalance),
+	}
+	err = json.NewEncoder(w).Encode(response)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, "unable to encode response")
+		return
+	}
 
 }
 
@@ -276,7 +276,7 @@ func (va *VAHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response := VAResponse{
-		Status:       "Success",
+		Status:       1,
 		Notification: fmt.Sprintf("successfully create virtual account! virtual account number : %v", vam.VaNum),
 	}
 
@@ -331,7 +331,7 @@ func (va *VAHandler) Update(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response := VAResponse{
-		Status:       "Success",
+		Status:       1,
 		Notification: fmt.Sprintf("successfully edit your virtual account! virtual account number : %v", vam.VaNum),
 	}
 

@@ -19,7 +19,6 @@ import (
 
 func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 	chiRouter := chi.NewRouter()
-	//vah := virtual_accounts.NewVAHandler(jwt, db)
 
 	chiRouter.Use(middleware.Logger)
 
@@ -33,10 +32,6 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 	chiRouter.Get("/", home.HomeHandler)
 	chiRouter.Post("/register", ch.Create)
 	chiRouter.Post("/login", customers.LoginHandler(jwt, db))
-
-	// Virtual Account endpoint
-	chiRouter.With(jwt.AuthMiddleware).Post("/me/va/create", va.Create)
-	chiRouter.With(jwt.AuthMiddleware).Put("/me/va/{va_num}/update", va.Update)
 
 	// VAC transactions API endpoints
 	chiRouter.With(jwt.AuthMiddleware).Post("/vac/to_main", va.VacToMain)
@@ -59,8 +54,8 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 
 	// Virtual Account Endpoint
 	chiRouter.With(jwt.AuthMiddleware).Get("/me/va", va.VacList)
-	// chiRouter.With(jwt.AuthMiddleware).Post("/me/va/create", vah.Create)
-	// chiRouter.With(jwt.AuthMiddleware).Put("/me/va/{va_num}", vah.Edit)
+	chiRouter.With(jwt.AuthMiddleware).Post("/me/va/create", va.Create)
+	chiRouter.With(jwt.AuthMiddleware).Put("/me/va/{va_num}/update", va.Update)
 	chiRouter.With(jwt.AuthMiddleware).Post("/me/va/{va_num}/transfer-main", va.VacToMain)
 	chiRouter.With(jwt.AuthMiddleware).Delete("/me/va/{va_num}", va.DeleteVac)
 

@@ -218,7 +218,11 @@ func (ch *CustomerHandler) UpdateProfile(w http.ResponseWriter, r *http.Request)
 			helpers.HTTPError(w, http.StatusBadRequest, "Email Token Failed")
 			return
 		}
-		ch.sendMail(w, tokenRegister, cus.CustEmail)
+		if err := ch.sendMail(w, tokenRegister, cus.CustEmail); err != nil {
+			w.Header().Set(constants.ContentType, constants.Json)
+			helpers.HTTPError(w, http.StatusBadRequest, constants.MailFailed)
+			return
+		}
 	}
 
 	_, res, err := helpers.NewResponseBuilder(w, true, constants.UpdateProfileSuccess, nil)

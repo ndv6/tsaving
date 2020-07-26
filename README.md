@@ -277,7 +277,7 @@
 ```
 {
     "status": "SUCCESS",
-    "message": "",
+    "message": "Successfully add balance to your virtual account",
     "data": {}  
 }
 ```
@@ -286,7 +286,7 @@
 ```
 {
     "status": "FAILED",
-    "message": "",
+    "message": "Failed transfer to virtual account",
     "data": {}  
 }
 ```

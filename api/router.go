@@ -53,7 +53,7 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 	chiRouter.With(jwt.AuthMiddleware).Post("/me/va/{va_num}/transfer-main", va.VacToMain)
 	chiRouter.With(jwt.AuthMiddleware).Delete("/me/va/{va_num}", va.DeleteVac)
 
-	// History Endpoint
+	// History Endpoint -- Yuly Haruka
 	chiRouter.With(jwt.AuthMiddleware).Get("/me/transaction/{page}", ch.HistoryTransactionHandler(db))
 
 	// Not Found Endpoint

@@ -28,7 +28,6 @@ const (
 	TransferToVAFailed      = "Failed transfer to virtual account "
 	InvalidBalance          = "Insufficient balance"
 	InvalidVA               = "Invalid virtual account number"
-	TransferToVAFailed      = "Failed transfer to virtual account "
 )
 
 //response messages

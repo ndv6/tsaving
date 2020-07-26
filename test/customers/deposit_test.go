@@ -1,3 +1,4 @@
+// Unit test for deposit API, made by Vici
 package customers
 
 import (
@@ -39,11 +40,7 @@ const (
 type testTransactor struct {
 }
 
-func (trx testTransactor) AddBalanceToMainAccount(amtToDeposit int, accNum string) error {
-	return nil
-}
-
-func (trx testTransactor) LogTransaction(log models.TransactionLogs) error {
+func (trx testTransactor) DepositToMainAccountDatabaseAccessor(balanceToAdd int, accountNumber string, log models.TransactionLogs) error {
 	return nil
 }
 
@@ -66,7 +63,7 @@ func TestShouldReturnBadRequestError(t *testing.T) {
 	partnerInterface := testPartnerInterface{}
 	transactor := testTransactor{}
 
-	mockRequest, err := http.NewRequest("POST", "/deposit", bytes.NewBuffer([]byte(testIncompleteRequest)))
+	mockRequest, err := http.NewRequest("POST", "/me/deposit", bytes.NewBuffer([]byte(testIncompleteRequest)))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -88,7 +85,7 @@ func TestShouldReturnUnauthorizedError(t *testing.T) {
 	partnerInterface := testPartnerInterface{}
 	transactor := testTransactor{}
 
-	mockRequest, err := http.NewRequest("POST", "/deposit", bytes.NewBuffer([]byte(testUnauthorizedRequest)))
+	mockRequest, err := http.NewRequest("POST", "/me/deposit", bytes.NewBuffer([]byte(testUnauthorizedRequest)))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -110,7 +107,7 @@ func TestShouldDepositSuccess(t *testing.T) {
 	partnerInterface := testPartnerInterface{}
 	transactor := testTransactor{}
 
-	mockRequest, err := http.NewRequest("POST", "/deposit", bytes.NewBuffer([]byte(testValidAuthorizedRequest)))
+	mockRequest, err := http.NewRequest("POST", "/me/deposit", bytes.NewBuffer([]byte(testValidAuthorizedRequest)))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -123,7 +120,7 @@ func TestShouldDepositSuccess(t *testing.T) {
 		t.Fatalf("Expected: %v, Received: %v", http.StatusOK, status)
 	}
 
-	if errorMsg := trimResponseMessage(responseReader.Body.String()); errorMsg != constants.DepositSuccess {
-		t.Fatalf("Expected: %v, Received: %v", constants.DepositSuccess, errorMsg)
+	if errorMsg := trimResponseMessage(responseReader.Body.String()); errorMsg != constants.Success {
+		t.Fatalf("Expected: %v, Received: %v", constants.Success, errorMsg)
 	}
 }

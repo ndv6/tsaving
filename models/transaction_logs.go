@@ -40,8 +40,8 @@ func CreateTransactionLog(db *sql.DB, log TransactionLogs) error {
 	return err
 }
 
-func TransactioLnog(db Execer, log TransactionLogs) error {
-	_, err := db.Exec("INSERT INTO transaction_logs (account_num, from_account, dest_account, tran_amount, description, created_at) VALUES ($1, $2, $3, $4, $5);",
+func TransactionLog(db Execer, log TransactionLogs) error {
+	_, err := db.Exec("INSERT INTO transaction_logs (account_num, from_account, dest_account, tran_amount, description, created_at) VALUES ($1, $2, $3, $4, $5, $6);",
 		log.AccountNum,
 		log.FromAccount,
 		log.DestAccount,

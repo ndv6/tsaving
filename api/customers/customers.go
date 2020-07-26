@@ -11,17 +11,22 @@ import (
 	"regexp"
 	"time"
 
+	"github.com/ndv6/tsaving/constants"
 	"github.com/ndv6/tsaving/helpers"
 	"github.com/ndv6/tsaving/models"
 	"github.com/ndv6/tsaving/tokens"
 )
 
-type RegisterResponse struct {
-	Token string `json:"token"`
-	Email string `json:"email"`
-}
+const (
+	PasswordRequirement = "Password Min 6 Character"
+	DupeEmailorPhone    = "Unable to Register, Your Phone Number Or Email Has Been Used"
+	EmailToken          = "Email Token Failed to Insert"
+	AccountFailed       = "Account Number Failed to Insert"
+	MailFailed          = "Register Success, but Cannot Send Mail"
+	RegisterSucceed     = "Register Succeeded"
+)
 
-type EmailResponse struct {
+type RegisterResponse struct {
 	Email string `json:"email"`
 }
 
@@ -76,22 +81,22 @@ func (ch *CustomerHandler) GetProfile(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, string(res))
 }
 
-func (ch *CustomerHandler) Create(w http.ResponseWriter, r *http.Request) {
+func (ch *CustomerHandler) Create(w http.ResponseWriter, r *http.Request) { // Handle by Caesar Gusti
 	b, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, "Unable Request Body")
+		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotReadRequest)
 		return
 	}
 	var cus models.Customers
 	err = json.Unmarshal(b, &cus)
 
 	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, "Unable to parse JSON Request")
+		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotParseRequest)
 		return
 	}
 
 	if len(cus.CustPassword) < 6 {
-		helpers.HTTPError(w, http.StatusBadRequest, "Password Min 6 Character")
+		helpers.HTTPError(w, http.StatusBadRequest, PasswordRequirement)
 		return
 	}
 
@@ -107,7 +112,7 @@ func (ch *CustomerHandler) Create(w http.ResponseWriter, r *http.Request) {
 	Pass := helpers.HashString(cus.CustPassword)
 
 	if err := models.RegisterCustomer(ch.db, cus, AccNum, Pass); err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, "Unable to Register, Your Phone Number Or Email Has Been Used")
+		helpers.HTTPError(w, http.StatusBadRequest, DupeEmailorPhone)
 		return
 	}
 
@@ -115,28 +120,35 @@ func (ch *CustomerHandler) Create(w http.ResponseWriter, r *http.Request) {
 		AccountNum: AccNum,
 	})
 
-	data := RegisterResponse{
-		Token: tokenRegister,
-		Email: cus.CustEmail,
-	}
-
-	err = json.NewEncoder(w).Encode(data)
-	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, "Unable to Encode response")
-		return
-	}
-
 	if err := models.AddEmailTokens(ch.db, tokenRegister, cus.CustEmail); err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, "Email Token Failed")
+		helpers.HTTPError(w, http.StatusBadRequest, EmailToken)
 		return
 	}
 
 	if err := models.AddAccountsWhileRegister(ch.db, AccNum); err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, "Account Failed")
+		helpers.HTTPError(w, http.StatusBadRequest, AccountFailed)
 		return
 	}
 
-	ch.sendMail(w, tokenRegister, cus.CustEmail)
+	data := RegisterResponse{
+		Email: cus.CustEmail,
+	}
+
+	err = ch.sendMail(w, tokenRegister, cus.CustEmail)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, MailFailed)
+		return
+	}
+
+	_, res, err := helpers.NewResponseBuilder(w, true, RegisterSucceed, data)
+
+	if err != nil {
+		helpers.HTTPError(w, http.StatusInternalServerError, constants.CannotEncodeResponse)
+		return
+	}
+
+	fmt.Fprint(w, string(res))
+
 }
 
 func (ch *CustomerHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
@@ -287,7 +299,7 @@ func isEmailValid(e string) bool {
 	return emailRegex.MatchString(e)
 }
 
-func (ch *CustomerHandler) sendMail(w http.ResponseWriter, tokenRegister string, cusEmail string) {
+func (ch *CustomerHandler) sendMail(w http.ResponseWriter, tokenRegister string, cusEmail string) error {
 
 	requestBody, err := json.Marshal(map[string]string{
 		"email": cusEmail,
@@ -295,24 +307,13 @@ func (ch *CustomerHandler) sendMail(w http.ResponseWriter, tokenRegister string,
 	})
 
 	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, "Unable to Parse JSON Email")
-		return
+		return err
 	}
 
 	_, err = http.Post("http://localhost:8082/sendMail", "application/json", bytes.NewBuffer(requestBody))
-
 	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, "Can't Send Email")
-		return
+		return err
 	}
 
-	dataemail := EmailResponse{
-		Email: cusEmail,
-	}
-
-	err = json.NewEncoder(w).Encode(dataemail)
-	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, "Fail Email Response")
-		return
-	}
+	return nil
 }

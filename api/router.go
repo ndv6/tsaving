@@ -29,9 +29,23 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 	va := virtual_accounts.NewVAHandler(jwt, db)
 	eh := database.NewEmailHandler(db)
 
-	// Home Endpoint
+	// Home endpoint
 	chiRouter.Get("/", home.HomeHandler)
+	chiRouter.Post("/register", ch.Create)
+	chiRouter.Post("/login", customers.LoginHandler(jwt, db))
 
+	// VAC transactions API endpoints
+	chiRouter.With(jwt.AuthMiddleware).Post("/vac/to_main", va.VacToMain)
+	chiRouter.With(jwt.AuthMiddleware).Get("/vac/list", va.VacList)
+	chiRouter.With(jwt.AuthMiddleware).Post("/vac/delete-vac", va.DeleteVac)
+
+	// VAC transactions API endpoints
+	chiRouter.With(jwt.AuthMiddleware).Post("/me/va/{va_num}/transfer-to-main", va.VacToMain)
+	chiRouter.With(jwt.AuthMiddleware).Get("/me/va/list", va.VacList)
+	chiRouter.With(jwt.AuthMiddleware).Post("/vac/delete-vac", va.DeleteVac)
+
+	// Get transaction history
+	chiRouter.With(jwt.AuthMiddleware).Get("/transaction/history/{page}", ch.HistoryTransactionHandler(db))
 	// Registration Endpoint
 	chiRouter.Post("/register", ch.Create)                        //Caesar
 	chiRouter.Post("/verify-account", email.VerifyEmailToken(eh)) //Joseph
@@ -54,7 +68,7 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 	chiRouter.With(jwt.AuthMiddleware).Post("/me/va/{va_num}/transfer-main", va.VacToMain) //Jocelyn
 	chiRouter.With(jwt.AuthMiddleware).Delete("/me/va/{va_num}", va.DeleteVac)             //Joseph
 
-	// History Endpoint
+	// History Endpoint -- Yuly Haruka
 	chiRouter.With(jwt.AuthMiddleware).Get("/me/transaction/{page}", ch.HistoryTransactionHandler(db)) //Yuly
 
 	// Not Found Endpoint

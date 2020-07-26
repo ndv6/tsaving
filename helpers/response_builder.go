@@ -7,6 +7,8 @@ import (
 	"github.com/ndv6/tsaving/constants"
 )
 
+// Made by Joseph and refactoring is done by Vici which consist of constants message
+
 type ResponseBuilder struct {
 	Status  string      `json:"status"`
 	Message string      `json:"message"`

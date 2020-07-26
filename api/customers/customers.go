@@ -76,8 +76,9 @@ func (ch *CustomerHandler) GetProfile(w http.ResponseWriter, r *http.Request) {
 
 func (ch *CustomerHandler) Create(w http.ResponseWriter, r *http.Request) { // Handle by Caesar Gusti
 	b, err := ioutil.ReadAll(r.Body)
+	w.Header().Set(constants.ContentType, constants.Json)
+
 	if err != nil {
-		w.Header().Set(constants.ContentType, constants.Json)
 		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotReadRequest)
 		return
 	}
@@ -85,13 +86,11 @@ func (ch *CustomerHandler) Create(w http.ResponseWriter, r *http.Request) { // H
 	err = json.Unmarshal(b, &cus)
 
 	if err != nil {
-		w.Header().Set(constants.ContentType, constants.Json)
 		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotParseRequest)
 		return
 	}
 
 	if len(cus.CustPassword) < 6 {
-		w.Header().Set(constants.ContentType, constants.Json)
 		helpers.HTTPError(w, http.StatusBadRequest, constants.PasswordRequirement)
 		return
 	}
@@ -108,7 +107,6 @@ func (ch *CustomerHandler) Create(w http.ResponseWriter, r *http.Request) { // H
 	Pass := helpers.HashString(cus.CustPassword)
 
 	if err := models.RegisterCustomer(ch.db, cus, AccNum, Pass); err != nil {
-		w.Header().Set(constants.ContentType, constants.Json)
 		helpers.HTTPError(w, http.StatusBadRequest, constants.DupeEmailorPhone)
 		return
 	}
@@ -118,19 +116,16 @@ func (ch *CustomerHandler) Create(w http.ResponseWriter, r *http.Request) { // H
 	})
 
 	if err := models.AddEmailTokens(ch.db, tokenRegister, cus.CustEmail); err != nil {
-		w.Header().Set(constants.ContentType, constants.Json)
 		helpers.HTTPError(w, http.StatusBadRequest, constants.EmailToken)
 		return
 	}
 
 	if err := models.AddAccountsWhileRegister(ch.db, AccNum); err != nil {
-		w.Header().Set(constants.ContentType, constants.Json)
 		helpers.HTTPError(w, http.StatusBadRequest, constants.AccountFailed)
 		return
 	}
 
 	if err := ch.sendMail(w, tokenRegister, cus.CustEmail); err != nil {
-		w.Header().Set(constants.ContentType, constants.Json)
 		helpers.HTTPError(w, http.StatusBadRequest, constants.MailFailed)
 		return
 	}
@@ -142,7 +137,6 @@ func (ch *CustomerHandler) Create(w http.ResponseWriter, r *http.Request) { // H
 	_, res, err := helpers.NewResponseBuilder(w, true, constants.RegisterSucceed, data)
 
 	if err != nil {
-		w.Header().Set(constants.ContentType, constants.Json)
 		helpers.HTTPError(w, http.StatusInternalServerError, constants.CannotEncodeResponse)
 		return
 	}

@@ -15,25 +15,12 @@ import (
 )
 
 // this verify_email_token.go is made by Joseph
-
-// constantnya sebelu di merge nanti bakal gw adjust lagi jadi nvm it for now okay? :)
-const (
-	EmailTokenNotFound      = "Can not find requested email"
-	VerifyEmailFailed       = "Email fail to be verified with given token"
-	UpdateEmailStatusFailed = "Fail to change email status to verified"
-	VerifyEmailTokenFailed  = "Unable to verify email token: "
-	DeleteEmailTokenFailed  = "Unable to delete verified email"
-	CannotReadRequest       = "Cannot read request body"
-	CannotParseRequest      = "Unable to parse request"
-	CannotEncodeResponse    = "Failed to encode response."
-)
-
 func VerifyEmailToken(eh database.EmailHandler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set(constants.ContentType, constants.Json)
 		requestBody, err := ioutil.ReadAll(r.Body)
 		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, CannotReadRequest)
+			helpers.HTTPError(w, http.StatusBadRequest, constants.CannotReadRequest)
 			return
 		}
 
@@ -41,36 +28,37 @@ func VerifyEmailToken(eh database.EmailHandler) http.HandlerFunc {
 
 		err = json.Unmarshal(requestBody, &et)
 		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, CannotParseRequest)
+			helpers.HTTPError(w, http.StatusBadRequest, constants.CannotParseRequest)
 			return
 		}
 
 		dbEt, err := eh.GetEmailTokenByEmail(et.Email)
 		if err != nil {
-			helpers.HTTPError(w, http.StatusNotFound, EmailTokenNotFound)
+			helpers.HTTPError(w, http.StatusNotFound, constants.EmailTokenNotFound)
 			return
 		}
 
 		if et.Token != dbEt.Token {
-			helpers.HTTPError(w, http.StatusBadRequest, VerifyEmailFailed)
+			helpers.HTTPError(w, http.StatusBadRequest, constants.VerifyEmailFailed)
 			return
 		}
 
 		err = eh.UpdateCustomerVerificationStatusByEmail(dbEt.Email)
 		if err != nil {
-			helpers.HTTPError(w, http.StatusNotFound, UpdateEmailStatusFailed)
+			helpers.HTTPError(w, http.StatusNotFound, constants.UpdateEmailStatusFailed)
 			return
 		}
 
 		err = eh.DeleteVerifiedEmailTokenById(dbEt.EtId)
 		if err != nil {
-			helpers.HTTPError(w, http.StatusNotFound, DeleteEmailTokenFailed)
+			helpers.HTTPError(w, http.StatusNotFound, constants.DeleteEmailTokenFailed)
 			return
 		}
 
-		w, resp, err := helpers.NewResponseBuilder(w, true, "Email has been successfully verified", models.VerifiedEmailResponse{Email: et.Email})
+		w, resp, err := helpers.NewResponseBuilder(w, true, constants.SuccessVerifyEmail, models.VerifiedEmailResponse{Email: et.Email})
 		if err != nil {
 			helpers.HTTPError(w, http.StatusInternalServerError, constants.CannotEncodeResponse)
+			return
 		}
 		fmt.Fprintf(w, resp)
 		return

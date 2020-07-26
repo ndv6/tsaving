@@ -41,6 +41,13 @@ const (
 	EmailToken              = "Email Token Failed to Insert"
 	AccountFailed           = "Account Number Failed to Insert"
 	MailFailed              = "Register Success, but Cannot Send Mail"
+
+	EmailTokenNotFound      = "Can not find requested email"
+	VerifyEmailFailed       = "Email fail to be verified with given token"
+	UpdateEmailStatusFailed = "Fail to change email status to verified"
+	VerifyEmailTokenFailed  = "Unable to verify email token: "
+	DeleteEmailTokenFailed  = "Unable to delete verified email"
+	SuccessVerifyEmail      = "Email has been successfully verified"
 )
 
 //response messages

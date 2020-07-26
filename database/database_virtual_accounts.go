@@ -190,7 +190,7 @@ func GetMaxVANum(accNum string, db *sql.DB) (maxId int, err error) {
 
 func RevertVacBalanceToMainAccount(trx *sql.Tx, va models.VirtualAccounts) (err error) {
 	if err == nil {
-		_, err = trx.Exec(fmt.Sprintf("SELECT account_balance FROM accounts WHERE account_id = '%s' FOR UPDATE; UPDATE accounts SET account_balance = account_balance + subquery.va_balance FROM (SELECT va_balance FROM virtual_accounts WHERE va_num = '%s') as subquery WHERE account_num = '%s'; DELETE FROM virtual_accounts WHERE va_num = '%s';", va.AccountNum, va.VaNum, va.AccountNum, va.VaNum))
+		_, err = trx.Exec(fmt.Sprintf("UPDATE accounts SET account_balance = account_balance + subquery.va_balance FROM (SELECT va_balance FROM virtual_accounts WHERE va_num = '%s') as subquery WHERE account_num = '%s'; DELETE FROM virtual_accounts WHERE va_num = '%s';", va.AccountNum, va.VaNum, va.AccountNum, va.VaNum))
 		fmt.Println(err)
 	}
 	return

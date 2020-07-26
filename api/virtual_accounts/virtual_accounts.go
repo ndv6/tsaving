@@ -76,7 +76,7 @@ func CheckVaNumValid(vaNum string) bool {
 }
 
 func (vh VAHandler) DeleteVac(w http.ResponseWriter, r *http.Request) {
-	w.Header.Set(constants.ContentType, constants.Json)
+	w.Header().Set(constants.ContentType, constants.Json)
 	token := vh.jwt.GetToken(r)
 	err := token.Valid()
 	if err != nil {

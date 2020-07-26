@@ -32,7 +32,13 @@ const (
 
 //response messages
 const (
-	AddBalanceVASuccess = "Successfully add balance to your virtual account"
+	AddBalanceVASuccess  = "Successfully add balance to your virtual account"
+	CannotParseURLParams = "Failed to parse URL Params"
+)
+
+// Response messages
+const (
+	GetListSuccess = "Success to get the list data"
 )
 
 // Headers

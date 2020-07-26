@@ -180,11 +180,13 @@ func (va *VAHandler) VacToMain(w http.ResponseWriter, r *http.Request) {
 }
 
 func (va *VAHandler) AddBalanceVA(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set(constants.ContentType, constants.Json)
 	token := va.jwt.GetToken(r)
 
 	var vac AddBalanceVARequest
 	err := json.NewDecoder(r.Body).Decode(&vac)
 	if err != nil {
+		w.Header().Set(constants.ContentType, constants.Json)
 		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
 		return
 	}

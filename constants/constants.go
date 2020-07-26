@@ -5,13 +5,12 @@ const (
 	Deposit = "DEPOSIT_TO_MAIN_ACCOUNT"
 )
 
-// Response message
+// Response status
 const (
 	DepositSuccess = "Deposit completed successfully"
 	DepositFailed  = "Failed to make deposit"
 )
 
-// Response status
 const (
 	Success = "SUCCESS"
 	Failed  = "FAILED"
@@ -36,6 +35,12 @@ const (
 	VANotFound              = "Virtual account not found"
 	FailToRevertBalance     = "Reverting balance to main account failed"
 	TokenExpires            = "Token is already expire, please login to continue"
+	TransferToVAFailed      = "Failed transfer to virtual account"
+)
+
+//response messages
+const (
+	AddBalanceVASuccess = "Successfully add balance to your virtual account"
 )
 
 // Response messages

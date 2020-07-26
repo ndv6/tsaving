@@ -26,12 +26,10 @@ const (
 	CannotEncodeResponse    = "Failed to encode response."
 	InsertFailed            = "Failed to insert to database."
 	InitLogFailed           = "Failed to insert log of this transaction."
-<<<<<<< HEAD
 	TransferFailed          = "Failed to transfer to main account."
 	CannotTransferVaToMain  = "Failed to transfer from virtual account to main account."
 	InvalidVA               = "Invalid virtual account number"
 	InvalidBalance          = "Insufficient balance"
-=======
 	CannotParseURLParams    = "Failed to parse URL Params"
 )
 
@@ -48,5 +46,4 @@ const (
 // Header types
 const (
 	Json = "application/json"
->>>>>>> de0d7fbe1bd25918d5187a60c57e39f7acd61096
 )

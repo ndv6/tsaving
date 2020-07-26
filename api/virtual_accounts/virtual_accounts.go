@@ -110,6 +110,7 @@ func (vh VAHandler) DeleteVac(w http.ResponseWriter, r *http.Request) {
 }
 
 func (va *VAHandler) VacToMain(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set(constants.ContentType, constants.Json)
 	token := va.jwt.GetToken(r)
 	//ambil input dari jsonnya (no rek VAC dan saldo input)
 	b, err := ioutil.ReadAll(r.Body)
@@ -287,7 +288,7 @@ func (va *VAHandler) Edit(w http.ResponseWriter, r *http.Request) {
 
 // print virtual account list
 func (va *VAHandler) VacList(w http.ResponseWriter, r *http.Request) {
-
+	w.Header().Set(constants.ContentType, constants.Json)
 	token := va.jwt.GetToken(r)
 	res, err := database.GetListVA(va.db, token.CustId)
 

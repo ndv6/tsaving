@@ -5,17 +5,16 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"strconv"
 	"time"
 
+	"github.com/go-chi/chi"
+	"github.com/ndv6/tsaving/database"
 	"github.com/ndv6/tsaving/helpers"
 	helper "github.com/ndv6/tsaving/helpers"
 	"github.com/ndv6/tsaving/models"
 	"github.com/ndv6/tsaving/tokens"
-
-	"github.com/ndv6/tsaving/database"
 )
 
 type VirtualAcc struct {
@@ -212,8 +211,11 @@ func (va *VAHandler) AddBalanceVA(w http.ResponseWriter, r *http.Request) {
 }
 
 func (va *VAHandler) Create(w http.ResponseWriter, r *http.Request) {
-	// read request body
 
+	// set response header
+	w.Header().Set("Content-Type", "application/json")
+
+	// read request body
 	token := va.jwt.GetToken(r)
 	req, err := ioutil.ReadAll(r.Body)
 
@@ -242,7 +244,6 @@ func (va *VAHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Println(res)
 	suffixVaNum := "000"
 	// get the last of VaNum
 	if len(res) > 0 {
@@ -252,6 +253,7 @@ func (va *VAHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 	lastVaNum, err := strconv.Atoi(suffixVaNum)
 	if err != nil {
+		helper.HTTPError(w, http.StatusBadRequest, "error generating va number")
 		return
 	}
 
@@ -264,9 +266,6 @@ func (va *VAHandler) Create(w http.ResponseWriter, r *http.Request) {
 		newSuffix = strconv.Itoa(lastVaNum + 1)
 	}
 	newVaNum := am.AccountNum + newSuffix
-	log.Println(newSuffix)
-	log.Println(am.AccountNum)
-	log.Println(newVaNum)
 
 	// insert to db
 	vam, err = database.CreateVA(newVaNum, token.AccountNum, vac.VaColor, vac.VaLabel, va.db)
@@ -276,11 +275,29 @@ func (va *VAHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Fprintf(w, "VA Number: %v Created!\n", vam.VaNum)
+	response := VAResponse{
+		Status:       1,
+		Notification: fmt.Sprintf("successfully create virtual account! virtual account number : %v", vam.VaNum),
+	}
+
+	// set response http status
+	w.WriteHeader(http.StatusCreated)
+
+	err = json.NewEncoder(w).Encode(response)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, "unable to encode response")
+		return
+	}
 }
 
 // to edit VA
-func (va *VAHandler) Edit(w http.ResponseWriter, r *http.Request) {
+func (va *VAHandler) Update(w http.ResponseWriter, r *http.Request) {
+
+	// set response header
+	w.Header().Set("Content-Type", "application/json")
+
+	// get va number in url
+	vaNumber := chi.URLParam(r, "va_num")
 
 	// read request body
 	req, err := ioutil.ReadAll(r.Body)
@@ -297,17 +314,32 @@ func (va *VAHandler) Edit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// update to db
-	fmt.Printf(vac.VaNumber + " " + " " + vac.VaColor + " " + vac.VaLabel)
+	// validasi
 	var vam models.VirtualAccounts
-	vam, err = database.UpdateVA(vac.VaNumber, vac.VaColor, vac.VaLabel, va.db)
+	vam, err = database.GetVaNumber(va.db, vaNumber)
+	if err != nil {
+		helper.HTTPError(w, http.StatusBadRequest, "validate va number failed, make sure va number is correct")
+		return
+	}
+
+	// update to db
+	vam, err = database.UpdateVA(vam.VaNum, vac.VaColor, vac.VaLabel, va.db)
 
 	if err != nil {
 		helper.HTTPError(w, http.StatusBadRequest, "failed insert data to db")
 		return
 	}
 
-	fmt.Fprintf(w, "Virtual Account: %v Updated!\n", vam.VaNum)
+	response := VAResponse{
+		Status:       1,
+		Notification: fmt.Sprintf("successfully edit your virtual account! virtual account number : %v", vam.VaNum),
+	}
+
+	err = json.NewEncoder(w).Encode(response)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, "unable to encode response")
+		return
+	}
 }
 
 func (va *VAHandler) VacList(w http.ResponseWriter, r *http.Request) {

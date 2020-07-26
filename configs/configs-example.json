@@ -1,0 +1,12 @@
+{
+    "port": "-",
+    "SECRET_KEY": "-",
+    "database": {
+        "username": "postgres",
+        "password": "-",
+        "dbName": "db_tsaving",
+        "dbType": "postgres",
+        "port": "5432",
+        "host": "127.0.0.1"
+    }
+}

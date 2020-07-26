@@ -1,6 +1,6 @@
 {
     "port": "8000",
-    "SECRET_KEY": "YOURSECRETSTRING",
+    "SECRET_KEY": "yoursecretkey",
     "database": {
         "username": "postgres",
         "password": "password",

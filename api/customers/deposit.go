@@ -1,3 +1,4 @@
+// Request, interface, and API for deposit to main account, made by Vici
 package customers
 
 import (
@@ -22,24 +23,20 @@ type DepositRequest struct {
 	ClientId      int    `json:"client_id"`
 }
 
-type DepositResponse struct {
-	DepositStatus string `json:"status"`
-}
-
 type PartnerInterface interface {
 	GetSecret(id int) (string, error)
 }
 
 type Transactor interface {
-	AddBalanceToMainAccount(amtToDeposit int, accNum string) error
-	LogTransaction(log models.TransactionLogs) error
+	DepositToMainAccountDatabaseAccessor(balanceToAdd int, accountNumber string, log models.TransactionLogs) error
 }
 
-//This is an API that partner bank(s) will call when one of our customers make a deposit through our bank
+//This is an API that partner bank(s) will call when one of our customers make a deposit through our bank, made by Vici
 func DepositToMainAccount(partner PartnerInterface, trx Transactor) http.HandlerFunc {
 	return (func(w http.ResponseWriter, r *http.Request) {
 		var request DepositRequest
-		var response DepositResponse
+
+		w.Header().Set(constants.ContentType, constants.Json)
 
 		b, err := ioutil.ReadAll(r.Body)
 		if err != nil {
@@ -64,37 +61,27 @@ func DepositToMainAccount(partner PartnerInterface, trx Transactor) http.Handler
 			return
 		}
 
-		err = trx.AddBalanceToMainAccount(request.BalanceAdded, request.AccountNumber)
+		log := models.TransactionLogs{
+			AccountNum:  request.AccountNumber,
+			DestAccount: request.AccountNumber,
+			FromAccount: strconv.Itoa(request.ClientId),
+			TranAmount:  request.BalanceAdded,
+			Description: constants.Deposit,
+			CreatedAt:   time.Now(),
+		}
+		err = trx.DepositToMainAccountDatabaseAccessor(request.BalanceAdded, request.AccountNumber, log)
 		if err != nil {
 			helpers.HTTPError(w, http.StatusInternalServerError, constants.InsertFailed)
 			return
 		}
 
-		response = DepositResponse{
-			DepositStatus: constants.DepositSuccess,
-		}
-
-		log := models.TransactionLogs{
-			AccountNum:  request.AccountNumber,
-			DestAccount: request.AccountNumber,
-			TranAmount:  request.BalanceAdded,
-			Description: constants.Deposit,
-			CreatedAt:   time.Now(),
-		}
-
-		err = trx.LogTransaction(log)
-		if err != nil {
-			fmt.Println(err)
-			helpers.HTTPError(w, http.StatusInternalServerError, constants.InitLogFailed)
-			return
-		}
-
-		err = json.NewEncoder(w).Encode(response)
+		w, responseJson, err := helpers.NewResponseBuilder(w, true, constants.DepositSuccess, nil)
 		if err != nil {
 			helpers.HTTPError(w, http.StatusInternalServerError, constants.CannotEncodeResponse)
 			return
 		}
 
+		fmt.Fprintf(w, responseJson)
 	})
 
 }

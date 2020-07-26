@@ -11,6 +11,11 @@ const (
 	DepositFailed  = "Failed to make deposit"
 )
 
+const (
+	Success = "SUCCESS"
+	Failed  = "FAILED"
+)
+
 // Error messages
 const (
 	RequestHasInvalidFields = "Mandatory field(s) is missing from request, or is invalid. Please ensure all fields are properly filled."
@@ -20,12 +25,30 @@ const (
 	CannotEncodeResponse    = "Failed to encode response."
 	InsertFailed            = "Failed to insert to database."
 	InitLogFailed           = "Failed to insert log of this transaction."
-	TransferToVAFailed      = "Failed tranfer to virtual account "
+	TransferToVAFailed      = "Failed transfer to virtual account "
 	InvalidBalance          = "Insufficient balance"
 	InvalidVA               = "Invalid virtual account number"
 )
 
 //response messages
 const (
-	AddBalanceVASuccess = "Successfully add balance to your virtual account"
+	AddBalanceVASuccess    = "Successfully add balance to your virtual account"
+	CannotParseURLParams   = "Failed to parse URL Params"
+	TransferFailed         = "Failed to transfer to main account."
+	CannotTransferVaToMain = "Failed to transfer from virtual account to main account."
+)
+
+// Response messages
+const (
+	GetListSuccess = "Success to get the list data"
+)
+
+// Headers
+const (
+	ContentType = "Content-Type"
+)
+
+// Header types
+const (
+	Json = "application/json"
 )

@@ -26,10 +26,6 @@ const (
 	RegisterSucceed     = "Register Succeeded"
 )
 
-type RegisterResponse struct {
-	Email string `json:"email"`
-}
-
 type StatusResult struct {
 	Status string `json:"status"`
 }
@@ -130,17 +126,13 @@ func (ch *CustomerHandler) Create(w http.ResponseWriter, r *http.Request) { // H
 		return
 	}
 
-	data := RegisterResponse{
-		Email: cus.CustEmail,
-	}
-
 	err = ch.sendMail(w, tokenRegister, cus.CustEmail)
 	if err != nil {
 		helpers.HTTPError(w, http.StatusBadRequest, MailFailed)
 		return
 	}
 
-	_, res, err := helpers.NewResponseBuilder(w, true, RegisterSucceed, data)
+	_, res, err := helpers.NewResponseBuilder(w, true, RegisterSucceed, nil)
 
 	if err != nil {
 		helpers.HTTPError(w, http.StatusInternalServerError, constants.CannotEncodeResponse)

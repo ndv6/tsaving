@@ -33,7 +33,9 @@
 {
     "status": "SUCCESS",
     "message": "Login Succeed",
-    "data": {}
+    "data": {
+        "email":"testing@gmail.com"
+    }
 }
 ```
 
@@ -41,7 +43,7 @@
 ```
 {
     "status": "FAILED",
-    "message": "",
+    "message": "Unable Register",
     "data": {}  
 }
 ```
@@ -105,7 +107,7 @@
 ```
 {
     "status": "FAILED",
-    "message": "",
+    "message": "Wrong Email or Password",
     "data": {}  
 }
 ```

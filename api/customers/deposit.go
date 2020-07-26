@@ -36,6 +36,8 @@ func DepositToMainAccount(partner PartnerInterface, trx Transactor) http.Handler
 	return (func(w http.ResponseWriter, r *http.Request) {
 		var request DepositRequest
 
+		w.Header().Set(constants.ContentType, constants.Json)
+
 		b, err := ioutil.ReadAll(r.Body)
 		if err != nil {
 			helpers.HTTPError(w, http.StatusBadRequest, constants.CannotReadRequest)

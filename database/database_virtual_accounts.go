@@ -42,6 +42,7 @@ func UpdateVacToMain(db *sql.DB, balanceInput int, vacNum string, accountNum str
 
 	if balanceVA < balanceInput {
 		err = errors.New(constants.InvalidBalance)
+		fmt.Print(err)
 		tx.Rollback()
 		return
 	}
@@ -64,13 +65,14 @@ func UpdateVacToMain(db *sql.DB, balanceInput int, vacNum string, accountNum str
 	//inpu transaction log
 	tLogs := models.TransactionLogs{
 		AccountNum:  accountNum,
+		FromAccount: accountNum,
 		DestAccount: vacNum,
 		TranAmount:  balanceInput,
 		Description: logDesc,
 		CreatedAt:   time.Now(),
 	}
 
-	err = models.TransactionLog(db, tLogs)
+	err = models.TransactionLog(tx, tLogs)
 	if err != nil {
 		fmt.Print(err)
 		tx.Rollback()

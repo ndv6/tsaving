@@ -21,6 +21,7 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 	chiRouter := chi.NewRouter()
 	vah := virtual_accounts.NewVAHandler(jwt, db)
 
+	// to log incoming requests
 	chiRouter.Use(middleware.Logger)
 
 	// Handler objects initialization
@@ -28,6 +29,7 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 	ah := database.NewAccountHandler(db)
 	ch := customers.NewCustomerHandler(jwt, db)
 	va := virtual_accounts.NewVAHandler(jwt, db)
+	eh := database.EmailHandler{Db: db}
 
 	// Home Endpoint
 	chiRouter.Get("/", home.HomeHandler)
@@ -44,7 +46,7 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 	chiRouter.With(jwt.AuthMiddleware).Get("/transaction/history/{page}", ch.HistoryTransactionHandler(db))
 	// Registration Endpoint
 	chiRouter.Post("/register", ch.Create)
-	chiRouter.Post("/verify-account", email.VerifyEmailToken(db))
+	chiRouter.Post("/verify-account", email.VerifyEmailToken(eh))
 
 	// Login Endpoint
 	chiRouter.Post("/login", customers.LoginHandler(jwt, db))

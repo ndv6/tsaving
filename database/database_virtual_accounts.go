@@ -242,3 +242,8 @@ func GetVacByAccountNum(db *sql.DB, accountNum string) (va models.VirtualAccount
 	err = db.QueryRow("SELECT va_id, va_num, account_num, va_balance FROM virtual_accounts WHERE account_num=$1", accountNum).Scan(&va.VaId, &va.VaNum, &va.AccountNum, &va.VaBalance)
 	return
 }
+
+func GetVaNumber(db *sql.DB, vaNum string) (va models.VirtualAccounts, err error) {
+	err = db.QueryRow("SELECT va_num FROM virtual_accounts WHERE va_num=$1", vaNum).Scan(&va.VaNum)
+	return
+}

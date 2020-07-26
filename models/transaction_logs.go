@@ -29,7 +29,6 @@ type Execer interface {
 	Exec(string, ...interface{}) (sql.Result, error)
 }
 
-// which one to use?
 func CreateTransactionLog(db *sql.DB, log TransactionLogs) error {
 	_, err := db.Exec("INSERT INTO transaction_logs (account_num, from_account, dest_account, tran_amount, description, created_at) VALUES ($1, $2, $3, $4, $5);",
 		log.AccountNum,
@@ -41,7 +40,6 @@ func CreateTransactionLog(db *sql.DB, log TransactionLogs) error {
 	return err
 }
 
-// which one to use?
 func TransactioLnog(db Execer, log TransactionLogs) error {
 	_, err := db.Exec("INSERT INTO transaction_logs (account_num, from_account, dest_account, tran_amount, description, created_at) VALUES ($1, $2, $3, $4, $5);",
 		log.AccountNum,

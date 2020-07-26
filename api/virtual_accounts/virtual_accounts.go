@@ -28,8 +28,13 @@ type InputVa struct {
 	VaNum         string `json:"va_num"`
 }
 
+type AddBalanceVARequest struct {
+	VaNum     string `json:"va_num"`
+	VaBalance int    `json:"va_balance"`
+}
+
 type VAResponse struct {
-	Status       int    `json:"status"`
+	Status       string `json:"status"`
 	Notification string `json:"notification"`
 }
 
@@ -141,15 +146,15 @@ func (va *VAHandler) VacToMain(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := VAResponse{
-		Status:       1,
-		Notification: fmt.Sprintf("successfully move balance to your main account : %v", VirAcc.BalanceChange),
-	}
-	err = json.NewEncoder(w).Encode(response)
-	if err != nil {
-		helper.HTTPError(w, http.StatusBadRequest, "unable to encode response")
-		return
-	}
+	// response := VAResponse{
+	// 	Status:       1,
+	// 	Notification: fmt.Sprintf("successfully move balance to your main account : %v", VirAcc.BalanceChange),
+	// }
+	// err = json.NewEncoder(w).Encode(response)
+	// if err != nil {
+	// 	helper.HTTPError(w, http.StatusBadRequest, "unable to encode response")
+	// 	return
+	// }
 
 	logDesc := models.LogDescriptionVaToMainTemplate(VirAcc.BalanceChange, VirAcc.VaNum, token.AccountNum)
 
@@ -171,6 +176,40 @@ func (va *VAHandler) VacToMain(w http.ResponseWriter, r *http.Request) {
 	return
 
 }
+
+func (va *VAHandler) AddBalanceVA(w http.ResponseWriter, r *http.Request) {
+	var vac AddBalanceVARequest
+	token := va.jwt.GetToken(r)
+	err := json.NewDecoder(r.Body).Decode(&vac)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, "unable to parse json request")
+		return
+	}
+	//check if va number is exist and valid to its owner
+	err = database.CheckAccountVA(va.db, vac.VaNum, token.CustId)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	updateBalanceVA := database.TransferFromMainToVa(token.AccountNum, vac.VaNum, vac.VaBalance, va.db)
+	if updateBalanceVA != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, updateBalanceVA.Error())
+		return
+	}
+
+	// response := VAResponse{
+	// 	Status:       1,
+	// 	Notification: fmt.Sprintf("successfully add balance to your virtual account : %v", vac.VaBalance),
+	// }
+	// err = json.NewEncoder(w).Encode(response)
+	// if err != nil {
+	// 	helpers.HTTPError(w, http.StatusBadRequest, "unable to encode response")
+	// 	return
+	// }
+
+}
+
 func (va *VAHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 	// set response header
@@ -237,7 +276,7 @@ func (va *VAHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response := VAResponse{
-		Status:       1,
+		Status:       "Success",
 		Notification: fmt.Sprintf("successfully create virtual account! virtual account number : %v", vam.VaNum),
 	}
 
@@ -292,7 +331,7 @@ func (va *VAHandler) Update(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response := VAResponse{
-		Status:       1,
+		Status:       "Success",
 		Notification: fmt.Sprintf("successfully edit your virtual account! virtual account number : %v", vam.VaNum),
 	}
 

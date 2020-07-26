@@ -21,19 +21,17 @@ type Customers struct {
 }
 
 func RegisterCustomer(db *sql.DB, objCustomer Customers, AccNum string, Pass string) error {
-	Create := time.Now()
-	Update := time.Now()
-	Verified := false
-	_, err := db.Exec("INSERT into customers (account_num, cust_name, cust_address, cust_phone, cust_email, cust_password, is_verified, channel, created_at, updated_at) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)", AccNum,
+	_, err := db.Exec("INSERT into customers (account_num, cust_name, cust_address, cust_phone, cust_email, cust_password, cust_pict, is_verified, channel, created_at, updated_at) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10,$11)", AccNum,
 		objCustomer.CustName,
 		objCustomer.CustAddress,
 		objCustomer.CustPhone,
 		objCustomer.CustEmail,
 		Pass,
-		Verified,
+		"",
+		false,
 		objCustomer.Channel,
-		Create,
-		Update,
+		time.Now(),
+		time.Now(),
 	)
 	return err
 }
@@ -82,4 +80,14 @@ func IsEmailExist(db *sql.DB, email string, id int) (bool, error) {
 		return true, err
 	}
 	return res, nil
+}
+
+func IsEmailChanged(db *sql.DB, email string, id int) (bool, error) {
+	var res bool
+	row := db.QueryRow("SELECT EXISTS(SELECT 1 FROM customers WHERE cust_email = $1 AND cust_id = $2)", email, id)
+	err := row.Scan(&res)
+	if err != nil {
+		return true, err
+	}
+	return !res, nil
 }

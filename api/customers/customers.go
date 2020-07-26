@@ -1,22 +1,32 @@
 package customers
 
 import (
+	"bytes"
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"github.com/ndv6/tsaving/helpers"
-	"github.com/ndv6/tsaving/models"
-	"github.com/ndv6/tsaving/tokens"
 	"io/ioutil"
 	"math/rand"
 	"net/http"
 	"regexp"
 	"time"
+
+	"github.com/ndv6/tsaving/helpers"
+	"github.com/ndv6/tsaving/models"
+	"github.com/ndv6/tsaving/tokens"
 )
 
 type RegisterResponse struct {
 	Token string `json:"token"`
 	Email string `json:"email"`
+}
+
+type EmailResponse struct {
+	Email string `json:"email"`
+}
+
+type StatusResult struct {
+	Status string `json:"status"`
 }
 
 type GetProfileResult struct {
@@ -65,12 +75,6 @@ func (ch *CustomerHandler) GetProfile(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Fprintln(w, string(res))
 }
-
-type StatusResult struct {
-	Status string `json:"status"`
-}
-
-var emailRegex = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 
 func (ch *CustomerHandler) Create(w http.ResponseWriter, r *http.Request) {
 	b, err := ioutil.ReadAll(r.Body)
@@ -126,11 +130,18 @@ func (ch *CustomerHandler) Create(w http.ResponseWriter, r *http.Request) {
 		helpers.HTTPError(w, http.StatusBadRequest, "Email Token Failed")
 		return
 	}
+
+	if err := models.AddAccountsWhileRegister(ch.db, AccNum); err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, "Account Failed")
+		return
+	}
+
+	ch.sendMail(w, tokenRegister, cus.CustEmail)
 }
 
 func (ch *CustomerHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
-	tokens := ch.jwt.GetToken(r)
-	err := tokens.Valid()
+	userToken := ch.jwt.GetToken(r)
+	err := userToken.Valid()
 	if err != nil {
 		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
 		return
@@ -151,24 +162,52 @@ func (ch *CustomerHandler) UpdateProfile(w http.ResponseWriter, r *http.Request)
 
 	//check if email address is valid
 	isValid := isEmailValid(cus.CustEmail)
+	isEmailChanged, err := models.IsEmailChanged(ch.db, cus.CustEmail, cus.CustId)
 	if isValid {
-		isExist, err := models.IsEmailExist(ch.db, cus.CustEmail, cus.CustId)
 		if err != nil {
 			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
 			return
 		}
-		if isExist {
-			helpers.HTTPError(w, http.StatusBadRequest, "Email already taken")
-			return
+
+		if isEmailChanged {
+			isExist, err := models.IsEmailExist(ch.db, cus.CustEmail, cus.CustId)
+			if err != nil {
+				helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+				return
+			}
+			if isExist {
+				helpers.HTTPError(w, http.StatusBadRequest, "Email already taken")
+				return
+			}
+			cus.IsVerified = false
 		}
+
 	} else {
 		helpers.HTTPError(w, http.StatusBadRequest, "Invalid email")
 		return
 	}
 
+	if len(cus.CustPassword) < 6 {
+		helpers.HTTPError(w, http.StatusBadRequest, "Password Min 6 Character")
+		return
+	}
+
+	cus.CustPassword = helpers.HashString(cus.CustPassword)
+
 	err = models.UpdateProfile(ch.db, cus)
 	if err != nil {
 		helpers.HTTPError(w, http.StatusBadRequest, "Error updating customer data"+err.Error())
+	}
+
+	if isEmailChanged {
+		tokenRegister := ch.jwt.Encode(tokens.Token{
+			AccountNum: cus.AccountNum,
+		})
+		if err := models.AddEmailTokens(ch.db, tokenRegister, cus.CustEmail); err != nil {
+			helpers.HTTPError(w, http.StatusBadRequest, "Email Token Failed")
+			return
+		}
+		ch.sendMail(w, tokenRegister, cus.CustEmail)
 	}
 
 	result := StatusResult{
@@ -241,8 +280,39 @@ func (ch *CustomerHandler) UpdatePhoto(w http.ResponseWriter, r *http.Request) {
 }
 
 func isEmailValid(e string) bool {
+	emailRegex := regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 	if len(e) < 4 || len(e) > 64 {
 		return false
 	}
 	return emailRegex.MatchString(e)
+}
+
+func (ch *CustomerHandler) sendMail(w http.ResponseWriter, tokenRegister string, cusEmail string) {
+
+	requestBody, err := json.Marshal(map[string]string{
+		"email": cusEmail,
+		"token": tokenRegister,
+	})
+
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, "Unable to Parse JSON Email")
+		return
+	}
+
+	_, err = http.Post("http://localhost:8082/sendMail", "application/json", bytes.NewBuffer(requestBody))
+
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, "Can't Send Email")
+		return
+	}
+
+	dataemail := EmailResponse{
+		Email: cusEmail,
+	}
+
+	err = json.NewEncoder(w).Encode(dataemail)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, "Fail Email Response")
+		return
+	}
 }

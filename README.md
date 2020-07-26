@@ -481,17 +481,34 @@
 ```
 {
     "status": "SUCCESS",
-    "message": "",
-    "data": {}  
+    "message": "Success to get the list data",
+    "data": [
+        {
+            "account_num": "2007233420",
+            "from_account": "2007233420",
+            "dest_account": "9908011234",
+            "tran_amount": 200000,
+            "description": "transfer_to_bank",
+            "created_at": "2020-07-23T10:16:34.026624Z"
+        },
+        {
+            "account_num": "2007233420",
+            "from_account": "1",
+            "dest_account": "2007233420",
+            "tran_amount": 200000,
+            "description": "deposit_from_customer",
+            "created_at": "2020-07-23T10:16:53.768798Z"
+        }
+    ]
 }
 ```
 
 ### **Response** : 
 ```
 {
-    "status": "FAILED",
-    "message": "",
-    "data": {}  
+    "status":"FAILED",
+    "message":"Error message",
+    "data":{}
 }
 ```
 

@@ -8,5 +8,7 @@ import (
 )
 
 func NotFoundHandler(w http.ResponseWriter, r *http.Request) {
-	helpers.HTTPError(w, 404, fmt.Sprintf("Seems like %v is not available or does not exist", r.URL))
+	rw := helpers.HTTPError(w, 404, fmt.Sprintf("Seems like %v is not available or does not exist", r.URL))
+	// fmt.Println(w.Header())
+	fmt.Fprintln(rw)
 }

@@ -13,13 +13,21 @@ import (
 )
 
 //untuk ngehandle error"
-func HTTPError(w http.ResponseWriter, status int, errorMessage string) {
-	w.WriteHeader(status)
-	w, resp, err := NewResponseBuilder(w, false, errorMessage, make(map[string]string))
+func HTTPError(w http.ResponseWriter, status int, errorMessage string) http.ResponseWriter {
+	rw := w
+	rw.WriteHeader(status)
+	rw.Header().Set("Content-Type", "application/json")
+
+	rw, resp, err := NewResponseBuilder(rw, false, errorMessage, make(map[string]string))
 	if err != nil {
 		json.NewEncoder(w).Encode(map[string]string{"error": constants.CannotEncodeResponse})
+		w.WriteHeader(http.StatusInternalServerError)
+		return w
 	}
-	fmt.Fprintln(w, resp)
+	// fmt.Println(w.Header())
+	rw.Write([]byte(resp))
+	fmt.Fprintln(rw, resp)
+	return rw
 }
 
 // Function to hash string, made by Vici

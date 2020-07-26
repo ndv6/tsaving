@@ -26,6 +26,12 @@ const (
 	CannotEncodeResponse    = "Failed to encode response."
 	InsertFailed            = "Failed to insert to database."
 	InitLogFailed           = "Failed to insert log of this transaction."
+	CannotParseURLParams    = "Failed to parse URL Params"
+)
+
+// Response messages
+const (
+	GetListSuccess = "Success to get the list data"
 )
 
 // Headers

@@ -404,7 +404,6 @@
 ### **Request** : 
 ```
 {
-    “va_num”      : “2008210001001”,
 	“balance_change” : 50000
 }
 
@@ -414,7 +413,7 @@
 ```
 {
     "status": "SUCCESS",
-    "message": "",
+    "message": "successfully move balance to your main account : 5000",
     "data": {}  
 }
 ```
@@ -423,7 +422,7 @@
 ```
 {
     "status": "FAILED",
-    "message": "",
+    "message": "Failed to transfer from virtual account to main account.",
     "data": {}  
 }
 ```

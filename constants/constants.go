@@ -36,6 +36,7 @@ const (
 	CannotParseURLParams   = "Failed to parse URL Params"
 	TransferFailed         = "Failed to transfer to main account."
 	CannotTransferVaToMain = "Failed to transfer from virtual account to main account."
+	ListSuccessful         = "List successful"
 )
 
 // Response messages

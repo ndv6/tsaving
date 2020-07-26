@@ -308,11 +308,16 @@
 
 ### **Response** : 
 ```
-{
-    "status": "SUCCESS",
-    "message": "",
-    "data": {}  
-}
+ {
+        "va_id": 1,
+        "va_num": "2007238758001",
+        "account_num": "2007238758",
+        "va_balance": 995000,
+        "va_color": "RED",
+        "va_label": "Tabungan Harian",
+        "CreatedAt": "2020-07-26T03:08:56.545514Z",
+        "UpdatedAt": "2020-07-26T03:08:56.545514Z"
+    }
 ```
 
 ### **Response** : 
@@ -406,8 +411,7 @@
 ### **Request** : 
 ```
 {
-    “va_num”      : “2008210001001”,
-	“balance_change” : 50000
+    “balance_change” : 50000
 }
 
 ```
@@ -416,7 +420,7 @@
 ```
 {
     "status": "SUCCESS",
-    "message": "",
+    "message": "successfully move balance to your main account : 5000",
     "data": {}  
 }
 ```
@@ -425,7 +429,7 @@
 ```
 {
     "status": "FAILED",
-    "message": "",
+    "message": "Failed to transfer from virtual account to main account.",
     "data": {}  
 }
 ```

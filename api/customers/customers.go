@@ -17,6 +17,10 @@ import (
 	"github.com/ndv6/tsaving/tokens"
 )
 
+type EmailResponse struct {
+	Email string `json:"email"`
+}
+
 type StatusResult struct {
 	Status string `json:"status"`
 }
@@ -117,13 +121,16 @@ func (ch *CustomerHandler) Create(w http.ResponseWriter, r *http.Request) { // H
 		return
 	}
 
-	err = ch.sendMail(w, tokenRegister, cus.CustEmail)
-	if err != nil {
+	if err := ch.sendMail(w, tokenRegister, cus.CustEmail); err != nil {
 		helpers.HTTPError(w, http.StatusBadRequest, constants.MailFailed)
 		return
 	}
 
-	_, res, err := helpers.NewResponseBuilder(w, true, constants.RegisterSucceed, nil)
+	data := EmailResponse{
+		Email: cus.CustEmail,
+	}
+
+	_, res, err := helpers.NewResponseBuilder(w, true, constants.RegisterSucceed, data)
 
 	if err != nil {
 		helpers.HTTPError(w, http.StatusInternalServerError, constants.CannotEncodeResponse)
@@ -282,7 +289,7 @@ func isEmailValid(e string) bool {
 	return emailRegex.MatchString(e)
 }
 
-func (ch *CustomerHandler) sendMail(w http.ResponseWriter, tokenRegister string, cusEmail string) error {
+func (ch *CustomerHandler) sendMail(w http.ResponseWriter, tokenRegister string, cusEmail string) (err error) {
 
 	requestBody, err := json.Marshal(map[string]string{
 		"email": cusEmail,
@@ -290,13 +297,13 @@ func (ch *CustomerHandler) sendMail(w http.ResponseWriter, tokenRegister string,
 	})
 
 	if err != nil {
-		return err
+		return
 	}
 
 	_, err = http.Post("http://localhost:8082/sendMail", "application/json", bytes.NewBuffer(requestBody))
 	if err != nil {
-		return err
+		return
 	}
 
-	return nil
+	return
 }

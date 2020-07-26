@@ -31,6 +31,7 @@ func LoginHandler(jwt *tokens.JWT, db *sql.DB) http.HandlerFunc { // Handle by C
 		var l LoginRequest // Ngambil dari body API
 		err := json.NewDecoder(r.Body).Decode(&l)
 		if err != nil {
+			w.Header().Set(constants.ContentType, constants.Json)
 			helpers.HTTPError(w, http.StatusBadRequest, constants.CannotReadRequest) //Format JSON Tidak Sesuai
 			return
 		}
@@ -40,6 +41,7 @@ func LoginHandler(jwt *tokens.JWT, db *sql.DB) http.HandlerFunc { // Handle by C
 		objCustomer, err := models.LoginCustomer(db, l.CustEmail, Pass)
 		if err != nil {
 			log.Println(err)
+			w.Header().Set(constants.ContentType, constants.Json)
 			helpers.HTTPError(w, http.StatusBadRequest, "Wrong Email or Password")
 			return
 		}
@@ -56,6 +58,7 @@ func LoginHandler(jwt *tokens.JWT, db *sql.DB) http.HandlerFunc { // Handle by C
 		_, res, err := helpers.NewResponseBuilder(w, true, constants.LoginSucceed, data)
 
 		if err != nil {
+			w.Header().Set(constants.ContentType, constants.Json)
 			helpers.HTTPError(w, http.StatusInternalServerError, constants.CannotEncodeResponse)
 			return
 		}

@@ -1,8 +1,8 @@
 # To start:
 1. Clone this respository
 2. Create database on Postgres:
-    CREATE DATABASE db_tsaving;
-3. Import to Postgres db_tsaving.sql
+`CREATE DATABASE db_tsaving;`
+3. Import to Postgres `db_tsaving.sql`
 
 
 # Naming Convention:
@@ -10,6 +10,8 @@
 `CamelCase` for struct names, struct attribute names, function names
 
 # API Documentation
+
+## REGISTER
 ## 1. [POST] /register
 ### **Description** : 
     Entry data for new customer
@@ -19,9 +21,9 @@
 {
     "cust_name" : "Caesar",
     "cust_address" : "Jakarta",
-    	"cust_phone" : "081312345678",
-    	"cust_email" : "testing@gmail.com",
-    	"cust_password" : "testing",
+    "cust_phone" : "081312345678",
+    "cust_email" : "testing@gmail.com",
+    "cust_password" : "testing",
     “channel” : “web”
 }
 ```
@@ -29,11 +31,52 @@
 ### **Response** : 
 ```
 {
-"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjdXN0X2lkIjoyMTYsImFjY291bnRfbnVtIjoiMjAwNzIzMTI4MiIsImN1c3RfbmFtZSI6IkNhZXNhciBQYW11bmdrYXMiLCJjdXN0X3Bob25lIjoiMDg5NjI2NjI0NDk3IiwiY3VzdF9lbWFpbCI6ImNhZXNhcmdtcHBsQGdtYWlsLmNvbSIsImV4cGlyZWQiOiIyMDIwLTA3LTIzVDEyOjM4OjEwLjQ4ODA2NCswNzowMCJ9.5XTia2n7k9F-C8kXBI5D1t9lcY8gbi87Y9j1kPzvUSQ,"email":"testing@gmail.com"
+    "status": "SUCCESS",
+    "message": "Login Succeed",
+    "data": {}
 }
-
 ```
 
+### **Response** : 
+```
+{
+    "status": "FAILED",
+    "message": "",
+    "data": {}  
+}
+```
+
+## 2. [POST] /verify-account
+### **Description** : 
+    api endpoint that enables customer to verified their email
+
+### **Request** : 
+```
+{
+	“token”	: “verificationToken”
+	“email” : “testing@example.com”
+}
+```
+
+### **Response** : 
+```
+{
+    "status": "SUCCESS",
+    "message": "",
+    "data": {}  
+}
+```
+
+### **Response** : 
+```
+{
+    "status": "FAILED",
+    "message": "",
+    "data": {}  
+}
+```
+
+## LOGIN
 ## 2. [POST] /login
 ### **Description** : 
     Enter the app with the Email and Password that user have
@@ -42,108 +85,35 @@
 ```
 {
 	"cust_email" : "testing@gmail.com",
-    	"cust_password" : "testing"
+    "cust_password" : "testing"
 }
 
 ```
 
 ### **Response** : 
 ```
-{
-"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjdXN0X2lkIjoyMTYsImFjY291bnRfbnVtIjoiMjAwNzIzMTI4MiIsImN1c3RfbmFtZSI6IkNhZXNhciBQYW11bmdrYXMiLCJjdXN0X3Bob25lIjoiMDg5NjI2NjI0NDk3IiwiY3VzdF9lbWFpbCI6ImNhZXNhcmdtcHBsQGdtYWlsLmNvbSIsImV4cGlyZWQiOiIyMDIwLTA3LTIzVDEyOjM4OjEwLjQ4ODA2NCswNzowMCJ9.5XTia2n7k9F-C8kXBI5D1t9lcY8gbi87Y9j1kPzvUSQ"
-}
-
-```
-
-## 3. [GET] /vac/list
-### **Description** : 
-    Add list of VIrtual Accounts that the current user have.
-
-## **Header** :
-```
-“Authorization”: “jwt-token”
-```
-
-### **Request** : 
-```
-
-```
-
-### **Response** : 
-```
-{ 
-	[
-        {
-            "va_id":3,"va_num":"2009110001003","account_num":"","va_balance":10000000,"va_color":"BLUE","va_label":"Tabungan Liburan","CreatedAt":"2020-07-22T12:40:03.305494Z","UpdatedAt":"2020-07-22T12:40:03.305494Z"
-        },
-        {
-            "va_id":2,"va_num":"2009110001002","account_num":"","va_balance":1000000,"va_color":"PURPLE","va_label":"Tabungan Liburan","CreatedAt":"2020-07-22T12:39:33.489406Z","UpdatedAt":"2020-07-22T12:39:33.489406Z"
-        },
-        {
-            "va_id":1,"va_num":"2009110001001","account_num":"","va_balance":200000,"va_color":"RED","va_label":"Tabungan Darurat","CreatedAt":"2020-07-22T03:03:01.144362Z","UpdatedAt":"2020-07-22T03:03:01.144362Z"
-        }
-    ]
-}
-
-
-```
-
-
-## 4. [POST] /vac/add_balance_vac
-### **Description** : 
-    Add balance from main account, to virtual accounts. Before update the balance check first if the balance sufficient
-
-## **Header** :
-```
-“Authorization”: “jwt-token”
-```
-
-### **Request** : 
-```
-{
-	“va_num”      : “2008210001001”,
-	“va_balance” : 50000
-}
+"status": "SUCCESS",
+   "message": "Login Succeed",
+   "data": 
+   {
+        "token":
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjdXN0X2lkIjoyMTYsImFjY291bnRfbnVtIjoiMjAwNzIzMTI4MiIsImV4cGlyZWQiOiIyMDIwLTA3LTI2VDA5OjM0OjM2LjE4OTI5NiswNzowMCJ9.BrLkQklGCFTDh01Q1EIvVDW7BSyw1sIlE2JPDbEspw4"
+   }
 ```
 
 ### **Response** : 
 ```
 {
-	“status”         : 1,
-	“notification” : “successfully add balance to your virtual account: xxxx"
+    "status": "FAILED",
+    "message": "",
+    "data": {}  
 }
-
 ```
 
-## 5. [POST] /vac/to_main
+## CUSTOMER
+## 1. [GET] /me/profile
 ### **Description** : 
-    Transfer the virtual account balance to main account.
-
-## **Header** :
-```
-“Authorization”: “jwt-token”
-```
-
-### **Request** : 
-```
-{
-    “va_num”      : “2008210001001”,
-	“balance_change” : 50000
-}
-
-```
-
-### **Response** : 
-```
-{
-	“status”         : 1,
-	“notification” : “successfully add balance to your main account : xxxx"
-}
-```
-
-## 6. [POST] /vac/delete-vac
-### **Description** : 
-   Deleting virtual account after reverting virtual account’s balance to main account.
+    Get customer profile and main account data.
 
 ### **Header** :
 ```
@@ -152,140 +122,33 @@
 
 ### **Request** : 
 ```
-{
-	“va_num”      : “2008210001001”,
-}
-```
-
-### **Response** : 
-```
-{
-	“notification” : “success delete virtual account"
-}
-```
-
-## 7. [POST]/virtualaccount/create
-### **Description** : 
-    Create Virtual Account
-
-## **Header** :
-```
-“Authorization”: “jwt-token”
-```
-
-### **Request** : 
-```
-{
-   "acc_num" : "2007051234",
-   "va_color" : "blue",
-   "va_label" : "apa"
-}
-```
-
-### **Response** : 
-```
-{
-	“status”         : 1,
-	“notification” : “successfully add balance to your main account : xxxx"
-}
-```
-
-## 8. [PUT]/virtualaccount/edit
-### **Description** : 
-    Update VA color and VA label
-
-## **Header** :
-```
-“Authorization”: “jwt-token”
-```
-
-### **Request** : 
-```
-{
-  "va_num" : "2007051234003",
-  "va_color" : "white",
-  "va_label" : "laptop"
-}
-```
-
-### **Response** : 
-```
-{ 
-      Virtual Account: 2007051234003 Updated!
-}
-```
-
-## 9. [GET] /transaction/history
-### **Description** : 
-    Get transaction history
-
-## **Header** :
-```
-“Authorization”: “jwt-token”
-```
-
-### **Request** : 
-```
-{}
-```
-
-### **Response** : 
-```
-{
-    [
-        {
-            "account_num":"2007233420",
-            "dest_account":"9908011234",
-            "tran_amount":200000,
-            "description":"transfer_to_bank",
-            "created_at":"2020-07-23T10:16:34.026624Z"
-        },
-        {
-        "account_num":"2007233420",
-        "dest_account":"1",
-        "tran_amount":200000,
-        "description":"deposit_from_customer",
-        "created_at":"2020-07-23T10:16:53.768798Z"
-        }
-    ]
-}
-```
-
-## 10. [GET] /customers/getprofile
-### **Description** : 
-    Get customer profile and main account data.
-
-## **Header** :
-```
-“Authorization”: “jwt-token”
-```
-
-### **Request** : 
-```
 {}
 
 ```
 
 ### **Response** : 
 ```
-
 {
-    "customers":
-    {
-        "cust_id":1,"account_num":"2007210001","cust_name":"andreas edited","cust_address":"jalan madrasah","cust_phone":"090909090909","cust_email":"andreas.ocbcnisp@gmail.com","cust_password":"","cust_pict":"/images/2007220002.jpg","is_verified":true,"channel":"Web","created_at":"2020-07-23T02:02:51.36058Z","updated_at":"2020-07-23T08:58:00.246691Z"
-        },
-        "accounts":
-        {
-            "account_id":1,"account_num":"2007210001","account_balance":2000000,"created_at":"2020-07-23T02:03:03.517839Z"
-        }
+    "status": "SUCCESS",
+    "message": "",
+    "data": {}  
 }
 ```
 
-## 11. [PUT] /customers/updateprofile
+### **Response** : 
+```
+{
+    "status": "FAILED",
+    "message": "",
+    "data": {}  
+}
+```
+
+## 2. [PUT] /me/update
 ### **Description** : 
     Update customer profile information
 
-## **Header** :
+### **Header** :
 ```
 “Authorization”: “jwt-token”
 ```
@@ -310,17 +173,27 @@
 
 ### **Response** : 
 ```
-- Error
-    {"error":"Password Min 6 Character"}
-- Success
-    {"status":"success"}
+{
+    "status": "SUCCESS",
+    "message": "",
+    "data": {}  
+}
 ```
 
-## 12. [PATCH] /customers/updatephoto
+### **Response** : 
+```
+{
+    "status": "FAILED",
+    "message": "",
+    "data": {}  
+}
+```
+
+## 3. [PATCH] /me/update-photo
 ### **Description** : 
     Upload customer photo & update image path
 
-## **Header** :
+### **Header** :
 ```
 “Authorization”: “jwt-token”
 ```
@@ -336,35 +209,294 @@
 ### **Response** : 
 ```
 {
-    "status":"success"
-}
-
-```
-
-
-## 13. [POST] /deposit
-### **Description** : 
-    UAPI used by partner bank/our staff, in case of cash deposit, called when a customer makes a deposit to their account.
-
-### **Request** : 
-```
-{
-	"balance_added": 1000000,
-    "account_number": "202007221",
-    "auth_code": "2bb34e46cf2d0c23bf2eca8564ff4ba34075d7847a1a224578cdbcc7eb72e13e",
-    "client_id": 1
+    "status": "SUCCESS",
+    "message": "",
+    "data": {}  
 }
 ```
 
 ### **Response** : 
 ```
 {
-	"Status" : "Deposit completed successfully"
+    "status": "FAILED",
+    "message": "",
+    "data": {}  
 }
 ```
 
+## 13. [POST] /me/deposit
+### **Description** : 
+    API used by partner bank/our staff, in case of cash deposit, called when a customer makes a deposit to their account.
 
-## 14. [POST] /sendMail
+### **Request** : 
+```
+{
+	"balance_added": 1000000,
+    	"account_number": "202007221",
+    	"auth_code": "2bb34e46cf2d0c23bf2eca8564ff4ba34075d7847a1a224578cdbcc7eb72e13e",
+    	"client_id": 1
+}
+```
+
+### **Response** : 
+```
+{
+    "status": "SUCCESS",
+    "message": "Deposit completed successfully",
+    "data": {}  
+}
+```
+
+### **Response** : 
+```
+{
+    "error": "<error_message>"
+}
+```
+
+## 4. [POST] /me/transfer-va
+### **Description** : 
+    Add balance from main account, to virtual accounts. Before update the balance check first if the balance sufficient
+
+### **Header** :
+```
+“Authorization”: “jwt-token”
+```
+
+### **Request** : 
+```
+{
+	“va_num”      : “2008210001001”,
+	“va_balance” : 50000
+}
+```
+
+### **Response** : 
+```
+{
+    "status": "SUCCESS",
+    "message": "",
+    "data": {}  
+}
+```
+
+### **Response** : 
+```
+{
+    "status": "FAILED",
+    "message": "",
+    "data": {}  
+}
+```
+
+## VIRTUAL ACCOUNT
+## 1. [GET] /me/va
+### **Description** : 
+    Add list of VIrtual Accounts that the current user have.
+
+### **Header** :
+```
+“Authorization”: “jwt-token”
+```
+
+### **Request** : 
+```
+
+```
+
+### **Response** : 
+```
+{
+    "status": "SUCCESS",
+    "message": "",
+    "data": {}  
+}
+```
+
+### **Response** : 
+```
+{
+    "status": "FAILED",
+    "message": "",
+    "data": {}  
+}
+```
+
+## 2. [POST] /me/va/create
+### **Description** : 
+    Create Virtual Account
+
+### **Header** :
+```
+“Authorization”: “jwt-token”
+```
+
+### **Request** : 
+```
+{
+   "va_color" : "blue",
+   "va_label" : "apa"
+}
+```
+
+### **Response** : 
+```
+{
+    "status": "SUCCESS",
+    "message": "",
+    "data": {}  
+}
+```
+
+### **Response** : 
+```
+{
+    "status": "FAILED",
+    "message": "",
+    "data": {}  
+}
+```
+
+## 3. [PUT] /me/va/{va_num}/update
+### **Description** : 
+    Update VA color and VA label
+
+### **Header** :
+```
+“Authorization”: “jwt-token”
+```
+
+### **Request** : 
+```
+{
+  "va_color" : "white",
+  "va_label" : "laptop"
+}
+```
+
+### **Response** : 
+```
+{
+    "status": "SUCCESS",
+    "message": "",
+    "data": {}  
+}
+```
+
+### **Response** : 
+```
+{
+    "status": "FAILED",
+    "message": "",
+    "data": {}  
+}
+```
+
+## 4. [POST] /me/va/{va_num}/transfer-main
+### **Description** : 
+    Transfer the virtual account balance to main account.
+
+### **Header** :
+```
+“Authorization”: “jwt-token”
+```
+
+### **Request** : 
+```
+{
+    “va_num”      : “2008210001001”,
+	“balance_change” : 50000
+}
+
+```
+
+### **Response** : 
+```
+{
+    "status": "SUCCESS",
+    "message": "",
+    "data": {}  
+}
+```
+
+### **Response** : 
+```
+{
+    "status": "FAILED",
+    "message": "",
+    "data": {}  
+}
+```
+
+## 5. [DELETE] /me/va/{va_num}
+### **Description** : 
+   Deleting virtual account after reverting virtual account’s balance to main account.
+
+### **Header** :
+```
+“Authorization”: “jwt-token”
+```
+
+### **Request** : 
+```
+{
+	“va_num”      : “2008210001001”,
+}
+```
+
+### **Response** : 
+```
+{
+    "status": "SUCCESS",
+    "message": "",
+    "data": {}  
+}
+```
+
+### **Response** : 
+```
+{
+    "status": "FAILED",
+    "message": "",
+    "data": {}  
+}
+```
+
+## LOG HISTORY
+## 1. [GET] /me/transaction/{page}
+### **Description** : 
+    Get transaction history
+
+### **Header** :
+```
+“Authorization”: “jwt-token”
+```
+
+### **Request** : 
+```
+{}
+```
+
+### **Response** : 
+```
+{
+    "status": "SUCCESS",
+    "message": "",
+    "data": {}  
+}
+```
+
+### **Response** : 
+```
+{
+    "status": "FAILED",
+    "message": "",
+    "data": {}  
+}
+```
+
+## NOTIFICATION
+## 1. [POST] /sendMail
 ### **Description** : 
     sending mail to user. After success sending mail, log it into database
 
@@ -379,27 +511,17 @@
 ### **Response** : 
 ```
 {
-	“email” : “testing@example.com”,
-}
-```
-
-
-## 15. [POST] /email/verify-email-token
-### **Description** : 
-    api endpoint that enables customer to verified their email
-
-### **Request** : 
-```
-{
-	“token”	: “verificationToken”
-	“email” : “testing@example.com”
+    "status": "SUCCESS",
+    "message": "",
+    "data": {}  
 }
 ```
 
 ### **Response** : 
 ```
 {
-	“email”	 : “testing@example.com”,
-	“status” : “verified”
+    "status": "FAILED",
+    "message": "",
+    "data": {}  
 }
 ```

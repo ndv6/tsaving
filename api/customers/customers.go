@@ -26,10 +26,6 @@ type EmailResponse struct {
 	Email string `json:"email"`
 }
 
-type StatusResult struct {
-	Status string `json:"status"`
-}
-
 type GetProfileResult struct {
 	Customers models.Customers `json:"customers"`
 	Accounts  models.Accounts  `json:"accounts"`
@@ -73,9 +69,9 @@ func (ch *CustomerHandler) GetProfile(w http.ResponseWriter, r *http.Request) {
 		Accounts:  acc,
 	}
 
-	res, err := json.Marshal(result)
+	_, res, err := helpers.NewResponseBuilder(w, true, constants.GetProfilSuccess, result)
 	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
 		return
 	}
 
@@ -162,7 +158,7 @@ func (ch *CustomerHandler) UpdateProfile(w http.ResponseWriter, r *http.Request)
 	var cus models.Customers
 	err = json.Unmarshal(requestedBody, &cus)
 	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, "Invalid json type")
+		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotParseRequest)
 		return
 	}
 	cus.CustId = userToken.CustId
@@ -182,25 +178,25 @@ func (ch *CustomerHandler) UpdateProfile(w http.ResponseWriter, r *http.Request)
 				return
 			}
 			if isExist {
-				helpers.HTTPError(w, http.StatusBadRequest, "Email already taken")
+				helpers.HTTPError(w, http.StatusBadRequest, constants.EmailTaken)
 				return
 			}
 			cus.IsVerified = false
 		}
 	} else {
-		helpers.HTTPError(w, http.StatusBadRequest, "Invalid email")
+		helpers.HTTPError(w, http.StatusBadRequest, constants.InvalidEmail)
 		return
 	}
 
 	isPhoneExist, err := models.IsPhoneExist(ch.db, cus.CustPhone, userToken.CustId)
 	if isPhoneExist {
-		helpers.HTTPError(w, http.StatusBadRequest, "Phone number already taken")
+		helpers.HTTPError(w, http.StatusBadRequest, constants.PhoneTaken)
 		return
 	}
 
 	err = models.UpdateProfile(ch.db, cus)
 	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, "Error updating customer data"+err.Error())
+		helpers.HTTPError(w, http.StatusBadRequest, constants.UpdateFailed+err.Error())
 	}
 
 	if isEmailChanged {
@@ -214,13 +210,9 @@ func (ch *CustomerHandler) UpdateProfile(w http.ResponseWriter, r *http.Request)
 		ch.sendMail(w, tokenRegister, cus.CustEmail)
 	}
 
-	result := StatusResult{
-		Status: "success",
-	}
-
-	res, err := json.Marshal(result)
+	_, res, err := helpers.NewResponseBuilder(w, true, constants.UpdateProfileSuccess, nil)
 	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
 		return
 	}
 
@@ -240,7 +232,7 @@ func (ch *CustomerHandler) UpdatePhoto(w http.ResponseWriter, r *http.Request) {
 	// FormFile returns the first file for the given key `myFile`
 	file, _, err := r.FormFile("myPhoto")
 	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, "Error Retrieving the File")
+		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotParseRequest)
 		return
 	}
 	defer file.Close()
@@ -267,16 +259,12 @@ func (ch *CustomerHandler) UpdatePhoto(w http.ResponseWriter, r *http.Request) {
 	pictPath := folderLocation + newFileName
 	err = models.UpdateCustomerPicture(ch.db, pictPath, tokens.CustId)
 	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, "Error updating customer picture"+err.Error())
+		helpers.HTTPError(w, http.StatusBadRequest, constants.UpdateFailed+err.Error())
 	}
 
-	result := StatusResult{
-		Status: "success",
-	}
-
-	res, err := json.Marshal(result)
+	_, res, err := helpers.NewResponseBuilder(w, true, constants.UpdatePhotoSuccess, nil)
 	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
 		return
 	}
 
@@ -300,12 +288,12 @@ func (ch *CustomerHandler) UpdatePassword(w http.ResponseWriter, r *http.Request
 	var newPass GetPasswordRequest
 	err = json.Unmarshal(requestedBody, &newPass)
 	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, "Invalid json type")
+		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotParseRequest)
 		return
 	}
 
 	if len(newPass.Password) < 6 {
-		helpers.HTTPError(w, http.StatusBadRequest, "Password Min 6 Character")
+		helpers.HTTPError(w, http.StatusBadRequest, constants.MinimumPassword)
 		return
 	}
 
@@ -313,10 +301,16 @@ func (ch *CustomerHandler) UpdatePassword(w http.ResponseWriter, r *http.Request
 
 	err = models.UpdateCustomerPassword(ch.db, hashedPass, tokens.CustId)
 	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, "Error updating customer password"+err.Error())
+		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
 	}
 
-	fmt.Fprintln(w, "Update password success")
+	_, res, err := helpers.NewResponseBuilder(w, true, constants.UpdatePasswordSuccess, nil)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
+		return
+	}
+
+	fmt.Fprintln(w, string(res))
 }
 
 func isEmailValid(e string) bool {

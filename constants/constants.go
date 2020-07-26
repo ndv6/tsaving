@@ -25,13 +25,22 @@ const (
 	UnauthorizedRequest     = "Failed to recognize deposit source. Please use authorized banks to deposit."
 	CannotEncodeResponse    = "Failed to encode response."
 	InsertFailed            = "Failed to insert to database."
+	UpdateFailed            = "Failed to update to database."
 	InitLogFailed           = "Failed to insert log of this transaction."
 	CannotParseURLParams    = "Failed to parse URL Params"
+	MinimumPassword         = "The password must have at least 6 characters"
+	EmailTaken              = "The email you entered is already taken"
+	InvalidEmail            = "Invalid email address format"
+	PhoneTaken              = "The phone number you entered is already taken"
 )
 
 // Response messages
 const (
-	GetListSuccess = "Success to get the list data"
+	GetListSuccess        = "Success to get the list data"
+	GetProfilSuccess      = "Get profile success"
+	UpdateProfileSuccess  = "Update profile success"
+	UpdatePasswordSuccess = "Update password success"
+	UpdatePhotoSuccess    = "Update photo success"
 )
 
 // Headers

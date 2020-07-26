@@ -22,15 +22,6 @@ import (
 	"github.com/ndv6/tsaving/database"
 )
 
-const (
-	InvalidVaNumber            = "Virtual Account number is invalid"
-	FailToCreateLogTransaction = "Create transaction log failed"
-	FailSqlTransaction         = "Sql Transaction failed to set begin"
-	VANotFound                 = "Virtual account not found"
-	FailToRevertBalance        = "Reverting balance to main account failed"
-	TokenExpires               = "Token is already expire, please login to continue"
-)
-
 type VirtualAcc struct {
 	VaNumber string `json:"va_num"` //ini berarti di request jsonnya "va_num" disimpen di variable VaNum.
 	VaColor  string `json:"va_color"`
@@ -80,30 +71,33 @@ func (vh VAHandler) DeleteVac(w http.ResponseWriter, r *http.Request) {
 	token := vh.jwt.GetToken(r)
 	err := token.Valid()
 	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, TokenExpires)
-	}
-
-	vaNum := chi.URLParam(r, "va_num")
-	if !CheckVaNumValid(vaNum) {
-		helpers.HTTPError(w, http.StatusBadRequest, InvalidVaNumber)
+		helpers.HTTPError(w, http.StatusBadRequest, constants.TokenExpires)
 		return
 	}
 
 	trx, err := vh.db.Begin()
 	if err != nil {
-		helpers.HTTPError(w, http.StatusInternalServerError, FailSqlTransaction)
+		helpers.HTTPError(w, http.StatusInternalServerError, constants.FailSqlTransaction)
 	}
-	defer trx.Rollback()
+
+	vaNum := chi.URLParam(r, "va_num")
+	if !CheckVaNumValid(vaNum) {
+		helpers.HTTPError(w, http.StatusBadRequest, constants.InvalidVaNumber)
+		trx.Rollback()
+		return
+	}
 
 	vac, err := database.GetVacByAccountNum(trx, token.AccountNum)
 	if err != nil {
-		helpers.HTTPError(w, http.StatusNotFound, VANotFound)
+		helpers.HTTPError(w, http.StatusNotFound, constants.VANotFound)
+		trx.Rollback()
 		return
 	}
 
 	err = database.RevertVacBalanceToMainAccount(trx, vac)
 	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, FailToRevertBalance)
+		helpers.HTTPError(w, http.StatusBadRequest, constants.FailToRevertBalance)
+		trx.Rollback()
 		return
 	}
 
@@ -116,12 +110,17 @@ func (vh VAHandler) DeleteVac(w http.ResponseWriter, r *http.Request) {
 			CreatedAt:   time.Now(),
 		})
 		if err != nil {
-			helpers.HTTPError(w, http.StatusInternalServerError, FailToCreateLogTransaction)
+			helpers.HTTPError(w, http.StatusInternalServerError, constants.InitLogFailed)
+			trx.Rollback()
 			return
 		}
 	}
 
 	err = trx.Commit()
+	if err != nil {
+		helpers.HTTPError(w, http.StatusInternalServerError, constants.InsertFailed)
+	}
+
 	w.WriteHeader(http.StatusNoContent)
 	return
 }

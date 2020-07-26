@@ -27,6 +27,11 @@ const (
 	InsertFailed            = "Failed to insert to database."
 	InitLogFailed           = "Failed to insert log of this transaction."
 	CannotParseURLParams    = "Failed to parse URL Params"
+	InvalidVaNumber         = "Virtual Account number is invalid"
+	FailSqlTransaction      = "Sql Transaction failed to set begin"
+	VANotFound              = "Virtual account not found"
+	FailToRevertBalance     = "Reverting balance to main account failed"
+	TokenExpires            = "Token is already expire, please login to continue"
 )
 
 // Response messages

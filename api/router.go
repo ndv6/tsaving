@@ -45,7 +45,7 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 	chiRouter.With(jwt.AuthMiddleware).Post("/vac/delete-vac", va.DeleteVac)
 
 	// Get transaction history
-	chiRouter.With(jwt.AuthMiddleware).Get("/transaction/history", ch.HistoryTransactionHandler(db))
+	chiRouter.With(jwt.AuthMiddleware).Get("/transaction/history/{page}", ch.HistoryTransactionHandler(db))
 
 	// Email verification endpoint
 	chiRouter.Post("/email/verify-email-token", email.VerifyEmailToken(db))

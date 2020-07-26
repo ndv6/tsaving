@@ -5,10 +5,16 @@ const (
 	Deposit = "DEPOSIT_TO_MAIN_ACCOUNT"
 )
 
-// Response status
+// Response message
 const (
 	DepositSuccess = "Deposit completed successfully"
 	DepositFailed  = "Failed to make deposit"
+)
+
+// Response status
+const (
+	Success = "SUCCESS"
+	Failed  = "FAILED"
 )
 
 // Error messages
@@ -20,8 +26,27 @@ const (
 	CannotEncodeResponse    = "Failed to encode response."
 	InsertFailed            = "Failed to insert to database."
 	InitLogFailed           = "Failed to insert log of this transaction."
+<<<<<<< HEAD
 	TransferFailed          = "Failed to transfer to main account."
 	CannotTransferVaToMain  = "Failed to transfer from virtual account to main account."
 	InvalidVA               = "Invalid virtual account number"
 	InvalidBalance          = "Insufficient balance"
+=======
+	CannotParseURLParams    = "Failed to parse URL Params"
+)
+
+// Response messages
+const (
+	GetListSuccess = "Success to get the list data"
+)
+
+// Headers
+const (
+	ContentType = "Content-Type"
+)
+
+// Header types
+const (
+	Json = "application/json"
+>>>>>>> de0d7fbe1bd25918d5187a60c57e39f7acd61096
 )

@@ -336,7 +336,6 @@
 ### **Request** : 
 ```
 {
-   "acc_num" : "2007051234",
    "va_color" : "blue",
    "va_label" : "apa"
 }
@@ -360,7 +359,7 @@
 }
 ```
 
-## 3. [PUT] /me/va/{va_num}
+## 3. [PUT] /me/va/{va_num}/update
 ### **Description** : 
     Update VA color and VA label
 
@@ -372,7 +371,6 @@
 ### **Request** : 
 ```
 {
-  "va_num" : "2007051234003",
   "va_color" : "white",
   "va_label" : "laptop"
 }

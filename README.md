@@ -442,7 +442,6 @@
 ### **Request** : 
 ```
 {
-	“va_num”      : “2008210001001”,
 }
 ```
 
@@ -459,7 +458,7 @@
 ```
 {
     "status": "FAILED",
-    "message": "",
+    "message": "errMessage",
     "data": {}  
 }
 ```

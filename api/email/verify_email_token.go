@@ -30,6 +30,7 @@ const (
 
 func VerifyEmailToken(eh database.EmailHandler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set(constants.ContentType, constants.Json)
 		requestBody, err := ioutil.ReadAll(r.Body)
 		if err != nil {
 			helpers.HTTPError(w, http.StatusBadRequest, CannotReadRequest)
@@ -55,13 +56,13 @@ func VerifyEmailToken(eh database.EmailHandler) http.HandlerFunc {
 			return
 		}
 
-		err = eh.UpdateCustomerVerificationStatusByEmail(et.Email)
+		err = eh.UpdateCustomerVerificationStatusByEmail(dbEt.Email)
 		if err != nil {
 			helpers.HTTPError(w, http.StatusNotFound, UpdateEmailStatusFailed)
 			return
 		}
 
-		err = eh.DeleteVerifiedEmailTokenById(et.EtId)
+		err = eh.DeleteVerifiedEmailTokenById(dbEt.EtId)
 		if err != nil {
 			helpers.HTTPError(w, http.StatusNotFound, DeleteEmailTokenFailed)
 			return

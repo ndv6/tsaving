@@ -5,13 +5,12 @@ const (
 	Deposit = "DEPOSIT_TO_MAIN_ACCOUNT"
 )
 
-// Response message
+// Response status
 const (
 	DepositSuccess = "Deposit completed successfully"
 	DepositFailed  = "Failed to make deposit"
 )
 
-// Response status
 const (
 	Success = "SUCCESS"
 	Failed  = "FAILED"
@@ -32,6 +31,16 @@ const (
 	EmailTaken              = "The email you entered is already taken"
 	InvalidEmail            = "Invalid email address format"
 	PhoneTaken              = "The phone number you entered is already taken"
+	TransferToVAFailed      = "Failed transfer to virtual account "
+	InvalidBalance          = "Insufficient balance"
+	InvalidVA               = "Invalid virtual account number"
+)
+
+//response messages
+const (
+	AddBalanceVASuccess    = "Successfully add balance to your virtual account"
+	TransferFailed         = "Failed to transfer to main account."
+	CannotTransferVaToMain = "Failed to transfer from virtual account to main account."
 )
 
 // Response messages

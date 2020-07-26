@@ -25,15 +25,21 @@ const (
 	CannotEncodeResponse    = "Failed to encode response."
 	InsertFailed            = "Failed to insert to database."
 	InitLogFailed           = "Failed to insert log of this transaction."
-	TransferToVAFailed      = "Failed transfer to virtual account "
-	InvalidBalance          = "Insufficient balance"
+	PasswordRequirement     = "Password Min 6 Character"
+	DupeEmailorPhone        = "Unable to Register, Your Phone Number Or Email Has Been Used"
+	EmailToken              = "Email Token Failed to Insert"
+	AccountFailed           = "Account Number Failed to Insert"
+	MailFailed              = "Register Success, but Cannot Send Mail"
+	CannotParseURLParams    = "Failed to parse URL Params"
 	InvalidVA               = "Invalid virtual account number"
+	InvalidBalance          = "Insufficient balance"
 )
 
 //response messages
 const (
+	LoginSucceed           = "Login Succeed"
+	RegisterSucceed        = "Register Succeeded"
 	AddBalanceVASuccess    = "Successfully add balance to your virtual account"
-	CannotParseURLParams   = "Failed to parse URL Params"
 	TransferFailed         = "Failed to transfer to main account."
 	CannotTransferVaToMain = "Failed to transfer from virtual account to main account."
 )

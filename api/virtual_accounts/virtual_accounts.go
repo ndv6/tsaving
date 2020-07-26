@@ -10,6 +10,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/ndv6/tsaving/constants"
+
 	"github.com/go-chi/chi"
 
 	"github.com/ndv6/tsaving/helpers"
@@ -74,6 +76,7 @@ func CheckVaNumValid(vaNum string) bool {
 }
 
 func (vh VAHandler) DeleteVac(w http.ResponseWriter, r *http.Request) {
+	w.Header.Set(constants.ContentType, constants.Json)
 	token := vh.jwt.GetToken(r)
 	err := token.Valid()
 	if err != nil {
@@ -92,20 +95,20 @@ func (vh VAHandler) DeleteVac(w http.ResponseWriter, r *http.Request) {
 	}
 	defer trx.Rollback()
 
-	vac, err := database.GetVacByAccountNum(vh.db, token.AccountNum)
+	vac, err := database.GetVacByAccountNum(trx, token.AccountNum)
 	if err != nil {
 		helpers.HTTPError(w, http.StatusNotFound, VANotFound)
 		return
 	}
 
-	err = database.RevertVacBalanceToMainAccount(vh.db, vac)
+	err = database.RevertVacBalanceToMainAccount(trx, vac)
 	if err != nil {
 		helpers.HTTPError(w, http.StatusBadRequest, FailToRevertBalance)
 		return
 	}
 
 	if vac.VaBalance > 0 {
-		err = models.CreateTransactionLog(vh.db, models.TransactionLogs{
+		err = models.TransactionLog(trx, models.TransactionLogs{
 			AccountNum:  vac.AccountNum,
 			DestAccount: vac.VaNum,
 			TranAmount:  vac.VaBalance,

@@ -188,14 +188,15 @@ func GetMaxVANum(accNum string, db *sql.DB) (maxId int, err error) {
 	return maxId, nil
 }
 
-func RevertVacBalanceToMainAccount(db *sql.DB, va models.VirtualAccounts) (err error) {
+func RevertVacBalanceToMainAccount(trx *sql.Tx, va models.VirtualAccounts) (err error) {
 	if err == nil {
-		_, err = db.Exec(fmt.Sprintf("UPDATE accounts SET account_balance = account_balance + subquery.va_balance FROM (SELECT va_balance FROM virtual_accounts WHERE va_num = '%s') as subquery WHERE account_num = '%s'; DELETE FROM virtual_accounts WHERE va_num = '%s';", va.VaNum, va.AccountNum, va.VaNum))
+		_, err = trx.Exec(fmt.Sprintf("SELECT account_balance FROM accounts WHERE account_id = '%s' FOR UPDATE; UPDATE accounts SET account_balance = account_balance + subquery.va_balance FROM (SELECT va_balance FROM virtual_accounts WHERE va_num = '%s') as subquery WHERE account_num = '%s'; DELETE FROM virtual_accounts WHERE va_num = '%s';", va.AccountNum, va.VaNum, va.AccountNum, va.VaNum))
+		fmt.Println(err)
 	}
 	return
 }
 
-func GetVacByAccountNum(db *sql.DB, accountNum string) (va models.VirtualAccounts, err error) {
-	err = db.QueryRow("SELECT va_id, va_num, account_num, va_balance FROM virtual_accounts WHERE account_num=$1 FOR UPDATE;", accountNum).Scan(&va.VaId, &va.VaNum, &va.AccountNum, &va.VaBalance)
+func GetVacByAccountNum(trx *sql.Tx, accountNum string) (va models.VirtualAccounts, err error) {
+	err = trx.QueryRow("SELECT va_id, va_num, account_num, va_balance FROM virtual_accounts WHERE account_num=$1 FOR UPDATE;", accountNum).Scan(&va.VaId, &va.VaNum, &va.AccountNum, &va.VaBalance)
 	return
 }

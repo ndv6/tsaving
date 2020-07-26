@@ -9,6 +9,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/ndv6/tsaving/constants"
+
 	"github.com/go-chi/chi"
 	"github.com/ndv6/tsaving/database"
 	"github.com/ndv6/tsaving/helpers"
@@ -24,8 +26,7 @@ type VirtualAcc struct {
 }
 
 type InputVa struct {
-	BalanceChange int    `json:"balance_change"`
-	VaNum         string `json:"va_num"`
+	BalanceChange int `json:"balance_change"`
 }
 
 type AddBalanceVARequest struct {
@@ -34,8 +35,8 @@ type AddBalanceVARequest struct {
 }
 
 type VAResponse struct {
-	Status       int    `json:"status"`
-	Notification string `json:"notification"`
+	Status  string `json:"status"`
+	Message string `json:"message"`
 }
 
 type VAHandler struct {
@@ -107,71 +108,45 @@ func (vh VAHandler) DeleteVac(w http.ResponseWriter, r *http.Request) {
 }
 
 func (va *VAHandler) VacToMain(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set(constants.ContentType, constants.Json)
 	token := va.jwt.GetToken(r)
 	//ambil input dari jsonnya (no rek VAC dan saldo input)
 	b, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		helper.HTTPError(w, http.StatusBadRequest, "unable to read request body")
+		helper.HTTPError(w, http.StatusBadRequest, constants.CannotReadRequest)
 		return
 	}
 	var VirAcc InputVa
 	err = json.Unmarshal(b, &VirAcc)
 	if err != nil {
-		helper.HTTPError(w, http.StatusBadRequest, "unable to parse json request")
+		helper.HTTPError(w, http.StatusBadRequest, constants.CannotParseRequest)
 		return
 	}
 
+	vaNum := chi.URLParam(r, "va_num")
 	// cek rekening
-	err = database.CheckAccountVA(va.db, VirAcc.VaNum, token.CustId)
+	err = database.CheckAccountVA(va.db, vaNum, token.CustId)
 	if err != nil {
-		helper.HTTPError(w, http.StatusBadRequest, err.Error())
-		return
-	}
-
-	//cek input apakah melebihi saldo
-	var BalanceChange int = VirAcc.BalanceChange
-	returnValue := database.CheckBalance("VA", VirAcc.VaNum, BalanceChange, va.db)
-	if returnValue == false {
-		helper.HTTPError(w, http.StatusBadRequest, "your input is bigger than virtual account balance.")
+		helper.HTTPError(w, http.StatusBadRequest, constants.InvalidVA)
 		return
 	}
 
 	//get no rekening by rekening vac
-	AccountNumber, _ := database.GetAccountByVA(va.db, VirAcc.VaNum)
+	AccountNumber, _ := database.GetAccountByVA(va.db, vaNum)
 
 	//update balance at both accounts
-	err = database.UpdateVacToMain(va.db, VirAcc.BalanceChange, VirAcc.VaNum, AccountNumber)
+	err = database.UpdateVacToMain(va.db, VirAcc.BalanceChange, vaNum, AccountNumber)
 	if err != nil {
-		helper.HTTPError(w, http.StatusBadRequest, "transfer error")
+		helper.HTTPError(w, http.StatusBadRequest, constants.CannotTransferVaToMain)
 		return
 	}
 
-	response := VAResponse{
-		Status:       1,
-		Notification: fmt.Sprintf("successfully move balance to your main account : %v", VirAcc.BalanceChange),
-	}
-	err = json.NewEncoder(w).Encode(response)
+	_, res, err := helpers.NewResponseBuilder(w, true, fmt.Sprintf("successfully move balance to your main account : %v", VirAcc.BalanceChange), nil)
 	if err != nil {
-		helper.HTTPError(w, http.StatusBadRequest, "unable to encode response")
+		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
 		return
 	}
-
-	logDesc := models.LogDescriptionVaToMainTemplate(VirAcc.BalanceChange, VirAcc.VaNum, token.AccountNum)
-
-	//inpu transaction log
-	tLogs := models.TransactionLogs{
-		AccountNum:  token.AccountNum,
-		DestAccount: VirAcc.VaNum,
-		TranAmount:  VirAcc.BalanceChange,
-		Description: logDesc,
-		CreatedAt:   time.Now(),
-	}
-
-	err = models.CreateTransactionLog(va.db, tLogs)
-	if err != nil {
-		helper.HTTPError(w, http.StatusBadRequest, "transaction log failed")
-		return
-	}
+	fmt.Fprint(w, string(res))
 
 	return
 
@@ -199,8 +174,8 @@ func (va *VAHandler) AddBalanceVA(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response := VAResponse{
-		Status:       1,
-		Notification: fmt.Sprintf("successfully add balance to your virtual account : %v", vac.VaBalance),
+		Status:  "sucess",
+		Message: fmt.Sprintf("successfully add balance to your virtual account : %v", vac.VaBalance),
 	}
 	err = json.NewEncoder(w).Encode(response)
 	if err != nil {
@@ -276,8 +251,8 @@ func (va *VAHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response := VAResponse{
-		Status:       1,
-		Notification: fmt.Sprintf("successfully create virtual account! virtual account number : %v", vam.VaNum),
+		Status:  "SUCCESS",
+		Message: fmt.Sprintf("successfully create virtual account! virtual account number : %v", vam.VaNum),
 	}
 
 	// set response http status
@@ -331,8 +306,8 @@ func (va *VAHandler) Update(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response := VAResponse{
-		Status:       1,
-		Notification: fmt.Sprintf("successfully edit your virtual account! virtual account number : %v", vam.VaNum),
+		Status:  "SUCCESS",
+		Message: fmt.Sprintf("successfully edit your virtual account! virtual account number : %v", vam.VaNum),
 	}
 
 	err = json.NewEncoder(w).Encode(response)
@@ -342,8 +317,9 @@ func (va *VAHandler) Update(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// print virtual account list
 func (va *VAHandler) VacList(w http.ResponseWriter, r *http.Request) {
-
+	w.Header().Set(constants.ContentType, constants.Json)
 	token := va.jwt.GetToken(r)
 	res, err := database.GetListVA(va.db, token.CustId)
 

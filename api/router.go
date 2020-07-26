@@ -40,6 +40,16 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 	chiRouter.With(jwt.AuthMiddleware).Get("/vac/list", va.VacList)
 	chiRouter.With(jwt.AuthMiddleware).Post("/vac/delete-vac", va.DeleteVac)
 
+	// Virtual Account endpoint
+	chiRouter.With(jwt.AuthMiddleware).Post("/virtualaccount/create", vah.Create)
+	chiRouter.With(jwt.AuthMiddleware).Put("/virtualaccount/edit", vah.Edit)
+	// VAC transactions API endpoints
+	chiRouter.With(jwt.AuthMiddleware).Post("/me/va/{va_num}/transfer-to-main", va.VacToMain)
+	chiRouter.With(jwt.AuthMiddleware).Get("/me/va/list", va.VacList)
+	chiRouter.With(jwt.AuthMiddleware).Post("/vac/delete-vac", va.DeleteVac)
+
+	// Get transaction history
+	chiRouter.With(jwt.AuthMiddleware).Get("/transaction/history/{page}", ch.HistoryTransactionHandler(db))
 	// Registration Endpoint
 	chiRouter.Post("/register", ch.Create)
 	chiRouter.Post("/verify-account", email.VerifyEmailToken(eh))

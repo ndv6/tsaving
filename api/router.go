@@ -54,7 +54,7 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 	chiRouter.With(jwt.AuthMiddleware).Delete("/me/va/{va_num}", va.DeleteVac)
 
 	// History Endpoint
-	chiRouter.With(jwt.AuthMiddleware).Get("/me/transaction", ch.HistoryTransactionHandler(db))
+	chiRouter.With(jwt.AuthMiddleware).Get("/me/transaction/{page}", ch.HistoryTransactionHandler(db))
 
 	// Not Found Endpoint
 	chiRouter.NotFound(not_found.NotFoundHandler)

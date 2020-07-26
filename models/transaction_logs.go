@@ -59,13 +59,14 @@ func LogDescriptionMainToVaTemplate(amount int, accountNum, vaNum string) string
 	return fmt.Sprintf("Transfer %d from Main Account %s to Virtual Account %s", amount, accountNum, vaNum)
 }
 
-func ListTransactionLog(db *sql.DB, id int) (list []HistoryTransaction, err error) {
+func ListTransactionLog(db *sql.DB, id int, page int) (list []HistoryTransaction, err error) {
 	accNumber, err := GetAccNumber(db, id)
 	if err != nil {
 		return
 	}
 
-	rows, err := db.Query("SELECT account_num, dest_account, tran_amount, description, created_at FROM transaction_logs WHERE account_num = $1", accNumber)
+	offset := (page - 1) * 20
+	rows, err := db.Query("SELECT account_num, dest_account, tran_amount, description, created_at FROM transaction_logs WHERE account_num = $1 ORDER BY created_at OFFSET $2 LIMIT 20", accNumber, offset)
 	if err != nil {
 		return
 	}

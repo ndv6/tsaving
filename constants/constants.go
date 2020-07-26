@@ -33,11 +33,18 @@ const (
 	PhoneTaken              = "The phone number you entered is already taken"
 	TransferToVAFailed      = "Failed transfer to virtual account "
 	InvalidBalance          = "Insufficient balance"
+	PasswordRequirement     = "Password Min 6 Character"
+	DupeEmailorPhone        = "Unable to Register, Your Phone Number Or Email Has Been Used"
+	EmailToken              = "Email Token Failed to Insert"
+	AccountFailed           = "Account Number Failed to Insert"
+	MailFailed              = "Register Success, but Cannot Send Mail"
 	InvalidVA               = "Invalid virtual account number"
 )
 
 //response messages
 const (
+	LoginSucceed           = "Login Succeed"
+	RegisterSucceed        = "Register Succeeded"
 	AddBalanceVASuccess    = "Successfully add balance to your virtual account"
 	TransferFailed         = "Failed to transfer to main account."
 	CannotTransferVaToMain = "Failed to transfer from virtual account to main account."

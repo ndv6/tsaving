@@ -30,7 +30,7 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 	va := virtual_accounts.NewVAHandler(jwt, db)
 	// Home endpoint
 	chiRouter.Get("/", home.HomeHandler)
-	chiRouter.With(jwt.AuthMiddleware).Put("/vac/add_balance_vac", va.AddBalanceVA)
+	chiRouter.With(jwt.AuthMiddleware).Put("/me/transfer-va", va.AddBalanceVA) // handle by David
 
 	chiRouter.Get("/", home.HomeHandler)
 	chiRouter.Post("/register", ch.Create)

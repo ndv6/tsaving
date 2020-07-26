@@ -5,13 +5,12 @@ const (
 	Deposit = "DEPOSIT_TO_MAIN_ACCOUNT"
 )
 
-// Response message
+// Response status
 const (
 	DepositSuccess = "Deposit completed successfully"
 	DepositFailed  = "Failed to make deposit"
 )
 
-// Response status
 const (
 	Success = "SUCCESS"
 	Failed  = "FAILED"
@@ -26,6 +25,14 @@ const (
 	CannotEncodeResponse    = "Failed to encode response."
 	InsertFailed            = "Failed to insert to database."
 	InitLogFailed           = "Failed to insert log of this transaction."
+	TransferToVAFailed      = "Failed transfer to virtual account "
+	InvalidBalance          = "Insufficient balance"
+	InvalidVA               = "Invalid virtual account number"
+)
+
+//response messages
+const (
+	AddBalanceVASuccess = "Successfully add balance to your virtual account"
 )
 
 // Headers

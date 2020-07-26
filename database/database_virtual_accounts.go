@@ -120,7 +120,7 @@ func CheckAccountVA(db *sql.DB, VaNum string, id int) (err error) {
 		return
 	}
 	if !exist {
-		err = errors.New("invalid virtual account number")
+		err = errors.New(constants.InvalidVA)
 		return
 	}
 	return
@@ -138,31 +138,6 @@ func CheckAccount(db *sql.DB, AccountNum string, id int) (err error) {
 		return
 	}
 	return
-}
-
-func CheckBalance(target string, accNumber string, amount int, db *sql.DB) (status bool) {
-	if target == "MAIN" {
-		sourceBalance, err := GetBalanceAcc(accNumber, db)
-		if err != nil {
-			return
-		}
-		if sourceBalance < amount || amount <= 0 {
-			return
-		}
-		status = true
-	}
-	if target == "VA" {
-		sourceBalance, err := GetBalanceVA(accNumber, db)
-		if err != nil {
-			return
-		}
-		if sourceBalance < amount || amount <= 0 {
-			return
-		}
-		status = true
-	}
-	return
-
 }
 
 func CreateVA(vaNum string, accNum string, vaColor string, vaLabel string, db *sql.DB) (va models.VirtualAccounts, err error) {

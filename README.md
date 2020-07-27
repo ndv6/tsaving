@@ -33,7 +33,9 @@
 {
     "status": "SUCCESS",
     "message": "Login Succeed",
-    "data": {}
+    "data": {
+        "email":"testing@gmail.com"
+    }
 }
 ```
 
@@ -41,7 +43,7 @@
 ```
 {
     "status": "FAILED",
-    "message": "",
+    "message": "Unable Register",
     "data": {}  
 }
 ```
@@ -105,7 +107,7 @@
 ```
 {
     "status": "FAILED",
-    "message": "",
+    "message": "Wrong Email or Password",
     "data": {}  
 }
 ```
@@ -275,7 +277,7 @@
 ```
 {
     "status": "SUCCESS",
-    "message": "",
+    "message": "Successfully add balance to your virtual account",
     "data": {}  
 }
 ```
@@ -284,7 +286,7 @@
 ```
 {
     "status": "FAILED",
-    "message": "",
+    "message": "Failed transfer to virtual account",
     "data": {}  
 }
 ```
@@ -440,7 +442,6 @@
 ### **Request** : 
 ```
 {
-	“va_num”      : “2008210001001”,
 }
 ```
 
@@ -457,7 +458,7 @@
 ```
 {
     "status": "FAILED",
-    "message": "",
+    "message": "errMessage",
     "data": {}  
 }
 ```

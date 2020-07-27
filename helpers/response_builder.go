@@ -35,8 +35,8 @@ func NewResponseBuilder(w http.ResponseWriter, isAPICallSuccess bool, message st
 	if err != nil {
 		b = []byte(`{}`)
 	}
-	responseJson = string(b)
 
+	responseJson = string(b)
 	rw = w
 	rw.Header().Set(constants.ContentType, constants.Json)
 	return

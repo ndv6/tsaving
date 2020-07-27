@@ -12,13 +12,17 @@ import (
 	"github.com/ndv6/tsaving/models"
 )
 
-//untuk ngehandle error"
+// made by Joseph
 func HTTPError(w http.ResponseWriter, status int, errorMessage string) {
 	w.WriteHeader(status)
+	w.Header().Set("Content-Type", "application/json")
+
 	w, resp, err := NewResponseBuilder(w, false, errorMessage, make(map[string]string))
 	if err != nil {
 		json.NewEncoder(w).Encode(map[string]string{"error": constants.CannotEncodeResponse})
+		w.WriteHeader(http.StatusInternalServerError)
 	}
+	// fmt.Println(w.Header())
 	fmt.Fprintln(w, resp)
 }
 

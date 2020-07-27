@@ -27,7 +27,7 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 	ah := database.NewAccountHandler(db)
 	ch := customers.NewCustomerHandler(jwt, db)
 	va := virtual_accounts.NewVAHandler(jwt, db)
-	eh := database.NewEmailHandler(db)
+	eh := database.NewEmailHandler(db) // Joseph
 
 	// Home endpoint
 	chiRouter.Get("/", home.HomeHandler)
@@ -72,7 +72,7 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 	chiRouter.With(jwt.AuthMiddleware).Get("/me/transaction/{page}", ch.HistoryTransactionHandler(db)) //Yuly
 
 	// Not Found Endpoint
-	chiRouter.NotFound(not_found.NotFoundHandler)
+	chiRouter.NotFound(not_found.NotFoundHandler) // Joseph
 
 	return chiRouter
 }

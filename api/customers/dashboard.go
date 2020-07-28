@@ -9,12 +9,7 @@ import (
 
 	"github.com/ndv6/tsaving/constants"
 	"github.com/ndv6/tsaving/helpers"
-	"github.com/ndv6/tsaving/models"
 )
-
-type DashboardInterface interface {
-	GetDashboardDataAccesor(accNum string) (dashboard models.Dashboard, err error)
-}
 
 func (ch *CustomerHandler) GetDashboardData(db *sql.DB) http.HandlerFunc {
 	return (func(w http.ResponseWriter, r *http.Request) {

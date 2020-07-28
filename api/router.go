@@ -28,6 +28,7 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 	ch := customers.NewCustomerHandler(jwt, db)
 	va := virtual_accounts.NewVAHandler(jwt, db) // David, Jocelyn, Joseph , Azizah
 	eh := database.NewEmailHandler(db)           // Joseph
+	// da := customers.NewDashboardHandler(jwt)
 
 	// Home endpoint
 	chiRouter.Get("/", home.HomeHandler)
@@ -46,6 +47,7 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 	chiRouter.With(jwt.AuthMiddleware).Patch("/me/update-password", ch.UpdatePassword) //Andreas
 	chiRouter.Post("/me/deposit", customers.DepositToMainAccount(ph, ah))              //Vici
 	chiRouter.With(jwt.AuthMiddleware).Put("/me/transfer-va", va.AddBalanceVA)         //David
+	chiRouter.With(jwt.AuthMiddleware).Get("/me/dashboard", ch.GetDashboardData(db))   //David
 
 	// Virtual Account Endpoint
 	chiRouter.With(jwt.AuthMiddleware).Get("/me/va", va.VacList)                           //Jocelyn

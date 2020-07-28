@@ -20,6 +20,27 @@ func NewAccountHandler(db *sql.DB) *AccountHandler {
 	}
 }
 
+func GetDashboardData(accNum string, db *sql.DB) (dashboard models.Dashboard, err error) {
+	// var da models.Dashboard
+	var custId int
+	err = db.QueryRow("SELECT a.cust_id, a.cust_name, a.cust_email, b.account_num,b.account_balance FROM customers a INNER JOIN accounts b on a.account_num = b.account_num WHERE a.account_num = $1", accNum).Scan(&custId, &dashboard.CustName, &dashboard.CustPhone, &dashboard.AccountNum, &dashboard.AccountBalance)
+	if err != nil {
+		return
+	}
+
+	dashboard.ListVA, err = GetListVA(db, custId)
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+// func (ah *AccountHandler) GetDashboardData(cust_id int) (dashboard []models.Dashboard, err error) {
+
+// 	return
+// }
+
 func GetBalanceAcc(accNum string, db *sql.DB) (balance int, err error) {
 	err = db.QueryRow("SELECT account_balance FROM accounts WHERE account_num = ($1) ", accNum).Scan(&balance)
 	return

@@ -331,7 +331,6 @@ func (va *VAHandler) Update(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// print virtual account list
 func (va *VAHandler) VacList(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set(constants.ContentType, constants.Json)
 	token := va.jwt.GetToken(r)

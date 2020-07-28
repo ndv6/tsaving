@@ -1,0 +1,12 @@
+{
+    "port": "8000",
+    "SECRET_KEY": "YOURSECRETKEY",
+    "database": {
+        "username": "postgres",
+        "password": "password",
+        "dbName": "db_tsaving",
+        "dbType": "postgres",
+        "port": "5432",
+        "host": "127.0.0.1"
+    }
+}

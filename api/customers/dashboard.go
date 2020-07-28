@@ -27,6 +27,6 @@ func (ch *CustomerHandler) GetDashboardData(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		fmt.Fprintln(w, string(res))
+		fmt.Fprintln(w, res)
 	})
 }

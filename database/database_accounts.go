@@ -52,6 +52,7 @@ func TransferFromMainToVa(accNum, vaNum string, amount int, db *sql.DB) (err err
 	err = tx.QueryRow("SELECT account_balance FROM accounts WHERE account_num = $1 FOR UPDATE", accNum).Scan(&sourceBalance)
 	if err != nil {
 		tx.Rollback()
+		err = errors.New(constants.TransferToVAFailed)
 		return
 	}
 
@@ -62,11 +63,13 @@ func TransferFromMainToVa(accNum, vaNum string, amount int, db *sql.DB) (err err
 	}
 	_, err = tx.Exec("UPDATE accounts SET account_balance = account_balance - $1 WHERE account_num = $2", amount, accNum)
 	if err != nil {
+		err = errors.New(constants.TransferToVAFailed)
 		tx.Rollback()
 		return
 	}
 	_, err = tx.Exec("UPDATE virtual_accounts SET va_balance = va_balance + $1 WHERE va_num = $2", amount, vaNum)
 	if err != nil {
+		err = errors.New(constants.TransferToVAFailed)
 		tx.Rollback()
 		return
 	}
@@ -83,6 +86,7 @@ func TransferFromMainToVa(accNum, vaNum string, amount int, db *sql.DB) (err err
 
 	err = models.TransactionLog(tx, logData)
 	if err != nil {
+		err = errors.New(constants.TransferToVAFailed)
 		tx.Rollback()
 		return
 	}

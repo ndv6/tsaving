@@ -185,7 +185,7 @@ func (va *VAHandler) AddBalanceVA(w http.ResponseWriter, r *http.Request) {
 
 	updateBalanceVA := database.TransferFromMainToVa(token.AccountNum, vac.VaNum, vac.VaBalance, va.db)
 	if updateBalanceVA != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, constants.TransferToVAFailed)
+		helpers.HTTPError(w, http.StatusBadRequest, updateBalanceVA.Error())
 		return
 	}
 
@@ -195,7 +195,7 @@ func (va *VAHandler) AddBalanceVA(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Fprint(w, string(res))
+	fmt.Fprint(w, res)
 }
 
 func (va *VAHandler) Create(w http.ResponseWriter, r *http.Request) {

@@ -32,7 +32,8 @@ type CustomerHandler struct {
 }
 
 type GetPasswordRequest struct {
-	Password string `json:"password"`
+	OldPassword string `json:"old_password"`
+	NewPassword string `json:"new_password"`
 }
 
 func NewCustomerHandler(jwt *tokens.JWT, db *sql.DB) *CustomerHandler {
@@ -296,23 +297,36 @@ func (ch *CustomerHandler) UpdatePassword(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	var newPass GetPasswordRequest
-	err = json.Unmarshal(requestedBody, &newPass)
+	var reqPass GetPasswordRequest
+	err = json.Unmarshal(requestedBody, &reqPass)
 	if err != nil {
 		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotParseRequest)
 		return
 	}
 
-	if len(newPass.Password) < 6 {
+	if len(reqPass.OldPassword) < 6 || len(reqPass.NewPassword) < 6 {
 		helpers.HTTPError(w, http.StatusBadRequest, constants.MinimumPassword)
 		return
 	}
 
-	hashedPass := helpers.HashString(newPass.Password)
+	hashedOldPass := helpers.HashString(reqPass.OldPassword)
+	hashedNewPass := helpers.HashString(reqPass.NewPassword)
 
-	err = models.UpdateCustomerPassword(ch.db, hashedPass, tokens.CustId)
+	isOldPasswordCorrect, err := models.IsOldPasswordCorrect(ch.db, hashedOldPass, tokens.CustId)
 	if err != nil {
 		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if !isOldPasswordCorrect {
+		helpers.HTTPError(w, http.StatusBadRequest, "Incorrect password")
+		return
+	}
+
+	err = models.UpdateCustomerPassword(ch.db, hashedNewPass, tokens.CustId)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+		return
 	}
 
 	_, res, err := helpers.NewResponseBuilder(w, true, constants.UpdatePasswordSuccess, nil)

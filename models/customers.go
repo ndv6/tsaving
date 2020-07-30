@@ -80,6 +80,16 @@ func UpdateCustomerPassword(db *sql.DB, pass string, id int) error {
 	return nil
 }
 
+func IsOldPasswordCorrect(db *sql.DB, pass string, id int) (bool, error) {
+	var res bool
+	row := db.QueryRow("SELECT EXISTS(SELECT 1 FROM customers WHERE cust_password = $1 AND cust_id = $2)", pass, id)
+	err := row.Scan(&res)
+	if err != nil {
+		return true, err
+	}
+	return res, nil
+}
+
 func IsEmailExist(db *sql.DB, email string, id int) (bool, error) {
 	var res bool
 	row := db.QueryRow("SELECT EXISTS(SELECT 1 FROM customers WHERE cust_email = $1 AND cust_id <> $2)", email, id)

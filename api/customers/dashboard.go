@@ -17,7 +17,7 @@ func (ch *CustomerHandler) GetDashboardData(db *sql.DB) http.HandlerFunc {
 		token := ch.jwt.GetToken(r)
 		result, err := database.GetDashboardData(token.CustId, db)
 		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
+			helpers.HTTPError(w, http.StatusOK, constants.CannotEncodeResponse)
 			return
 		}
 

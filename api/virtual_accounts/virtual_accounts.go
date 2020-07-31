@@ -179,13 +179,13 @@ func (va *VAHandler) AddBalanceVA(w http.ResponseWriter, r *http.Request) {
 	//check if va number is exist and valid to its owner
 	err = database.CheckAccountVA(va.db, vac.VaNum, token.CustId)
 	if err != nil {
-		helper.HTTPError(w, http.StatusBadRequest, constants.InvalidVA)
+		helper.HTTPError(w, http.StatusOK, constants.InvalidVA)
 		return
 	}
 
 	updateBalanceVA := database.TransferFromMainToVa(token.AccountNum, vac.VaNum, vac.VaBalance, va.db)
 	if updateBalanceVA != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, updateBalanceVA.Error())
+		helpers.HTTPError(w, http.StatusOK, updateBalanceVA.Error())
 		return
 	}
 

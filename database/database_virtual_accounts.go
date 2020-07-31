@@ -88,7 +88,7 @@ func GetAccountByVA(db *sql.DB, vacNum string) (AccountNum string, err error) {
 }
 
 func GetListVA(db *sql.DB, id int) (VirAcc []models.VirtualAccounts, err error) {
-	rows, err := db.Query("SELECT va_id, va_num, virtual_accounts.account_num, COALESCE(va_label,'') as va_label, COALESCE(va_color,'') as va_color, va_balance, COALESCE(virtual_accounts.created_at,'1970-01-01 00:00:00-00') as created_at, COALESCE(virtual_accounts.created_at,'1970-01-01 00:00:00-00') as updated_at FROM virtual_accounts INNER JOIN customers ON virtual_accounts.account_num = customers.account_num WHERE cust_id = $1", id)
+	rows, err := db.Query("SELECT va_id, va_num, virtual_accounts.account_num, COALESCE(va_label,'') as va_label, COALESCE(va_color,'') as va_color, va_balance, COALESCE(virtual_accounts.created_at,now()) as created_at, COALESCE(virtual_accounts.created_at,now()) as updated_at FROM virtual_accounts INNER JOIN customers ON virtual_accounts.account_num = customers.account_num WHERE cust_id = $1 ORDER BY virtual_accounts.va_balance DESC", id)
 	if err != nil {
 		return VirAcc, err
 	}

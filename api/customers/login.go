@@ -23,7 +23,9 @@ type LoginRequest struct {
 }
 
 type LoginResponse struct {
-	Token string `json:"token"`
+	Token    string `json:"token"`
+	Email    string `json:"email"`
+	CustName string `json:"cust_name"`
 }
 
 func LoginHandler(jwt *tokens.JWT, db *sql.DB) http.HandlerFunc { // Handle by Caesar Gusti
@@ -52,7 +54,9 @@ func LoginHandler(jwt *tokens.JWT, db *sql.DB) http.HandlerFunc { // Handle by C
 		})
 
 		data := LoginResponse{
-			Token: tokenLogin,
+			Token:    tokenLogin,
+			Email:    objCustomer.CustEmail,
+			CustName: objCustomer.CustName,
 		}
 
 		_, res, err := helpers.NewResponseBuilder(w, true, constants.LoginSucceed, data)

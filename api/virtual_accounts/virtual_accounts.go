@@ -102,7 +102,7 @@ func (vh VAHandler) DeleteVac(w http.ResponseWriter, r *http.Request) {
 			AccountNum:  vac.AccountNum,
 			DestAccount: vac.VaNum,
 			TranAmount:  vac.VaBalance,
-			Description: models.LogDescriptionVaToMainTemplate(vac.VaBalance, vac.VaNum, vac.AccountNum),
+			Description: constants.TransferToMainAccount,
 			CreatedAt:   time.Now(),
 		})
 		if err != nil {

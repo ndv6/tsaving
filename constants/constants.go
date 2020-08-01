@@ -2,7 +2,9 @@ package constants
 
 // Transaction types
 const (
-	Deposit = "DEPOSIT_TO_MAIN_ACCOUNT"
+	Deposit                  = "DEPOSIT_TO_MAIN_ACCOUNT"
+	TransferToVirtualAccount = "MAIN_TO_VA"
+	TransferToMainAccount    = "VA_TO_MAIN"
 )
 
 // Response status
@@ -54,15 +56,11 @@ const (
 	SuccessVerifyEmail      = "Email has been successfully verified"
 )
 
-//response messages
-const (
-	AddBalanceVASuccess = "Successfully add balance to your virtual account"
-	LoginSucceed        = "Login Succeed"
-	RegisterSucceed     = "Register Succeeded"
-)
-
 // Response messages
 const (
+	AddBalanceVASuccess   = "Successfully add balance to your virtual account"
+	LoginSucceed          = "Login Succeed"
+	RegisterSucceed       = "Register Succeeded"
 	GetListSuccess        = "Success to get the list data"
 	GetProfilSuccess      = "Get profile success"
 	UpdateProfileSuccess  = "Update profile success"

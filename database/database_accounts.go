@@ -72,14 +72,13 @@ func TransferFromMainToVa(accNum, vaNum string, amount int, db *sql.DB) (err err
 		tx.Rollback()
 		return
 	}
-	// println("d")
-	logDesc := models.LogDescriptionMainToVaTemplate(amount, accNum, vaNum)
+
 	logData := models.TransactionLogs{
 		AccountNum:  accNum,
 		FromAccount: accNum,
 		DestAccount: vaNum,
 		TranAmount:  amount,
-		Description: logDesc,
+		Description: constants.TransferToVirtualAccount,
 		CreatedAt:   time.Now(),
 	}
 

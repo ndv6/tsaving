@@ -60,7 +60,7 @@ func UpdateVacToMain(db *sql.DB, balanceInput int, vacNum string, accountNum str
 		return
 	}
 
-	logDesc := models.LogDescriptionVaToMainTemplate(balanceInput, vacNum, accountNum)
+	logDesc := constants.TransferToMainAccount
 
 	//inpu transaction log
 	tLogs := models.TransactionLogs{

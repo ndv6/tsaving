@@ -65,7 +65,7 @@ func ListTransactionLog(db *sql.DB, id int, page int) (list []HistoryTransaction
 	defer rows.Close()
 	for rows.Next() {
 		var ht HistoryTransaction
-		err = rows.Scan(&ht.AccountNum, &ht.FromAccount, &ht.DestAccount, &ht.TranAmount, &ht.Description, &ht.CreatedAt)
+		err = rows.Scan(&ht.AccountNum, &ht.DestAccount, &ht.FromAccount, &ht.TranAmount, &ht.Description, &ht.CreatedAt)
 		if err != nil {
 			return
 		}

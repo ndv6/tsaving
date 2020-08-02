@@ -66,6 +66,7 @@ const (
 	UpdateProfileSuccess  = "Update profile success"
 	UpdatePasswordSuccess = "Update password success"
 	UpdatePhotoSuccess    = "Update photo success"
+	SuccessGetToken       = "Success to get the token"
 )
 
 // Headers

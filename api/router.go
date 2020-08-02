@@ -36,6 +36,7 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 	// Registration Endpoint
 	chiRouter.Post("/register", ch.Create)                        //Caesar
 	chiRouter.Post("/verify-account", email.VerifyEmailToken(eh)) //Joseph
+	chiRouter.Post("/get-token", email.GetEmailToken(eh))         // Yuly
 
 	// Login Endpoint
 	chiRouter.Post("/login", customers.LoginHandler(jwt, db)) //Caesar

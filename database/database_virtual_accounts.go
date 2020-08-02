@@ -36,6 +36,7 @@ func UpdateVacToMain(db *sql.DB, balanceInput int, vacNum string, accountNum str
 	err = tx.QueryRow("SELECT va_balance FROM virtual_accounts WHERE account_num = $1 FOR UPDATE", accountNum).Scan(&balanceVA)
 	if err != nil {
 		fmt.Print(err)
+		err = errors.New(constants.CannotTransferVaToMain)
 		tx.Rollback()
 		return
 	}
@@ -50,12 +51,14 @@ func UpdateVacToMain(db *sql.DB, balanceInput int, vacNum string, accountNum str
 	_, err = tx.Exec("UPDATE accounts SET account_balance = account_balance + $1 WHERE account_num = $2", balanceInput, accountNum)
 	if err != nil {
 		fmt.Print(err)
+		err = errors.New(constants.CannotTransferVaToMain)
 		tx.Rollback()
 		return
 	}
 	_, err = tx.Exec("UPDATE virtual_accounts SET va_balance = va_balance - $1 WHERE va_num = $2", balanceInput, vacNum)
 	if err != nil {
 		fmt.Print(err)
+		err = errors.New(constants.CannotTransferVaToMain)
 		tx.Rollback()
 		return
 	}

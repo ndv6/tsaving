@@ -41,6 +41,11 @@ func LoginCustomer(db *sql.DB, email string, password string) (objCustomer Custo
 	return
 }
 
+func CheckLoginVerified(db *sql.DB, email string, password string) (isVerified bool, err error) {
+	err = db.QueryRow("SELECT is_verified FROM customers WHERE cust_email = ($1) and cust_password = ($2)", email, password).Scan(&isVerified)
+	return
+}
+
 func GetAccNumber(db *sql.DB, id int) (acc string, err error) {
 	err = db.QueryRow("SELECT account_num FROM customers WHERE cust_id = $1", id).Scan(&acc)
 	return
@@ -78,6 +83,16 @@ func UpdateCustomerPassword(db *sql.DB, pass string, id int) error {
 		return err
 	}
 	return nil
+}
+
+func IsOldPasswordCorrect(db *sql.DB, pass string, id int) (bool, error) {
+	var res bool
+	row := db.QueryRow("SELECT EXISTS(SELECT 1 FROM customers WHERE cust_password = $1 AND cust_id = $2)", pass, id)
+	err := row.Scan(&res)
+	if err != nil {
+		return true, err
+	}
+	return res, nil
 }
 
 func IsEmailExist(db *sql.DB, email string, id int) (bool, error) {

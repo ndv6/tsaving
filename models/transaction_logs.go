@@ -2,7 +2,6 @@ package models
 
 import (
 	"database/sql"
-	"fmt"
 	"time"
 )
 
@@ -49,18 +48,6 @@ func TransactionLog(db Execer, log TransactionLogs) error {
 		log.Description,
 		log.CreatedAt)
 	return err
-}
-
-func LogDescriptionVaToMainTemplate(amount int, vaNum, accountNum string) string {
-	return fmt.Sprintf("Transfer %d from Virtual Account %s to Main Account %s", amount, vaNum, accountNum)
-}
-
-func LogDescriptionPartnerToMainTemplate(amount, partnerId int, accountNum string) string {
-	return fmt.Sprintf("Transfer %d from Partner %d to Main Account %s", amount, partnerId, accountNum)
-}
-
-func LogDescriptionMainToVaTemplate(amount int, accountNum, vaNum string) string {
-	return fmt.Sprintf("Transfer %d from Main Account %s to Virtual Account %s", amount, accountNum, vaNum)
 }
 
 func ListTransactionLog(db *sql.DB, id int, page int) (list []HistoryTransaction, err error) {

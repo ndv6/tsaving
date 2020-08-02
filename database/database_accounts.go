@@ -20,10 +20,9 @@ func NewAccountHandler(db *sql.DB) *AccountHandler {
 	}
 }
 
-func GetDashboardData(accNum string, db *sql.DB) (dashboard models.Dashboard, err error) {
+func GetDashboardData(custId int, db *sql.DB) (dashboard models.Dashboard, err error) {
 	// var da models.Dashboard
-	var custId int
-	err = db.QueryRow("SELECT a.cust_id, a.cust_name, a.cust_email, b.account_num,b.account_balance FROM customers a INNER JOIN accounts b on a.account_num = b.account_num WHERE a.account_num = $1", accNum).Scan(&custId, &dashboard.CustName, &dashboard.CustEmail, &dashboard.AccountNum, &dashboard.AccountBalance)
+	err = db.QueryRow("SELECT a.cust_name, a.cust_email, b.account_num,b.account_balance FROM customers a INNER JOIN accounts b on a.account_num = b.account_num WHERE a.cust_id = $1", custId).Scan(&dashboard.CustName, &dashboard.CustEmail, &dashboard.AccountNum, &dashboard.AccountBalance)
 	if err != nil {
 		return
 	}
@@ -73,14 +72,13 @@ func TransferFromMainToVa(accNum, vaNum string, amount int, db *sql.DB) (err err
 		tx.Rollback()
 		return
 	}
-	// println("d")
-	logDesc := models.LogDescriptionMainToVaTemplate(amount, accNum, vaNum)
+
 	logData := models.TransactionLogs{
 		AccountNum:  accNum,
 		FromAccount: accNum,
 		DestAccount: vaNum,
 		TranAmount:  amount,
-		Description: logDesc,
+		Description: constants.TransferToVirtualAccount,
 		CreatedAt:   time.Now(),
 	}
 

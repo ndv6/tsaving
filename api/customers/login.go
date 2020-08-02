@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"time"
 
@@ -23,7 +22,9 @@ type LoginRequest struct {
 }
 
 type LoginResponse struct {
-	Token string `json:"token"`
+	Token     string `json:"token"`
+	CustEmail string `json:"cust_email"`
+	CustName  string `json:"cust_name"`
 }
 
 func LoginHandler(jwt *tokens.JWT, db *sql.DB) http.HandlerFunc { // Handle by Caesar Gusti
@@ -38,9 +39,22 @@ func LoginHandler(jwt *tokens.JWT, db *sql.DB) http.HandlerFunc { // Handle by C
 
 		//Membuat Hash Password
 		Pass := helpers.HashString(l.CustPassword)
+
+		isVerified, err := models.CheckLoginVerified(db, l.CustEmail, Pass)
+		if err != nil {
+			w.Header().Set(constants.ContentType, constants.Json)
+			helpers.HTTPError(w, http.StatusBadRequest, "Failed to check verified status")
+			return
+		}
+
+		if isVerified == false {
+			w.Header().Set(constants.ContentType, constants.Json)
+			helpers.HTTPError(w, http.StatusUnauthorized, "This account is not verified")
+			return
+		}
+
 		objCustomer, err := models.LoginCustomer(db, l.CustEmail, Pass)
 		if err != nil {
-			log.Println(err)
 			w.Header().Set(constants.ContentType, constants.Json)
 			helpers.HTTPError(w, http.StatusBadRequest, "Wrong Email or Password")
 			return
@@ -52,7 +66,9 @@ func LoginHandler(jwt *tokens.JWT, db *sql.DB) http.HandlerFunc { // Handle by C
 		})
 
 		data := LoginResponse{
-			Token: tokenLogin,
+			Token:     tokenLogin,
+			CustEmail: objCustomer.CustEmail,
+			CustName:  objCustomer.CustName,
 		}
 
 		_, res, err := helpers.NewResponseBuilder(w, true, constants.LoginSucceed, data)

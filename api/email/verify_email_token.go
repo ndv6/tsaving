@@ -64,3 +64,32 @@ func VerifyEmailToken(eh database.EmailHandler) http.HandlerFunc {
 		return
 	}
 }
+
+func GetEmailToken(eh database.EmailHandler) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set(constants.ContentType, constants.Json)
+		var req models.GetTokenRequest
+		err := json.NewDecoder(r.Body).Decode(&req)
+		if err != nil {
+			helpers.HTTPError(w, http.StatusBadRequest, constants.CannotReadRequest)
+			return
+		}
+
+		dbEt, err := eh.GetEmailTokenByEmail(req.Email)
+		if err != nil {
+			helpers.HTTPError(w, http.StatusNotFound, constants.EmailTokenNotFound)
+			return
+		}
+
+		w, resp, err := helpers.NewResponseBuilder(w, true, constants.SuccessGetToken, models.EmailToken{
+			Email: dbEt.Email,
+			Token: dbEt.Token,
+		})
+		if err != nil {
+			helpers.HTTPError(w, http.StatusInternalServerError, constants.CannotEncodeResponse)
+			return
+		}
+		fmt.Fprintf(w, resp)
+		return
+	}
+}

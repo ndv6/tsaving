@@ -550,33 +550,33 @@
 
 ```
 - Joseph
-* Router 
-* Delete Virtual Account 
-* Verify Email Token 
-* Helper HTTP Error 
+* Router
+* Delete Virtual Account
+* Verify Email Token
+* Helper HTTP Error
 - Andreas
-* Profile 
-* Edit Profile 
+* Profile
+* Edit Profile
 - Caesar
-* Login 
-* Register 
+* Login
+* Register
 - David
-* Add Balance Virtual Account * CheckRekening 
+* Add Balance Virtual Account* CheckRekening 
 - Yuly
-* Sendmail 
-* Log transaction list 
+* Sendmail
+* Log transaction list
 - Vici
-* Deposit 
-* Rebase code 
+* Deposit
+* Rebase code
 * Baseline struktur kode
 - Azizah
-* Create Virtual Account 
-* Edit Virtual Account 
+* Create Virtual Account
+* Edit Virtual Account
 - Sekar
-* Database 
-* Log transaction function 
+* Database
+* Log transaction function
 - Jocelyn
-* Transfer Virtual Account to main 
+* Transfer Virtual Account to main
 * Virtual Account list
 ```
 

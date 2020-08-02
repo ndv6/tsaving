@@ -41,6 +41,11 @@ func LoginCustomer(db *sql.DB, email string, password string) (objCustomer Custo
 	return
 }
 
+func CheckLoginVerified(db *sql.DB, email string, password string) (isVerified bool, err error) {
+	err = db.QueryRow("SELECT is_verified FROM customers WHERE cust_email = ($1) and cust_password = ($2)", email, password).Scan(&isVerified)
+	return
+}
+
 func GetAccNumber(db *sql.DB, id int) (acc string, err error) {
 	err = db.QueryRow("SELECT account_num FROM customers WHERE cust_id = $1", id).Scan(&acc)
 	return

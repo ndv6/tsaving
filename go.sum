@@ -5,5 +5,9 @@ github.com/go-chi/chi v4.1.2+incompatible h1:fGFk2Gmi/YKXk0OmGfBh0WgmN3XB8lVnEyN
 github.com/go-chi/chi v4.1.2+incompatible/go.mod h1:eB3wogJHnLi3x/kFX2A+IbTBlXxmMeXJVKy9tTv1XzQ=
 github.com/go-chi/jwtauth v4.0.4+incompatible h1:LGIxg6YfvSBzxU2BljXbrzVc1fMlgqSKBQgKOGAVtPY=
 github.com/go-chi/jwtauth v4.0.4+incompatible/go.mod h1:Q5EIArY/QnD6BdS+IyDw7B2m6iNbnPxtfd6/BcmtWbs=
+github.com/hubcash/cards v0.0.0-20170418190613-3b29ed8ddf68 h1:HGTAb5ZGNnRLv5T7uTv4+naiOjlzv/J4tPPnNdSaZvg=
+github.com/hubcash/cards v0.0.0-20170418190613-3b29ed8ddf68/go.mod h1:mL/U8ZTwuCSocbNunrBTu0aQTjYOZp8wR5ZXcp47Yik=
 github.com/lib/pq v1.7.1 h1:FvD5XTVTDt+KON6oIoOmHq6B6HzGuYEhuTMpEG0yuBQ=
 github.com/lib/pq v1.7.1/go.mod h1:AlVN5x4E4T544tWzH6hKfbfQvm3HdbOxrmggDNAPY9o=
+github.com/theplant/luhn v0.0.0-20170224032821-81a1a381387a h1:8Yp+jFiOdzOTk/YQcKEA/ccK0NQD3LT965HrQgNqd3o=
+github.com/theplant/luhn v0.0.0-20170224032821-81a1a381387a/go.mod h1:ZaMGXj0IgDRrzbd+S4SJEqxUQSOhbsyCbM6hXiIhnXM=

@@ -56,7 +56,7 @@ func NewVAHandler(jwt *tokens.JWT, db *sql.DB) *VAHandler {
 // Delete VAC relies heavily on query logic so unit testing is not really the perfect choice
 // unless we create factory and interface that enables memory storage
 func CheckVaNumValid(vaNum string) bool {
-	if len(vaNum) > 12 {
+	if len(vaNum) > 13 {
 		return true
 	}
 	return false
@@ -74,12 +74,10 @@ func (vh VAHandler) DeleteVac(w http.ResponseWriter, r *http.Request) {
 	trx, err := vh.db.Begin()
 	if err != nil {
 		helpers.HTTPError(w, http.StatusInternalServerError, constants.FailSqlTransaction)
-		return
 	}
 
 	vaNum := chi.URLParam(r, "va_num")
 	if !CheckVaNumValid(vaNum) {
-		fmt.Println(CheckVaNumValid(vaNum))
 		helpers.HTTPError(w, http.StatusBadRequest, constants.InvalidVaNumber)
 		trx.Rollback()
 		return

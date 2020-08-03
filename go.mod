@@ -8,4 +8,5 @@ require (
 	github.com/go-chi/chi v4.1.2+incompatible
 	github.com/go-chi/jwtauth v4.0.4+incompatible
 	github.com/lib/pq v1.7.1
+	github.com/xlzd/gotp v0.0.0-20181030022105-c8557ba2c119
 )

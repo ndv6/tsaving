@@ -22,7 +22,7 @@ func NewAccountHandler(db *sql.DB) *AccountHandler {
 
 func GetDashboardData(custId int, db *sql.DB) (dashboard models.Dashboard, err error) {
 	// var da models.Dashboard
-	err = db.QueryRow("SELECT a.cust_name, a.cust_email, b.account_num,b.account_balance FROM customers a INNER JOIN accounts b on a.account_num = b.account_num WHERE a.cust_id = $1", custId).Scan(&dashboard.CustName, &dashboard.CustEmail, &dashboard.AccountNum, &dashboard.AccountBalance)
+	err = db.QueryRow("SELECT a.cust_name, a.cust_email, b.account_num, b.account_balance, a.card_num, a.cvv, a.expired FROM customers a INNER JOIN accounts b on a.account_num = b.account_num WHERE a.cust_id = $1", custId).Scan(&dashboard.CustName, &dashboard.CustEmail, &dashboard.AccountNum, &dashboard.AccountBalance, &dashboard.CardNum, &dashboard.CVV, &dashboard.Expired)
 	if err != nil {
 		return
 	}

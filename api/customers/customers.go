@@ -6,11 +6,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"math/rand"
 	"net/http"
 	"regexp"
-	"strconv"
 	"time"
+
+	"github.com/xlzd/gotp"
 
 	"github.com/ndv6/tsaving/constants"
 	"github.com/ndv6/tsaving/helpers"
@@ -83,11 +83,9 @@ func (ch *CustomerHandler) Create(w http.ResponseWriter, r *http.Request) { // H
 
 	date := time.Now()
 	now := date.Format("060102")
-	rand.Seed(time.Now().UnixNano())
-	randomNumber := rand.Intn(9999)
-
+	number := string(gotp.NewDefaultTOTP("4S62BZNFXXSZLCRO").Now()[0:4])
 	// Account Number YYMMDDNNNN
-	AccNum := fmt.Sprint(now, randomNumber)
+	AccNum := fmt.Sprint(now, number)
 
 	// Password Hash
 	Pass := helpers.HashString(cus.CustPassword)
@@ -97,7 +95,7 @@ func (ch *CustomerHandler) Create(w http.ResponseWriter, r *http.Request) { // H
 		return
 	}
 
-	OTPEmail := strconv.Itoa(rand.Intn(999999))
+	OTPEmail := gotp.NewDefaultTOTP("4S62BZNFXXSZLCRO").Now()
 
 	if err := models.AddEmailTokens(ch.db, OTPEmail, cus.CustEmail); err != nil {
 		helpers.HTTPError(w, http.StatusBadRequest, constants.EmailToken)
@@ -191,7 +189,7 @@ func (ch *CustomerHandler) UpdateProfile(w http.ResponseWriter, r *http.Request)
 	}
 
 	if isEmailChanged {
-		OTPEmail := strconv.Itoa(rand.Intn(999999))
+		OTPEmail := gotp.NewDefaultTOTP("4S62BZNFXXSZLCRO").Now()
 
 		if err := models.AddEmailTokens(ch.db, OTPEmail, cus.CustEmail); err != nil {
 			helpers.HTTPError(w, http.StatusBadRequest, "Email Token Failed")

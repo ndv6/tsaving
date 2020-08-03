@@ -109,11 +109,9 @@ func (ch *CustomerHandler) Create(w http.ResponseWriter, r *http.Request) { // H
 		return
 	}
 
-	tokenRegister := ch.jwt.Encode(tokens.Token{
-		AccountNum: AccNum,
-	})
+	OTPEmail := strconv.Itoa(rand.Intn(999999))
 
-	if err := models.AddEmailTokens(ch.db, tokenRegister, cus.CustEmail); err != nil {
+	if err := models.AddEmailTokens(ch.db, OTPEmail, cus.CustEmail); err != nil {
 		helpers.HTTPError(w, http.StatusBadRequest, constants.EmailToken)
 		return
 	}
@@ -123,7 +121,7 @@ func (ch *CustomerHandler) Create(w http.ResponseWriter, r *http.Request) { // H
 		return
 	}
 
-	if err := ch.sendMail(w, tokenRegister, cus.CustEmail); err != nil {
+	if err := ch.sendMail(w, OTPEmail, cus.CustEmail); err != nil {
 		helpers.HTTPError(w, http.StatusBadRequest, constants.MailFailed)
 		return
 	}
@@ -205,14 +203,13 @@ func (ch *CustomerHandler) UpdateProfile(w http.ResponseWriter, r *http.Request)
 	}
 
 	if isEmailChanged {
-		tokenRegister := ch.jwt.Encode(tokens.Token{
-			AccountNum: cus.AccountNum,
-		})
-		if err := models.AddEmailTokens(ch.db, tokenRegister, cus.CustEmail); err != nil {
+		OTPEmail := strconv.Itoa(rand.Intn(999999))
+
+		if err := models.AddEmailTokens(ch.db, OTPEmail, cus.CustEmail); err != nil {
 			helpers.HTTPError(w, http.StatusBadRequest, "Email Token Failed")
 			return
 		}
-		if err := ch.sendMail(w, tokenRegister, cus.CustEmail); err != nil {
+		if err := ch.sendMail(w, OTPEmail, cus.CustEmail); err != nil {
 			w.Header().Set(constants.ContentType, constants.Json)
 			helpers.HTTPError(w, http.StatusBadRequest, constants.MailFailed)
 			return
@@ -345,11 +342,11 @@ func isEmailValid(e string) bool {
 	return emailRegex.MatchString(e)
 }
 
-func (ch *CustomerHandler) sendMail(w http.ResponseWriter, tokenRegister string, cusEmail string) (err error) {
+func (ch *CustomerHandler) sendMail(w http.ResponseWriter, OTPEmail string, cusEmail string) (err error) {
 
 	requestBody, err := json.Marshal(map[string]string{
 		"email": cusEmail,
-		"token": tokenRegister,
+		"token": OTPEmail,
 	})
 
 	if err != nil {

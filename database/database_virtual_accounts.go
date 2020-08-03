@@ -165,7 +165,7 @@ func UpdateVA(vaNum string, vaColor string, vaLabel string, db *sql.DB) (va mode
 }
 
 func GetListVANum(accNum string, db *sql.DB) (res []string, err error) {
-	rows, err := db.Query("SELECT va_num FROM virtual_accounts WHERE account_num = $1", accNum)
+	rows, err := db.Query("SELECT va_num FROM virtual_accounts WHERE account_num = $1 ORDER BY va_num DESC LIMIT 1", accNum)
 	if err != nil {
 		return
 	}
@@ -198,8 +198,8 @@ func RevertVacBalanceToMainAccount(trx *sql.Tx, va models.VirtualAccounts) (err 
 	return
 }
 
-func GetVacByAccountNum(trx *sql.Tx, accountNum string) (va models.VirtualAccounts, err error) {
-	err = trx.QueryRow("SELECT va_id, va_num, account_num, va_balance FROM virtual_accounts WHERE account_num=$1 FOR UPDATE;", accountNum).Scan(&va.VaId, &va.VaNum, &va.AccountNum, &va.VaBalance)
+func GetVacByAccountNum(trx *sql.Tx, accountNum string, vaNum string) (va models.VirtualAccounts, err error) {
+	err = trx.QueryRow("SELECT va_id, va_num, account_num, va_balance FROM virtual_accounts WHERE account_num=$1 AND va_num = $2 FOR UPDATE;", accountNum, vaNum).Scan(&va.VaId, &va.VaNum, &va.AccountNum, &va.VaBalance)
 	return
 }
 

@@ -83,7 +83,7 @@ func (vh VAHandler) DeleteVac(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	vac, err := database.GetVacByAccountNum(trx, token.AccountNum)
+	vac, err := database.GetVacByAccountNum(trx, token.AccountNum, vaNum)
 	if err != nil {
 		helpers.HTTPError(w, http.StatusNotFound, constants.VANotFound)
 		trx.Rollback()

@@ -20,8 +20,16 @@ type Customers struct {
 	UpdatedAt    time.Time `json:"updated_at"`
 }
 
-func RegisterCustomer(db *sql.DB, objCustomer Customers, AccNum string, Pass string) error {
-	_, err := db.Exec("INSERT into customers (account_num, cust_name, cust_address, cust_phone, cust_email, cust_password, cust_pict, is_verified, channel, created_at, updated_at) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10,$11)", AccNum,
+type Card struct {
+	Number  string
+	Cvv     string
+	Expired time.Time
+}
+
+func RegisterCustomer(db *sql.DB, objCustomer Customers, AccNum string, Pass string, cardNum string, cvv string, expired time.Time) error {
+	_, err := db.Exec(`INSERT into customers (account_num, cust_name, cust_address, cust_phone, cust_email, cust_password, cust_pict, is_verified, channel, card_num, cvv, expired, created_at, updated_at) 
+	values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`,
+		AccNum,
 		objCustomer.CustName,
 		objCustomer.CustAddress,
 		objCustomer.CustPhone,
@@ -30,6 +38,9 @@ func RegisterCustomer(db *sql.DB, objCustomer Customers, AccNum string, Pass str
 		"",
 		false,
 		objCustomer.Channel,
+		cardNum,
+		cvv,
+		expired,
 		time.Now(),
 		time.Now(),
 	)

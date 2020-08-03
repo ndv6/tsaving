@@ -1,11 +1,15 @@
-# To start:
+# THIS IS MATERIAL FOR BASIC GO API MADE BY OUR BA STUDENTS
+# EVERYTHING HERE IS AVAILABLE FOR LEARNING PURPOSES
+
+
+## To start:
 1. Clone this respository
 2. Create database on Postgres:
 `CREATE DATABASE db_tsaving;`
 3. Import to Postgres `db_tsaving.sql`
 
 
-# Naming Convention:
+## Naming Convention:
 `snake_case` for file names, folder names
 `CamelCase` for struct names, struct attribute names, function names
 

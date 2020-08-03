@@ -21,11 +21,6 @@ type EmailResponse struct {
 	Email string `json:"email"`
 }
 
-// type GetProfileResult struct {
-// 	Customers models.Customers `json:"customers"`
-// 	Accounts  models.Accounts  `json:"accounts"`
-// }
-
 type CustomerHandler struct {
 	jwt *tokens.JWT
 	db  *sql.DB
@@ -54,17 +49,6 @@ func (ch *CustomerHandler) GetProfile(w http.ResponseWriter, r *http.Request) {
 		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
 		return
 	}
-
-	// acc, err := models.GetMainAccount(ch.db, cus.AccountNum)
-	// if err != nil {
-	// 	helpers.HTTPError(w, http.StatusBadRequest, err.Error())
-	// 	return
-	// }
-
-	// result := GetProfileResult{
-	// 	Customers: cus,
-	// 	Accounts:  acc,
-	// }
 
 	_, res, err := helpers.NewResponseBuilder(w, true, constants.GetProfilSuccess, cus)
 	if err != nil {

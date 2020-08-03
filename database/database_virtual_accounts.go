@@ -33,7 +33,7 @@ func UpdateVacToMain(db *sql.DB, balanceInput int, vacNum string, accountNum str
 	}
 
 	var balanceVA int
-	err = tx.QueryRow("SELECT va_balance FROM virtual_accounts WHERE account_num = $1 FOR UPDATE", accountNum).Scan(&balanceVA)
+	err = tx.QueryRow("SELECT va_balance FROM virtual_accounts WHERE account_num = $1 AND va_num = $2 FOR UPDATE", accountNum, vacNum).Scan(&balanceVA)
 	if err != nil {
 		fmt.Print(err)
 		err = errors.New(constants.CannotTransferVaToMain)

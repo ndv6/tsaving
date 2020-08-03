@@ -78,3 +78,8 @@ const (
 const (
 	Json = "application/json"
 )
+
+// Card Company
+const (
+	Mastercard = "51"
+)

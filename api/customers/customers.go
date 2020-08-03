@@ -6,8 +6,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"math/rand"
 	"net/http"
 	"regexp"
+	"strconv"
 	"time"
 
 	"github.com/xlzd/gotp"
@@ -16,6 +18,7 @@ import (
 	"github.com/ndv6/tsaving/helpers"
 	"github.com/ndv6/tsaving/models"
 	"github.com/ndv6/tsaving/tokens"
+	"github.com/theplant/luhn"
 )
 
 type EmailResponse struct {
@@ -90,7 +93,17 @@ func (ch *CustomerHandler) Create(w http.ResponseWriter, r *http.Request) { // H
 	// Password Hash
 	Pass := helpers.HashString(cus.CustPassword)
 
-	if err := models.RegisterCustomer(ch.db, cus, AccNum, Pass); err != nil {
+	// Generate card number
+	cardNum, err := GenerateCardNumber(AccNum, date)
+
+	if err != nil {
+		w.Header().Set(constants.ContentType, constants.Json)
+		helpers.HTTPError(w, http.StatusBadRequest, "Cannot generate card number")
+		return
+	}
+
+	if err := models.RegisterCustomer(ch.db, cus, AccNum, Pass, cardNum.Number, cardNum.Cvv, cardNum.Expired); err != nil {
+		fmt.Println(err)
 		helpers.HTTPError(w, http.StatusBadRequest, constants.DupeEmailorPhone)
 		return
 	}
@@ -345,4 +358,30 @@ func (ch *CustomerHandler) sendMail(w http.ResponseWriter, OTPEmail string, cusE
 	}
 
 	return
+}
+
+func GenerateCardNumber(accNum string, date time.Time) (card models.Card, err error) {
+	intAccNum, err := strconv.Atoi(constants.Mastercard + accNum)
+	if err != nil {
+		return
+	}
+
+	cvv := GenerateRandomNumber(100, 999)
+	validDigit := luhn.CalculateLuhn(intAccNum)
+	cardNumber := strconv.Itoa(intAccNum) + strconv.Itoa(validDigit)
+	fmt.Println(cardNumber)
+
+	expired := date.AddDate(5, 0, 0)
+
+	card = models.Card{
+		Number:  cardNumber,
+		Cvv:     strconv.Itoa(cvv),
+		Expired: expired,
+	}
+
+	return card, nil
+}
+
+func GenerateRandomNumber(min, max int) int {
+	return min + rand.Intn(max-min)
 }

@@ -56,7 +56,7 @@ func NewVAHandler(jwt *tokens.JWT, db *sql.DB) *VAHandler {
 // Delete VAC relies heavily on query logic so unit testing is not really the perfect choice
 // unless we create factory and interface that enables memory storage
 func CheckVaNumValid(vaNum string) bool {
-	if len(vaNum) > 13 {
+	if len(vaNum) > 12 {
 		return true
 	}
 	return false

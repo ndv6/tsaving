@@ -83,7 +83,7 @@ func (vh VAHandler) DeleteVac(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	vac, err := database.GetVacByAccountNum(trx, token.AccountNum)
+	vac, err := database.GetVacByAccountNum(trx, token.AccountNum, vaNum)
 	if err != nil {
 		helpers.HTTPError(w, http.StatusNotFound, constants.VANotFound)
 		trx.Rollback()
@@ -100,7 +100,8 @@ func (vh VAHandler) DeleteVac(w http.ResponseWriter, r *http.Request) {
 	if vac.VaBalance > 0 {
 		err = models.TransactionLog(trx, models.TransactionLogs{
 			AccountNum:  vac.AccountNum,
-			DestAccount: vac.VaNum,
+			FromAccount: vac.VaNum,
+			DestAccount: vac.AccountNum,
 			TranAmount:  vac.VaBalance,
 			Description: constants.TransferToMainAccount,
 			CreatedAt:   time.Now(),

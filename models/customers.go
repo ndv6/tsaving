@@ -21,15 +21,14 @@ type Customers struct {
 }
 
 type Card struct {
-	Number string
-	Cvv    string
-	Month  string
-	Year   string
+	Number  string
+	Cvv     string
+	Expired time.Time
 }
 
-func RegisterCustomer(db *sql.DB, objCustomer Customers, AccNum string, Pass string, cardNum string, cvv string, month string, year string) error {
-	_, err := db.Exec(`INSERT into customers (account_num, cust_name, cust_address, cust_phone, cust_email, cust_password, cust_pict, is_verified, channel, card_num, cvv, month, year, created_at, updated_at) 
-	values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)`,
+func RegisterCustomer(db *sql.DB, objCustomer Customers, AccNum string, Pass string, cardNum string, cvv string, expired time.Time) error {
+	_, err := db.Exec(`INSERT into customers (account_num, cust_name, cust_address, cust_phone, cust_email, cust_password, cust_pict, is_verified, channel, card_num, cvv, expired, created_at, updated_at) 
+	values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`,
 		AccNum,
 		objCustomer.CustName,
 		objCustomer.CustAddress,
@@ -41,8 +40,7 @@ func RegisterCustomer(db *sql.DB, objCustomer Customers, AccNum string, Pass str
 		objCustomer.Channel,
 		cardNum,
 		cvv,
-		month,
-		year,
+		expired,
 		time.Now(),
 		time.Now(),
 	)

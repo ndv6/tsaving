@@ -10,7 +10,6 @@ import (
 	"net/http"
 	"regexp"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/ndv6/tsaving/constants"
@@ -86,7 +85,7 @@ func (ch *CustomerHandler) Create(w http.ResponseWriter, r *http.Request) { // H
 	date := time.Now()
 	now := date.Format("060102")
 	rand.Seed(time.Now().UnixNano())
-	randomNumber := rand.Intn(9999)
+	randomNumber := GenerateRandomNumber(1000, 9999)
 
 	// Account Number YYMMDDNNNN
 	AccNum := fmt.Sprint(now, randomNumber)
@@ -103,7 +102,7 @@ func (ch *CustomerHandler) Create(w http.ResponseWriter, r *http.Request) { // H
 		return
 	}
 
-	if err := models.RegisterCustomer(ch.db, cus, AccNum, Pass, cardNum.Number, cardNum.Cvv, cardNum.Month, cardNum.Year); err != nil {
+	if err := models.RegisterCustomer(ch.db, cus, AccNum, Pass, cardNum.Number, cardNum.Cvv, cardNum.Expired); err != nil {
 		fmt.Println(err)
 		helpers.HTTPError(w, http.StatusBadRequest, constants.DupeEmailorPhone)
 		return
@@ -373,13 +372,11 @@ func GenerateCardNumber(accNum string, date time.Time) (card models.Card, err er
 	fmt.Println(cardNumber)
 
 	expired := date.AddDate(5, 0, 0)
-	expiredString := expired.Format("01-02-2006")
 
 	card = models.Card{
-		Number: cardNumber,
-		Cvv:    strconv.Itoa(cvv),
-		Month:  strings.Split(expiredString, "-")[0],
-		Year:   strings.Split(expiredString, "-")[2],
+		Number:  cardNumber,
+		Cvv:     strconv.Itoa(cvv),
+		Expired: expired,
 	}
 
 	return card, nil

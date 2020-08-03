@@ -16,6 +16,9 @@ type Customers struct {
 	CustPict     string    `json:"cust_pict"`
 	IsVerified   bool      `json:"is_verified"`
 	Channel      string    `json:"channel"`
+	CardNum      string    `json:"card_num"`
+	Cvv          string    `json:"cvv"`
+	Expired      time.Time `json:"expired"`
 	CreatedAt    time.Time `json:"created_at"`
 	UpdatedAt    time.Time `json:"updated_at"`
 }
@@ -48,7 +51,7 @@ func RegisterCustomer(db *sql.DB, objCustomer Customers, AccNum string, Pass str
 }
 
 func LoginCustomer(db *sql.DB, email string, password string) (objCustomer Customers, err error) {
-	err = db.QueryRow("SELECT cust_id, account_num, cust_name, cust_address, cust_phone, cust_email, cust_password, is_verified, channel, created_at, updated_at from customers where is_verified = true and cust_email = ($1) and cust_password = ($2)", email, password).Scan(&objCustomer.CustId, &objCustomer.AccountNum, &objCustomer.CustName, &objCustomer.CustAddress, &objCustomer.CustPhone, &objCustomer.CustEmail, &objCustomer.CustPassword, &objCustomer.IsVerified, &objCustomer.Channel, &objCustomer.CreatedAt, &objCustomer.UpdatedAt)
+	err = db.QueryRow("SELECT cust_id, account_num, cust_name, cust_address, cust_phone, cust_email, cust_password, is_verified, expired, channel, created_at, updated_at from customers where is_verified = true and cust_email = ($1) and cust_password = ($2)", email, password).Scan(&objCustomer.CustId, &objCustomer.AccountNum, &objCustomer.CustName, &objCustomer.CustAddress, &objCustomer.CustPhone, &objCustomer.CustEmail, &objCustomer.CustPassword, &objCustomer.IsVerified, &objCustomer.Expired, &objCustomer.Channel, &objCustomer.CreatedAt, &objCustomer.UpdatedAt)
 	return
 }
 

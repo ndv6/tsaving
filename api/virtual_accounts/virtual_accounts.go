@@ -83,7 +83,7 @@ func (vh VAHandler) DeleteVac(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	vac, err := database.GetVacByAccountNum(trx, token.AccountNum)
+	vac, err := database.GetVacByAccountNum(trx, token.AccountNum, vaNum)
 	if err != nil {
 		helpers.HTTPError(w, http.StatusNotFound, constants.VANotFound)
 		trx.Rollback()
@@ -222,6 +222,7 @@ func (va *VAHandler) Create(w http.ResponseWriter, r *http.Request) {
 	am, err := models.GetMainAccount(va.db, token.AccountNum)
 	fmt.Println(token.AccountNum)
 	if err != nil {
+		fmt.Printf("haha %v", err.Error())
 		helper.HTTPError(w, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -229,6 +230,7 @@ func (va *VAHandler) Create(w http.ResponseWriter, r *http.Request) {
 	// generate va number
 	res, err := database.GetListVANum(token.AccountNum, va.db)
 	if err != nil {
+		fmt.Printf("haha %v", err.Error())
 		helper.HTTPError(w, http.StatusBadRequest, "unable to get virtual account list")
 		return
 	}
@@ -260,6 +262,7 @@ func (va *VAHandler) Create(w http.ResponseWriter, r *http.Request) {
 	vam, err = database.CreateVA(newVaNum, token.AccountNum, vac.VaColor, vac.VaLabel, va.db)
 
 	if err != nil {
+		fmt.Printf("haha %v", err.Error())
 		helper.HTTPError(w, http.StatusBadRequest, "failed insert data to db")
 		return
 	}

@@ -21,6 +21,7 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 	chiRouter := chi.NewRouter()
 
 	chiRouter.Use(middleware.Logger)
+	chiRouter.Use(middleware.Recoverer)
 
 	// Handler objects initialization
 	ph := database.NewPartnerHandler(db)

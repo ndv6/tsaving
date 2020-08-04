@@ -4,33 +4,39 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/ndv6/tsaving/api"
 	"github.com/ndv6/tsaving/database"
-	"github.com/ndv6/tsaving/helpers"
 	"github.com/ndv6/tsaving/tokens"
 )
 
 var jwt *tokens.JWT
 
 func main() {
-	config, err := helpers.LoadConfig("configs/configs.json")
+	port := os.Getenv("PORT")
+	if port == "" {
+		log.Fatal("$PORT must be set")
+	}
+
+	jwtSecret := os.Getenv("JWT_SECRET")
+	if jwtSecret == "" {
+		log.Fatal("$JWT_SECRET must be set")
+	}
+	jwt := tokens.New([]byte(jwtSecret))
+
+	dbUri := os.Getenv("DATABASE_URL")
+	if dbUri == "" {
+		log.Fatal("$DATABASE_URL must be set")
+	}
+	db, err := database.DatabaseConnect(dbUri)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	jwt := tokens.New([]byte(config.SecretKey))
-
-	db, err := database.GetDatabaseConnection(config.DbCfg)
+	fmt.Println("Server is now accepting request from port " + port)
+	err = http.ListenAndServe(":"+port, api.Router(jwt, db))
 	if err != nil {
 		log.Fatal(err)
-	}
-
-	jwt = tokens.New([]byte(config.SecretKey))
-
-	fmt.Println("Server is now accepting request from port " + config.Port)
-	err = http.ListenAndServe("127.0.0.1:"+config.Port, api.Router(jwt, db))
-	if err != nil {
-		log.Fatal("Can not listen to port 8000: ", err)
 	}
 }

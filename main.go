@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/joho/godotenv"
 	"log"
 	"net/http"
 	"os"
@@ -12,6 +13,11 @@ import (
 )
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		log.Fatal("$PORT must be set")
@@ -32,7 +38,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Println("Server is now accepting request from port " + port)
+	fmt.Println("Server is now accepting request at :" + port)
 	err = http.ListenAndServe(":"+port, api.Router(jwt, db))
 	if err != nil {
 		log.Fatal(err)

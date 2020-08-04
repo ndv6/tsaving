@@ -100,6 +100,8 @@
    {
         "token":
         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjdXN0X2lkIjoyMTYsImFjY291bnRfbnVtIjoiMjAwNzIzMTI4MiIsImV4cGlyZWQiOiIyMDIwLTA3LTI2VDA5OjM0OjM2LjE4OTI5NiswNzowMCJ9.BrLkQklGCFTDh01Q1EIvVDW7BSyw1sIlE2JPDbEspw4"
+	"cust_email": "testing@gmail.com",
+        "cust_name": "Testing"
    }
 ```
 

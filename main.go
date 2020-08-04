@@ -11,8 +11,6 @@ import (
 	"github.com/ndv6/tsaving/tokens"
 )
 
-var jwt *tokens.JWT
-
 func main() {
 	port := os.Getenv("PORT")
 	if port == "" {

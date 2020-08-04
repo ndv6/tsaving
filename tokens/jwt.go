@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/ndv6/tsaving/constants"
 
@@ -54,13 +55,13 @@ func (j *JWT) AuthMiddleware(handler http.Handler) http.Handler {
 		var claims Token
 		b, err := json.Marshal(jwtToken.Claims) //Encode Token
 		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, "Invalid Token")
+			helpers.HTTPError(w, http.StatusUnauthorized, "Invalid Token")
 			return
 		}
 
 		err = json.Unmarshal(b, &claims)
 		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, "Unable to Parse Token")
+			helpers.HTTPError(w, http.StatusUnauthorized, "Unable to Parse Token")
 			return
 		}
 
@@ -72,6 +73,19 @@ func (j *JWT) AuthMiddleware(handler http.Handler) http.Handler {
 
 		ctx := context.WithValue(r.Context(), "token", claims)
 		handler.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+func (j *JWT) ValidateAccount(handler http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set(constants.ContentType, constants.Json)
+		token := j.GetToken(r)
+
+		if token.AccountExpiration.Before(time.Now()) {
+			helpers.HTTPError(w, http.StatusBadRequest, "Card expired, please renew it")
+			return
+		}
+		handler.ServeHTTP(w, r)
 	})
 }
 

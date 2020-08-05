@@ -20,7 +20,7 @@ CREATE TABLE "public"."customers" (
     "expired" timestamp,
     "created_at" timestamp,
     "updated_at" timestamp,
-    "is_delete" boolean,
+    "is_deleted" boolean,
     CONSTRAINT "customers_account_num" UNIQUE ("account_num"),
     CONSTRAINT "customers_cust_email_key" UNIQUE ("cust_email"),
     CONSTRAINT "customers_cust_phone_key" UNIQUE ("cust_phone"),

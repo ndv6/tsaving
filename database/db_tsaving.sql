@@ -15,11 +15,12 @@ CREATE TABLE "public"."customers" (
     "cust_pict" character varying(200),
     "is_verified" boolean,
     "channel" character varying(20),
-    "card_num" CHARACTER varying(20),
-    "cvv" CHARACTER varying(3),
-    "expired" TIMESTAMP,
+    "card_num" character varying(20),
+    "cvv" character varying(3),
+    "expired" timestamp,
     "created_at" timestamp,
     "updated_at" timestamp,
+    "is_delete" boolean,
     CONSTRAINT "customers_account_num" UNIQUE ("account_num"),
     CONSTRAINT "customers_cust_email_key" UNIQUE ("cust_email"),
     CONSTRAINT "customers_cust_phone_key" UNIQUE ("cust_phone"),
@@ -115,8 +116,21 @@ CREATE TABLE "public"."admins" (
     "password" character varying(64) NOT NULL,
     "created_at" timestamp DEFAULT CURRENT_TIMESTAMP,
     "lastlogin_at" timestamp,
+    CONSTRAINT "admin_unique" UNIQUE ("username"),
     CONSTRAINT "admins_pkey" PRIMARY KEY ("id")
 ) WITH (oids = false);
 
+DROP TABLE IF EXISTS "log_admins";
+DROP SEQUENCE IF EXISTS log_admins_id_seq;
+CREATE SEQUENCE log_admins_id_seq INCREMENT 1 MINVALUE 1 MAXVALUE 2147483647 START 1 CACHE 1;
+
+CREATE TABLE "public"."log_admins" (
+    "id" integer DEFAULT nextval('log_admins_id_seq') NOT NULL,
+    "username" character varying(20) NOT NULL,
+    "action" character varying(64) NOT NULL,
+    "lastlogin_at" timestamp,
+    CONSTRAINT "log_admins_pkey" PRIMARY KEY ("id"),
+    CONSTRAINT "fk_log_admins" FOREIGN KEY (username) REFERENCES admins(username) NOT DEFERRABLE
+) WITH (oids = false);
 
 -- 2020-07-25 10:06:53.514544+00

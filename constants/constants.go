@@ -39,6 +39,7 @@ const (
 	CannotTransferVaToMain  = "Failed to transfer from virtual account to main account."
 	InvalidVA               = "Invalid virtual account number"
 	InvalidVaNumber         = "Virtual Account number is invalid"
+	InvalidAdmin			= "Invalid Admin"
 	FailSqlTransaction      = "Sql Transaction failed to set begin"
 	VANotFound              = "Virtual account not found"
 	FailToRevertBalance     = "Reverting balance to main account failed"

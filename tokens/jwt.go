@@ -67,7 +67,6 @@ func (j *JWT) AuthMiddleware(handler http.Handler) http.Handler {
 
 		err = claims.Valid()
 		if err != nil {
-			fmt.Println(err.Error())
 			helpers.HTTPError(w, http.StatusUnauthorized, "Token Expired")
 			return
 		}

@@ -12,12 +12,11 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/ndv6/tsaving/database"
-
 	"github.com/go-chi/chi"
 	"github.com/xlzd/gotp"
 
 	"github.com/ndv6/tsaving/constants"
+	"github.com/ndv6/tsaving/database"
 	"github.com/ndv6/tsaving/helpers"
 	"github.com/ndv6/tsaving/models"
 	"github.com/ndv6/tsaving/tokens"

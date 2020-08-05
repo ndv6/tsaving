@@ -12,6 +12,7 @@ import (
 	"github.com/ndv6/tsaving/api/home"
 	"github.com/ndv6/tsaving/api/not_found"
 	"github.com/ndv6/tsaving/api/virtual_accounts"
+	"github.com/ndv6/tsaving/api/admin"
 	"github.com/ndv6/tsaving/tokens"
 
 	"github.com/go-chi/chi"
@@ -29,6 +30,7 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 	ch := customers.NewCustomerHandler(jwt, db)
 	va := virtual_accounts.NewVAHandler(jwt, db) // David, Jocelyn, Joseph , Azizah
 	eh := database.NewEmailHandler(db)           // Joseph
+	adm := admin.NewAdminHandler(jwt, db) 		 // Azizah
 	// da := customers.NewDashboardHandler(jwt)
 
 	// Home endpoint
@@ -58,8 +60,9 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 	chiRouter.With(jwt.AuthMiddleware).With(jwt.ValidateAccount).Post("/me/va/{va_num}/transfer-main", va.VacToMain) //Jocelyn
 	chiRouter.With(jwt.AuthMiddleware).With(jwt.ValidateAccount).Delete("/me/va/{va_num}", va.DeleteVac)             //Joseph
 
-	// History Endpoint -- Yuly Haruka
+	// History Endpoint 
 	chiRouter.With(jwt.AuthMiddleware).Get("/me/transaction/{page}", ch.HistoryTransactionHandler(db)) //Yuly
+	chiRouter.With(jwt.AuthMiddleware).Get("/admin/transactions", adm.TransactionHistoryHandler) //Azizah
 
 	// Not Found Endpoint
 	chiRouter.NotFound(not_found.NotFoundHandler) // Joseph

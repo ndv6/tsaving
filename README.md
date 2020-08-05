@@ -1,11 +1,15 @@
-# To start:
+# THIS IS MATERIAL FOR BASIC GO API MADE BY OUR BA STUDENTS
+# EVERYTHING HERE IS AVAILABLE FOR LEARNING PURPOSES
+
+
+## To start:
 1. Clone this respository
 2. Create database on Postgres:
 `CREATE DATABASE db_tsaving;`
 3. Import to Postgres `db_tsaving.sql`
 
 
-# Naming Convention:
+## Naming Convention:
 `snake_case` for file names, folder names
 `CamelCase` for struct names, struct attribute names, function names
 
@@ -510,6 +514,59 @@
 }
 ```
 
+### **Response** : 
+```
+{
+    "status":"FAILED",
+    "message":"Error message",
+    "data":{}
+}
+```
+
+## DASHBOARD
+## 1. [GET] /me/dashboard
+### **Description** : 
+   Getting data for dashboard information
+
+### **Header** :
+```
+“Authorization”: “jwt-token”
+```
+
+### **Request** : 
+```
+{
+}
+```
+
+### **Response** : 
+```
+{
+    "status": "SUCCESS",
+    "message": "SUCCESS",
+    "data": {
+        "cust_name": "david",
+        "cust_email": "david.ocbcnisp@gmail.com",
+        "account_num": "2008030642",
+        "account_balance": 998000,
+        "card_num": "5120080306427",
+        "json:cvv": "561",
+        "json:expired": "2025-08-03T18:10:01.15242Z",
+        "virtual_accounts": [
+            {
+                "va_id": 2,
+                "va_num": "2008030642001",
+                "account_num": "2008030642",
+                "va_balance": 2000,
+                "va_color": "Red",
+                "va_label": "Tabungan Rumah",
+                "created_at": "2020-08-03T19:30:23.082233Z",
+                "updated_at": "2020-08-03T19:30:23.082233Z"
+            }
+        ]
+    }
+}
+```
 ### **Response** : 
 ```
 {

@@ -112,7 +112,7 @@ CREATE SEQUENCE admin_id_seq INCREMENT 1 MINVALUE 1 MAXVALUE 2147483647 START 1 
 
 CREATE TABLE "public"."admins" (
     "id" integer DEFAULT nextval('admin_id_seq') NOT NULL,
-    "username" character varying(20),
+    "username" character varying(20) NOT NULL,
     "password" character varying(64) NOT NULL,
     "created_at" timestamp DEFAULT CURRENT_TIMESTAMP,
     "lastlogin_at" timestamp,

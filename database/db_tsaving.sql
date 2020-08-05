@@ -20,7 +20,7 @@ CREATE TABLE "public"."customers" (
     "expired" timestamp,
     "created_at" timestamp,
     "updated_at" timestamp,
-    "is_deleted" boolean,
+    "is_deleted" boolean DEFAULT false,
     CONSTRAINT "customers_account_num" UNIQUE ("account_num"),
     CONSTRAINT "customers_cust_email_key" UNIQUE ("cust_email"),
     CONSTRAINT "customers_cust_phone_key" UNIQUE ("cust_phone"),
@@ -127,8 +127,9 @@ CREATE SEQUENCE log_admins_id_seq INCREMENT 1 MINVALUE 1 MAXVALUE 2147483647 STA
 CREATE TABLE "public"."log_admins" (
     "id" integer DEFAULT nextval('log_admins_id_seq') NOT NULL,
     "username" character varying(20) NOT NULL,
+    "account_num" character varying(10),
     "action" character varying(64) NOT NULL,
-    "lastlogin_at" timestamp,
+    "action_time" timestamp,
     CONSTRAINT "log_admins_pkey" PRIMARY KEY ("id"),
     CONSTRAINT "fk_log_admins" FOREIGN KEY (username) REFERENCES admins(username) NOT DEFERRABLE
 ) WITH (oids = false);

@@ -105,5 +105,18 @@ CREATE TABLE "public"."virtual_accounts" (
     CONSTRAINT "virtual_accounts_account_num_fkey" FOREIGN KEY (account_num) REFERENCES customers(account_num) NOT DEFERRABLE
 ) WITH (oids = false);
 
+DROP TABLE IF EXISTS "admins";
+DROP SEQUENCE IF EXISTS admin_id_seq;
+CREATE SEQUENCE admin_id_seq INCREMENT 1 MINVALUE 1 MAXVALUE 2147483647 START 1 CACHE 1;
+
+CREATE TABLE "public"."admins" (
+    "id" integer DEFAULT nextval('admin_id_seq') NOT NULL,
+    "username" character varying(20) NOT NULL,
+    "password" character varying(64) NOT NULL,
+    "created_at" timestamp DEFAULT CURRENT_TIMESTAMP,
+    "lastlogin_at" timestamp,
+    CONSTRAINT "admins_pkey" PRIMARY KEY ("id")
+) WITH (oids = false);
+
 
 -- 2020-07-25 10:06:53.514544+00

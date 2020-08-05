@@ -60,9 +60,10 @@ func LoginHandler(jwt *tokens.JWT, db *sql.DB) http.HandlerFunc { // Handle by C
 			return
 		}
 		_, tokenLogin, _ := jwt.JWTAuth.Encode(&tokens.Token{
-			CustId:     objCustomer.CustId,
-			AccountNum: objCustomer.AccountNum,
-			Expired:    time.Now().Add(120 * time.Minute),
+			CustId:            objCustomer.CustId,
+			AccountNum:        objCustomer.AccountNum,
+			AccountExpiration: objCustomer.Expired,
+			Expired:           time.Now().Add(120 * time.Minute),
 		})
 
 		data := LoginResponse{

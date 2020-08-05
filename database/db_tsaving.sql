@@ -39,7 +39,7 @@ CREATE TABLE "public"."accounts" (
     "created_at" timestamp,
     CONSTRAINT "accounts_account_num_key" UNIQUE ("account_num"),
     CONSTRAINT "accounts_pkey" PRIMARY KEY ("account_id"),
-    CONSTRAINT "account_fk" FOREIGN KEY (account_num) REFERENCES customers(account_num) ON DELETE CASCADE NOT DEFERRABLE
+    CONSTRAINT "account_fk" FOREIGN KEY (account_num) REFERENCES customers(account_num) NOT DEFERRABLE
 ) WITH (oids = false);
 
 
@@ -53,7 +53,7 @@ CREATE TABLE "public"."email_token" (
     "email" character varying(64),
     CONSTRAINT "email_token_pkey" PRIMARY KEY ("et_id"),
     CONSTRAINT "email_token_token_key" UNIQUE ("token"),
-    CONSTRAINT "email_token_email_fkey" FOREIGN KEY (email) REFERENCES customers(cust_email) ON DELETE CASCADE NOT DEFERRABLE
+    CONSTRAINT "email_token_email_fkey" FOREIGN KEY (email) REFERENCES customers(cust_email) NOT DEFERRABLE
 ) WITH (oids = false);
 
 
@@ -103,7 +103,7 @@ CREATE TABLE "public"."virtual_accounts" (
     "updated_at" timestamp,
     CONSTRAINT "virtual_accounts_pkey" PRIMARY KEY ("va_id"),
     CONSTRAINT "virtual_accounts_va_num_key" UNIQUE ("va_num"),
-    CONSTRAINT "virtual_accounts_account_num_fkey" FOREIGN KEY (account_num) REFERENCES customers(account_num) ON DELETE CASCADE NOT DEFERRABLE
+    CONSTRAINT "virtual_accounts_account_num_fkey" FOREIGN KEY (account_num) REFERENCES customers(account_num) NOT DEFERRABLE
 ) WITH (oids = false);
 
 DROP TABLE IF EXISTS "admins";

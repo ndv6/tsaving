@@ -3,8 +3,6 @@ package database
 import (
 	"database/sql"
 	"github.com/ndv6/tsaving/models"
-	//"errors"
-	//"time"
 
 )
 

@@ -15,11 +15,12 @@ CREATE TABLE "public"."customers" (
     "cust_pict" character varying(200),
     "is_verified" boolean,
     "channel" character varying(20),
-    "card_num" CHARACTER varying(20),
-    "cvv" CHARACTER varying(3),
-    "expired" TIMESTAMP,
+    "card_num" character varying(20),
+    "cvv" character varying(3),
+    "expired" timestamp,
     "created_at" timestamp,
     "updated_at" timestamp,
+    "is_delete" boolean,
     CONSTRAINT "customers_account_num" UNIQUE ("account_num"),
     CONSTRAINT "customers_cust_email_key" UNIQUE ("cust_email"),
     CONSTRAINT "customers_cust_phone_key" UNIQUE ("cust_phone"),
@@ -38,7 +39,7 @@ CREATE TABLE "public"."accounts" (
     "created_at" timestamp,
     CONSTRAINT "accounts_account_num_key" UNIQUE ("account_num"),
     CONSTRAINT "accounts_pkey" PRIMARY KEY ("account_id"),
-    CONSTRAINT "account_fk" FOREIGN KEY (account_num) REFERENCES customers(account_num) NOT DEFERRABLE
+    CONSTRAINT "account_fk" FOREIGN KEY (account_num) REFERENCES customers(account_num) ON DELETE CASCADE NOT DEFERRABLE
 ) WITH (oids = false);
 
 
@@ -52,7 +53,7 @@ CREATE TABLE "public"."email_token" (
     "email" character varying(64),
     CONSTRAINT "email_token_pkey" PRIMARY KEY ("et_id"),
     CONSTRAINT "email_token_token_key" UNIQUE ("token"),
-    CONSTRAINT "email_token_email_fkey" FOREIGN KEY (email) REFERENCES customers(cust_email) NOT DEFERRABLE
+    CONSTRAINT "email_token_email_fkey" FOREIGN KEY (email) REFERENCES customers(cust_email) ON DELETE CASCADE NOT DEFERRABLE
 ) WITH (oids = false);
 
 
@@ -102,7 +103,7 @@ CREATE TABLE "public"."virtual_accounts" (
     "updated_at" timestamp,
     CONSTRAINT "virtual_accounts_pkey" PRIMARY KEY ("va_id"),
     CONSTRAINT "virtual_accounts_va_num_key" UNIQUE ("va_num"),
-    CONSTRAINT "virtual_accounts_account_num_fkey" FOREIGN KEY (account_num) REFERENCES customers(account_num) NOT DEFERRABLE
+    CONSTRAINT "virtual_accounts_account_num_fkey" FOREIGN KEY (account_num) REFERENCES customers(account_num) ON DELETE CASCADE NOT DEFERRABLE
 ) WITH (oids = false);
 
 DROP TABLE IF EXISTS "admins";
@@ -111,12 +112,25 @@ CREATE SEQUENCE admin_id_seq INCREMENT 1 MINVALUE 1 MAXVALUE 2147483647 START 1 
 
 CREATE TABLE "public"."admins" (
     "id" integer DEFAULT nextval('admin_id_seq') NOT NULL,
-    "username" character varying(20) NOT NULL,
+    "username" character varying(20),
     "password" character varying(64) NOT NULL,
     "created_at" timestamp DEFAULT CURRENT_TIMESTAMP,
     "lastlogin_at" timestamp,
+    CONSTRAINT "admin_unique" UNIQUE ("username"),
     CONSTRAINT "admins_pkey" PRIMARY KEY ("id")
 ) WITH (oids = false);
 
+DROP TABLE IF EXISTS "log_admins";
+DROP SEQUENCE IF EXISTS log_admins_id_seq;
+CREATE SEQUENCE log_admins_id_seq INCREMENT 1 MINVALUE 1 MAXVALUE 2147483647 START 1 CACHE 1;
+
+CREATE TABLE "public"."log_admins" (
+    "id" integer DEFAULT nextval('log_admins_id_seq') NOT NULL,
+    "username" character varying(20) NOT NULL,
+    "action" character varying(64) NOT NULL,
+    "lastlogin_at" timestamp,
+    CONSTRAINT "log_admins_pkey" PRIMARY KEY ("id"),
+    CONSTRAINT "fk_log_admins" FOREIGN KEY (username) REFERENCES admins(username) NOT DEFERRABLE
+) WITH (oids = false);
 
 -- 2020-07-25 10:06:53.514544+00

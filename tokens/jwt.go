@@ -26,7 +26,7 @@ func (j *JWT) Encode(token Token) string {
 	return tokenString
 }
 
-func (j *JWT) Decode(tokenString string) (token *Token, err error) {
+func (j *JWT) Decode(tokenString string) (token Token, err error) {
 	jwtToken, err := j.JWTAuth.Decode(tokenString)
 	fmt.Println(jwtToken.Claims)
 	if err != nil {
@@ -40,7 +40,6 @@ func (j *JWT) GetToken(r *http.Request) Token {
 	if !ok {
 		return Token{}
 	}
-	fmt.Println("token ok")
 	return token
 }
 
@@ -74,7 +73,6 @@ func (j *JWT) AuthMiddleware(handler http.Handler) http.Handler {
 
 		ctx := context.WithValue(r.Context(), "token", claims)
 		handler.ServeHTTP(w, r.WithContext(ctx))
-		fmt.Println("auth middleware served")
 		return
 	})
 }

@@ -390,12 +390,6 @@ func GenerateRandomNumber(min, max int) int {
 
 func (ch *CustomerHandler) GetListCustomers(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set(constants.ContentType, constants.Json)
-	token := ch.jwt.GetToken(r)
-	err := token.Valid()
-	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
-		return
-	}
 
 	page, err := strconv.Atoi(chi.URLParam(r, "page"))
 	if err != nil {

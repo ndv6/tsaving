@@ -13,18 +13,23 @@ import (
 	"time"
 
 	"github.com/go-chi/chi"
-	"github.com/xlzd/gotp"
-
 	"github.com/ndv6/tsaving/constants"
 	"github.com/ndv6/tsaving/database"
 	"github.com/ndv6/tsaving/helpers"
 	"github.com/ndv6/tsaving/models"
 	"github.com/ndv6/tsaving/tokens"
 	"github.com/theplant/luhn"
+	"github.com/xlzd/gotp"
 )
 
 type EmailResponse struct {
 	Email string `json:"email"`
+}
+
+type CardResponse struct {
+	CardNum string    `json:"card_num"`
+	CVV     string    `json:"cvv"`
+	Expired time.Time `json:"expired"`
 }
 
 type CustomerHandler struct {
@@ -57,6 +62,31 @@ func (ch *CustomerHandler) GetProfile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	_, res, err := helpers.NewResponseBuilder(w, true, constants.GetProfilSuccess, cus)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
+		return
+	}
+
+	fmt.Fprintln(w, string(res))
+}
+
+func (ch *CustomerHandler) GetCardCustomers(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set(constants.ContentType, constants.Json)
+
+	AccountNum := chi.URLParam(r, "account_num")
+	cardDetails, err := models.GetDetailsCard(ch.db, AccountNum)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	data := CardResponse{
+		CardNum: cardDetails.CardNum,
+		CVV:     cardDetails.Cvv,
+		Expired: cardDetails.Expired,
+	}
+
+	_, res, err := helpers.NewResponseBuilder(w, true, constants.GetCardSuccess, data)
 	if err != nil {
 		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
 		return

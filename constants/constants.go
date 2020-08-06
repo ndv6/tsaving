@@ -56,6 +56,7 @@ const (
 	SuccessVerifyEmail      = "Email has been successfully verified"
 	LogAdminFailed          = "Failed to get admin log."
 	InsertAdminLogFailed    = "Insert Admin Log Failed"
+	CustomersNotFound       = "List Customers Not Found"
 )
 
 // Response messages

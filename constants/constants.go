@@ -39,7 +39,6 @@ const (
 	CannotTransferVaToMain  = "Failed to transfer from virtual account to main account."
 	InvalidVA               = "Invalid virtual account number"
 	InvalidVaNumber         = "Virtual Account number is invalid"
-	InvalidAdmin            = "Invalid Admin"
 	FailSqlTransaction      = "Sql Transaction failed to set begin"
 	VANotFound              = "Virtual account not found"
 	FailToRevertBalance     = "Reverting balance to main account failed"
@@ -87,11 +86,4 @@ const (
 // Card Company
 const (
 	Mastercard = "51"
-)
-
-//Log Admin Action
-const (
-	Edit   = "EDIT"
-	Delete = "DELETE"
-	Resend = "RESEND"
 )

@@ -42,17 +42,19 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 	chiRouter.Post("/get-token", email.GetEmailToken(eh))         // Yuly
 
 	// Login Endpoint
-	chiRouter.Post("/login", customers.LoginHandler(jwt, db)) //Caesar
+	chiRouter.Post("/login", customers.LoginHandler(jwt, db))        //Caesar
+	chiRouter.Post("/admin/login", admin.LoginAdminHandler(jwt, db)) //Caesar
 
 	// Customer Endpoint
-	chiRouter.With(jwt.AuthMiddleware).Get("/me/profile", ch.GetProfile)                                 //Andreas
-	chiRouter.With(jwt.AuthMiddleware).Put("/me/update", ch.UpdateProfile)                               //Andreas
-	chiRouter.With(jwt.AuthMiddleware).Patch("/me/update-photo", ch.UpdatePhoto)                         //Andreas
-	chiRouter.With(jwt.AuthMiddleware).Patch("/me/update-password", ch.UpdatePassword)                   //Andreas
-	chiRouter.With(jwt.ValidateAccount).Post("/me/deposit", customers.DepositToMainAccount(ph, ah))      //Vici
-	chiRouter.With(jwt.AuthMiddleware).With(jwt.ValidateAccount).Put("/me/transfer-va", va.AddBalanceVA) //David
-	chiRouter.With(jwt.AuthMiddleware).Get("/me/dashboard", ch.GetDashboardData(db))                     //David
-	chiRouter.Get("/admin/customers/{page}", ch.GetListCustomers)                                        //David
+	chiRouter.With(jwt.AuthMiddleware).Get("/me/profile", ch.GetProfile)                                     //Andreas
+	chiRouter.With(jwt.AuthMiddleware).Put("/me/update", ch.UpdateProfile)                                   //Andreas
+	chiRouter.With(jwt.AuthMiddleware).Patch("/me/update-photo", ch.UpdatePhoto)                             //Andreas
+	chiRouter.With(jwt.AuthMiddleware).Patch("/me/update-password", ch.UpdatePassword)                       //Andreas
+	chiRouter.With(jwt.ValidateAccount).Post("/me/deposit", customers.DepositToMainAccount(ph, ah))          //Vici
+	chiRouter.With(jwt.AuthMiddleware).With(jwt.ValidateAccount).Put("/me/transfer-va", va.AddBalanceVA)     //David
+	chiRouter.With(jwt.AuthMiddleware).Get("/me/dashboard", ch.GetDashboardData(db))                         //David
+	chiRouter.With(jwt.AuthAdminMiddleware).Get("/admin/customers/{page}", ch.GetListCustomers)              //David
+	chiRouter.With(jwt.AuthAdminMiddleware).Get("/admin/customers/cards/{account_num}", ch.GetCardCustomers) //Caesar
 
 	// Virtual Account Endpoint
 	chiRouter.With(jwt.AuthMiddleware).Get("/me/va", va.VacList)                                                     //Jocelyn
@@ -65,8 +67,8 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 	chiRouter.With(jwt.AuthMiddleware).Get("/me/transaction/{page}", ch.HistoryTransactionHandler(db)) //Yuly
 
 	// Log Admin
-	chiRouter.Get("/admin/log/{page}", la.Get)
-	chiRouter.Post("/admin/log/insert", la.Insert)
+	chiRouter.With(jwt.AuthAdminMiddleware).Get("/admin/log/{page}", la.Get)
+	chiRouter.With(jwt.AuthAdminMiddleware).Post("/admin/log/insert", la.Insert)
 
 	// Not Found Endpoint
 	chiRouter.NotFound(not_found.NotFoundHandler) // Joseph

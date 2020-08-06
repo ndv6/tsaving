@@ -66,6 +66,7 @@ const (
 	RegisterSucceed       = "Register Succeeded"
 	GetListSuccess        = "Success to get the list data"
 	GetProfilSuccess      = "Get profile success"
+	GetCardSuccess        = "Get Cards Success"
 	UpdateProfileSuccess  = "Update profile success"
 	UpdatePasswordSuccess = "Update password success"
 	UpdatePhotoSuccess    = "Update photo success"

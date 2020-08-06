@@ -72,6 +72,9 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 	chiRouter.With(jwt.AuthAdminMiddleware).Get("/admin/log/{page}", la.Get)
 	chiRouter.With(jwt.AuthAdminMiddleware).Post("/admin/log/insert", la.Insert)
 
+	// admin dashboard
+	chiRouter.Get("/admin/dashboard", adm.GetDashboard())
+
 	// Not Found Endpoint
 	chiRouter.NotFound(not_found.NotFoundHandler) // Joseph
 

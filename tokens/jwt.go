@@ -130,13 +130,31 @@ func (j *JWT) AuthMiddleware(handler http.Handler) http.Handler {
 func (j *JWT) ValidateAccount(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set(constants.ContentType, constants.Json)
-		token := j.GetToken(r)
+		jwtToken, err := jwtauth.VerifyRequest(j.JWTAuth, r, TokenFromHeader)
+		if err != nil {
+			helpers.HTTPError(w, http.StatusBadRequest, "Error Verifying Token")
+			return
+		}
 
-		if token.AccountExpiration.Before(time.Now()) {
+		var claims Token
+		b, err := json.Marshal(jwtToken.Claims)
+		if err != nil {
+			helpers.HTTPError(w, http.StatusUnauthorized, "Invalid Token")
+			return
+		}
+
+		err = json.Unmarshal(b, &claims)
+		if err != nil {
+			helpers.HTTPError(w, http.StatusUnauthorized, "Unable to Parse Token")
+			return
+		}
+
+		if claims.AccountExpiration.Before(time.Now()) {
 			helpers.HTTPError(w, http.StatusBadRequest, "Card expired, please renew it")
 			return
 		}
 		handler.ServeHTTP(w, r)
+		return
 	})
 }
 

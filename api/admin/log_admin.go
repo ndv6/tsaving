@@ -28,7 +28,7 @@ func NewLogAdminHandler(db *sql.DB) *LogAdminHandler {
 func (la *LogAdminHandler) Get(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set(constants.ContentType, constants.Json)
-	// token := va.jwt.GetToken(r)
+
 	var username = "admin" //get from token (later)
 
 	page, err := strconv.Atoi(chi.URLParam(r, "page"))

@@ -26,7 +26,7 @@ func (j *JWT) Encode(token Token) string {
 	return tokenString
 }
 
-func (j *JWT) Decode(tokenString string) (token Token, err error) {
+func (j *JWT) Decode(tokenString string) (token *Token, err error) {
 	jwtToken, err := j.JWTAuth.Decode(tokenString)
 	fmt.Println(jwtToken.Claims)
 	if err != nil {
@@ -40,6 +40,7 @@ func (j *JWT) GetToken(r *http.Request) Token {
 	if !ok {
 		return Token{}
 	}
+	fmt.Println("token ok")
 	return token
 }
 
@@ -73,19 +74,45 @@ func (j *JWT) AuthMiddleware(handler http.Handler) http.Handler {
 
 		ctx := context.WithValue(r.Context(), "token", claims)
 		handler.ServeHTTP(w, r.WithContext(ctx))
+		fmt.Println("auth middleware served")
+		return
 	})
 }
 
 func (j *JWT) ValidateAccount(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set(constants.ContentType, constants.Json)
-		token := j.GetToken(r)
+		jwtToken, err := jwtauth.VerifyRequest(j.JWTAuth, r, TokenFromHeader)
+		if err != nil {
+			helpers.HTTPError(w, http.StatusBadRequest, "Error Verifying Token")
+			return
+		}
 
-		if token.AccountExpiration.Before(time.Now()) {
+		var claims Token
+		b, err := json.Marshal(jwtToken.Claims) //Encode Token
+		if err != nil {
+			helpers.HTTPError(w, http.StatusUnauthorized, "Invalid Token")
+			return
+		}
+
+		err = json.Unmarshal(b, &claims)
+		if err != nil {
+			helpers.HTTPError(w, http.StatusUnauthorized, "Unable to Parse Token")
+			return
+		}
+
+		err = claims.Valid()
+		if err != nil {
+			helpers.HTTPError(w, http.StatusUnauthorized, "Token Expired")
+			return
+		}
+
+		if claims.AccountExpiration.Before(time.Now()) {
 			helpers.HTTPError(w, http.StatusBadRequest, "Card expired, please renew it")
 			return
 		}
 		handler.ServeHTTP(w, r)
+		return
 	})
 }
 

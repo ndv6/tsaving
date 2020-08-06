@@ -47,4 +47,6 @@ func (ch *CustomerHandler) HistoryTransactionHandler(db *sql.DB) http.HandlerFun
 		w.Header().Set(constants.ContentType, constants.Json)
 		fmt.Fprint(w, string(res))
 	})
+
+	
 }

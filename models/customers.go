@@ -61,6 +61,11 @@ func CheckLoginVerified(db *sql.DB, email string, password string) (isVerified b
 	return
 }
 
+func GetDetailsCard(db *sql.DB, accountnum string) (objCustomer Customers, err error) {
+	err = db.QueryRow("SELECT card_num, cvv, expired FROM customers WHERE account_num = ($1)", accountnum).Scan(&objCustomer.CardNum, &objCustomer.Cvv, &objCustomer.Expired)
+	return
+}
+
 func GetAccNumber(db *sql.DB, id int) (acc string, err error) {
 	err = db.QueryRow("SELECT account_num FROM customers WHERE cust_id = $1", id).Scan(&acc)
 	return

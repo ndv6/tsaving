@@ -43,6 +43,52 @@ func (j *JWT) GetToken(r *http.Request) Token {
 	return token
 }
 
+func (j *JWT) GetTokenAdmin(r *http.Request) TokenAdmin {
+	token, ok := r.Context().Value("token").(TokenAdmin)
+	if !ok {
+		return TokenAdmin{}
+	}
+	return token
+}
+
+func (j *JWT) AuthAdminMiddleware(handler http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set(constants.ContentType, constants.Json)
+		jwtTokenAdmin, err := jwtauth.VerifyRequest(j.JWTAuth, r, TokenFromHeader)
+		if err != nil {
+			helpers.HTTPError(w, http.StatusBadRequest, "Error Verifying Token")
+			return
+		}
+
+		var claimsAdmin TokenAdmin
+		b, err := json.Marshal(jwtTokenAdmin.Claims) //Encode Token
+		if err != nil {
+			helpers.HTTPError(w, http.StatusUnauthorized, "Invalid Token")
+			return
+		}
+
+		err = json.Unmarshal(b, &claimsAdmin)
+		if err != nil {
+			helpers.HTTPError(w, http.StatusUnauthorized, "Unable to Parse Token")
+			return
+		}
+
+		if len(claimsAdmin.Username) < 1 {
+			helpers.HTTPError(w, http.StatusUnauthorized, "Invalid User")
+			return
+		}
+
+		err = claimsAdmin.Valid()
+		if err != nil {
+			helpers.HTTPError(w, http.StatusUnauthorized, "Token Not Valid")
+			return
+		}
+
+		ctx := context.WithValue(r.Context(), "token", claimsAdmin)
+		handler.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
 func (j *JWT) AuthMiddleware(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set(constants.ContentType, constants.Json)
@@ -62,6 +108,11 @@ func (j *JWT) AuthMiddleware(handler http.Handler) http.Handler {
 		err = json.Unmarshal(b, &claims)
 		if err != nil {
 			helpers.HTTPError(w, http.StatusUnauthorized, "Unable to Parse Token")
+			return
+		}
+
+		if len(claims.AccountNum) < 1 {
+			helpers.HTTPError(w, http.StatusUnauthorized, "Invalid User")
 			return
 		}
 

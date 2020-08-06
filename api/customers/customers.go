@@ -12,17 +12,24 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/xlzd/gotp"
-
+	"github.com/go-chi/chi"
 	"github.com/ndv6/tsaving/constants"
+	"github.com/ndv6/tsaving/database"
 	"github.com/ndv6/tsaving/helpers"
 	"github.com/ndv6/tsaving/models"
 	"github.com/ndv6/tsaving/tokens"
 	"github.com/theplant/luhn"
+	"github.com/xlzd/gotp"
 )
 
 type EmailResponse struct {
 	Email string `json:"email"`
+}
+
+type CardResponse struct {
+	CardNum string    `json:"card_num"`
+	CVV     string    `json:"cvv"`
+	Expired time.Time `json:"expired"`
 }
 
 type CustomerHandler struct {
@@ -55,6 +62,31 @@ func (ch *CustomerHandler) GetProfile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	_, res, err := helpers.NewResponseBuilder(w, true, constants.GetProfilSuccess, cus)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
+		return
+	}
+
+	fmt.Fprintln(w, string(res))
+}
+
+func (ch *CustomerHandler) GetCardCustomers(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set(constants.ContentType, constants.Json)
+
+	AccountNum := chi.URLParam(r, "account_num")
+	cardDetails, err := models.GetDetailsCard(ch.db, AccountNum)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	data := CardResponse{
+		CardNum: cardDetails.CardNum,
+		CVV:     cardDetails.Cvv,
+		Expired: cardDetails.Expired,
+	}
+
+	_, res, err := helpers.NewResponseBuilder(w, true, constants.GetCardSuccess, data)
 	if err != nil {
 		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
 		return
@@ -384,4 +416,28 @@ func GenerateCardNumber(accNum string, date time.Time) (card models.Card, err er
 
 func GenerateRandomNumber(min, max int) int {
 	return min + rand.Intn(max-min)
+}
+
+func (ch *CustomerHandler) GetListCustomers(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set(constants.ContentType, constants.Json)
+
+	page, err := strconv.Atoi(chi.URLParam(r, "page"))
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotParseURLParams)
+		return
+	}
+
+	listCustomers, err := database.GetListCustomers(ch.db, page)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	_, res, err := helpers.NewResponseBuilder(w, true, constants.Success, listCustomers)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
+		return
+	}
+
+	fmt.Fprint(w, res)
 }

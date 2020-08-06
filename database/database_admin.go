@@ -34,7 +34,12 @@ func GetActInActUserCount(db *sql.DB) (act, inact int, err error) {
 	defer rows.Close()
 	for rows.Next() {
 		var is_verified bool
-		rows.Scan(&is_verified)
+		err = rows.Scan(&is_verified)
+		if err != nil {
+			act = 0
+			inact = 0
+			return
+		}
 		if is_verified {
 			act += 1
 			continue

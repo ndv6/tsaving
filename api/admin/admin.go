@@ -42,9 +42,14 @@ func (ah *AdminHandler) GetDashboard() http.HandlerFunc {
 		act, inact, err := database.GetActInActUserCount(ah.db)
 		if err != nil {
 			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+			return
 		}
 
 		total, err := database.GetTotalTransactionCount(ah.db)
+		if err != nil {
+			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+			return
+		}
 
 		dashboardAdm := models.DashboardAdmin{
 			ActUser:          act,

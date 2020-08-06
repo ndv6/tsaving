@@ -8,6 +8,7 @@ import (
 	"github.com/ndv6/tsaving/constants"
 	"github.com/ndv6/tsaving/database"
 	"github.com/ndv6/tsaving/helpers"
+	"github.com/ndv6/tsaving/models"
 )
 
 type AdminHandler struct {
@@ -34,4 +35,25 @@ func (adm *AdminHandler) TransactionHistoryHandler(w http.ResponseWriter, r *htt
 	}
 
 	fmt.Fprintln(w, string(res))
+}
+
+func (ah *AdminHandler) GetDashboard() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		act, inact, err := database.GetActInActUserCount(ah.db)
+		if err != nil {
+			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+		}
+
+		total, err := database.GetTotalTransactionCount(ah.db)
+
+		dashboardAdm := models.DashboardAdmin{
+			ActUser:          act,
+			InactUser:        inact,
+			TotalTransaction: total,
+		}
+
+		w, res, err := helpers.NewResponseBuilder(w, true, "Success fetching dashboard data", dashboardAdm)
+		fmt.Fprint(w, res)
+		return
+	}
 }

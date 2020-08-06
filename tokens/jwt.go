@@ -149,12 +149,6 @@ func (j *JWT) ValidateAccount(handler http.Handler) http.Handler {
 			return
 		}
 
-		err = claims.Valid()
-		if err != nil {
-			helpers.HTTPError(w, http.StatusUnauthorized, "Token Expired")
-			return
-		}
-
 		if claims.AccountExpiration.Before(time.Now()) {
 			helpers.HTTPError(w, http.StatusBadRequest, "Card expired, please renew it")
 			return

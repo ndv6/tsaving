@@ -97,7 +97,7 @@ func GetListVA(db *sql.DB, id int) (VirAcc []models.VirtualAccounts, err error) 
 	}
 
 	defer rows.Close()
-	//defer -> yang harus dipanggil di akhir (biar ga lupa
+	//defer -> yang harus dipanggil di akhir (biar ga lugitpa
 
 	res := make([]models.VirtualAccounts, 0)
 

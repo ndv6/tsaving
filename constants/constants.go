@@ -54,6 +54,8 @@ const (
 	VerifyEmailTokenFailed  = "Unable to verify email token: "
 	DeleteEmailTokenFailed  = "Unable to delete verified email"
 	SuccessVerifyEmail      = "Email has been successfully verified"
+	LogAdminFailed          = "Failed to get admin log."
+	InsertAdminLogFailed    = "Insert Admin Log Failed"
 	CustomersNotFound       = "List Customers Not Found"
 )
 
@@ -68,6 +70,8 @@ const (
 	UpdatePasswordSuccess = "Update password success"
 	UpdatePhotoSuccess    = "Update photo success"
 	SuccessGetToken       = "Success to get the token"
+	AddLogAdminSuccess    = "Add admin log success"
+	GetLogAdminSuccess    = "Get admin log success"
 )
 
 // Headers

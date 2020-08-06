@@ -70,6 +70,25 @@ func (ch *CustomerHandler) GetProfile(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, string(res))
 }
 
+func (ch *CustomerHandler) GetProfileforAdmin(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set(constants.ContentType, constants.Json)
+
+	CustId, _ := strconv.Atoi(chi.URLParam(r, "cust_id"))
+	cus, err := models.GetProfile(ch.db, CustId)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	_, res, err := helpers.NewResponseBuilder(w, true, constants.GetProfilSuccess, cus)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
+		return
+	}
+
+	fmt.Fprintln(w, string(res))
+}
+
 func (ch *CustomerHandler) GetCardCustomers(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set(constants.ContentType, constants.Json)
 

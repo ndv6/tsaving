@@ -54,8 +54,9 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 	chiRouter.With(jwt.ValidateAccount).Post("/me/deposit", customers.DepositToMainAccount(ph, ah))          //Vici
 	chiRouter.With(jwt.AuthMiddleware).With(jwt.ValidateAccount).Put("/me/transfer-va", va.AddBalanceVA)     //David
 	chiRouter.With(jwt.AuthMiddleware).Get("/me/dashboard", ch.GetDashboardData(db))                         //David
-	chiRouter.With(jwt.AuthAdminMiddleware).Get("/admin/customers/{page}", ch.GetListCustomers)              //David
+	chiRouter.With(jwt.AuthAdminMiddleware).Get("/admin/customers/list/{page}", ch.GetListCustomers)         //David
 	chiRouter.With(jwt.AuthAdminMiddleware).Get("/admin/customers/cards/{account_num}", ch.GetCardCustomers) //Caesar
+	chiRouter.With(jwt.AuthAdminMiddleware).Get("/admin/customers/{cust_id}", ch.GetProfileforAdmin)         //Caesar
 
 	// Virtual Account Endpoint
 	chiRouter.With(jwt.AuthMiddleware).Get("/me/va", va.VacList)                                                     //Jocelyn

@@ -31,7 +31,8 @@ func (la *LogAdminHandler) Get(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set(constants.ContentType, constants.Json)
 	// token := va.jwt.GetToken(r)
-	var username = "admin" //get token username
+	var username = "admin" //get from token (later)
+
 	page, err := strconv.Atoi(chi.URLParam(r, "page"))
 	if err != nil {
 		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotParseURLParams)
@@ -40,7 +41,6 @@ func (la *LogAdminHandler) Get(w http.ResponseWriter, r *http.Request) {
 
 	LogAdmin, err := database.GetLogAdmin(la.db, username, page)
 	if err != nil {
-		fmt.Fprint(w, err)
 		helper.HTTPError(w, http.StatusBadRequest, constants.LogAdminFailed)
 		return
 	}
@@ -75,7 +75,6 @@ func (la *LogAdminHandler) Insert(w http.ResponseWriter, r *http.Request) {
 
 	err = database.InsertLogAdmin(la.db, lar, username)
 	if err != nil {
-		fmt.Fprint(w, err)
 		helper.HTTPError(w, http.StatusBadRequest, constants.InsertAdminLogFailed)
 		return
 	}

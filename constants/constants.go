@@ -54,6 +54,7 @@ const (
 	VerifyEmailTokenFailed  = "Unable to verify email token: "
 	DeleteEmailTokenFailed  = "Unable to delete verified email"
 	SuccessVerifyEmail      = "Email has been successfully verified"
+	CustomersNotFound       = "List Customers Not Found"
 )
 
 // Response messages

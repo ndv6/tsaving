@@ -30,7 +30,7 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 	ch := customers.NewCustomerHandler(jwt, db)
 	va := virtual_accounts.NewVAHandler(jwt, db) // David, Jocelyn, Joseph , Azizah
 	eh := database.NewEmailHandler(db)           // Joseph
-	la := admin.NewLogAdminHandler(jwt, db)
+	la := admin.NewLogAdminHandler(db)
 	// da := customers.NewDashboardHandler(jwt)
 
 	// Home endpoint
@@ -64,8 +64,8 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 	chiRouter.With(jwt.AuthMiddleware).Get("/me/transaction/{page}", ch.HistoryTransactionHandler(db)) //Yuly
 
 	// Log Admin
-	chiRouter.With(jwt.AuthMiddleware).Get("/admin/log/{page}", la.Get)
-	chiRouter.With(jwt.AuthMiddleware).Post("/admin/log/insert", la.Insert)
+	chiRouter.Get("/admin/log/{page}", la.Get)
+	chiRouter.Post("/admin/log/insert", la.Insert)
 
 	// Not Found Endpoint
 	chiRouter.NotFound(not_found.NotFoundHandler) // Joseph

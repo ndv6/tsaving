@@ -15,16 +15,14 @@ import (
 	"github.com/ndv6/tsaving/database"
 	"github.com/ndv6/tsaving/helpers"
 	helper "github.com/ndv6/tsaving/helpers"
-	"github.com/ndv6/tsaving/tokens"
 )
 
 type LogAdminHandler struct {
-	jwt *tokens.JWT
-	db  *sql.DB
+	db *sql.DB
 }
 
-func NewLogAdminHandler(jwt *tokens.JWT, db *sql.DB) *LogAdminHandler {
-	return &LogAdminHandler{jwt, db}
+func NewLogAdminHandler(db *sql.DB) *LogAdminHandler {
+	return &LogAdminHandler{db}
 }
 
 func (la *LogAdminHandler) Get(w http.ResponseWriter, r *http.Request) {

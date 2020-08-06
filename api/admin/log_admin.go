@@ -1,57 +1,88 @@
 package admin
 
+import (
+	"database/sql"
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"net/http"
+	"strconv"
+
+	"github.com/ndv6/tsaving/models"
+
+	"github.com/go-chi/chi"
+	"github.com/ndv6/tsaving/constants"
+	"github.com/ndv6/tsaving/database"
+	"github.com/ndv6/tsaving/helpers"
+	helper "github.com/ndv6/tsaving/helpers"
+	"github.com/ndv6/tsaving/tokens"
+)
+
 type LogAdminHandler struct {
 	jwt *tokens.JWT
 	db  *sql.DB
 }
 
-func NewLogAdminHandler(jwt *tokens.JWT, db *sql.DB) *VAHandler {
+func NewLogAdminHandler(jwt *tokens.JWT, db *sql.DB) *LogAdminHandler {
 	return &LogAdminHandler{jwt, db}
 }
 
-func (la *LogAdminHandler) VacToMain(w http.ResponseWriter, r *http.Request) {
-	
-	w.Header().Set(constants.ContentType, constants.Json)
-	token := va.jwt.GetToken(r)
-	//ambil input dari jsonnya (no rek VAC dan saldo input)
+func (la *LogAdminHandler) Get(w http.ResponseWriter, r *http.Request) {
 
-	b, err := ioutil.ReadAll(r.Body)
+	w.Header().Set(constants.ContentType, constants.Json)
+	// token := va.jwt.GetToken(r)
+	var username = "admin" //get token username
+	page, err := strconv.Atoi(chi.URLParam(r, "page"))
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotParseURLParams)
+		return
+	}
+
+	LogAdmin, err := database.GetLogAdmin(la.db, username, page)
+	if err != nil {
+		fmt.Fprint(w, err)
+		helper.HTTPError(w, http.StatusBadRequest, constants.LogAdminFailed)
+		return
+	}
+
+	_, res, err := helpers.NewResponseBuilder(w, true, constants.GetLogAdminSuccess, LogAdmin)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
+		return
+	}
+
+	fmt.Fprint(w, res)
+
+}
+
+func (la *LogAdminHandler) Insert(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set(constants.ContentType, constants.Json)
+
+	var username = "admin" //get from token (later)
+
+	req, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		helper.HTTPError(w, http.StatusBadRequest, constants.CannotReadRequest)
 		return
 	}
 
-	var LogAdmin models.LogAdmin
-	err = json.Unmarshal(b, &LogAdmin)
+	var lar models.LogAdmin
+	err = json.Unmarshal(req, &lar)
 	if err != nil {
 		helper.HTTPError(w, http.StatusBadRequest, constants.CannotParseRequest)
 		return
 	}
 
-	//cek admin ?
-	UsernameAdmin := chi.URLParam(r,"username") //ini bisa ambil dari token
-	err = database.CheckAdmin(la.db,UsernameAdmin)
+	err = database.InsertLogAdmin(la.db, lar, username)
 	if err != nil {
-		helper.HTTPError(w, http.StatusBadRequest, constants.InvalidAdmin)
+		fmt.Fprint(w, err)
+		helper.HTTPError(w, http.StatusBadRequest, constants.InsertAdminLogFailed)
 		return
 	}
 
-	database.GetLogAdmin(la.db, UsernameAdmin)
-
-
-	//get no rekening by rekening vac
-	AccountNumber, _ := database.GetAccountByVA(va.db, vaNum)
-
-	//update balance at both accounts
-	err = database.UpdateVacToMain(va.db, VirAcc.BalanceChange, vaNum, AccountNumber)
+	_, res, err := helper.NewResponseBuilder(w, true, constants.AddLogAdminSuccess, nil)
 	if err != nil {
-		helper.HTTPError(w, http.StatusOK, err.Error())
-		return
-	}
-
-	_, res, err := helpers.NewResponseBuilder(w, true, fmt.Sprintf("successfully move balance to your main account : %v", VirAcc.BalanceChange), nil)
-	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
+		helper.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
 		return
 	}
 	fmt.Fprint(w, string(res))

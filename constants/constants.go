@@ -39,7 +39,7 @@ const (
 	CannotTransferVaToMain  = "Failed to transfer from virtual account to main account."
 	InvalidVA               = "Invalid virtual account number"
 	InvalidVaNumber         = "Virtual Account number is invalid"
-	InvalidAdmin			= "Invalid Admin"
+	InvalidAdmin            = "Invalid Admin"
 	FailSqlTransaction      = "Sql Transaction failed to set begin"
 	VANotFound              = "Virtual account not found"
 	FailToRevertBalance     = "Reverting balance to main account failed"
@@ -55,6 +55,8 @@ const (
 	VerifyEmailTokenFailed  = "Unable to verify email token: "
 	DeleteEmailTokenFailed  = "Unable to delete verified email"
 	SuccessVerifyEmail      = "Email has been successfully verified"
+	LogAdminFailed          = "Failed to get admin log."
+	InsertAdminLogFailed    = "Insert Admin Log Failed"
 )
 
 // Response messages
@@ -68,6 +70,8 @@ const (
 	UpdatePasswordSuccess = "Update password success"
 	UpdatePhotoSuccess    = "Update photo success"
 	SuccessGetToken       = "Success to get the token"
+	AddLogAdminSuccess    = "Add admin log success"
+	GetLogAdminSuccess    = "Get admin log success"
 )
 
 // Headers
@@ -83,4 +87,11 @@ const (
 // Card Company
 const (
 	Mastercard = "51"
+)
+
+//Log Admin Action
+const (
+	Edit   = "EDIT"
+	Delete = "DELETE"
+	Resend = "RESEND"
 )

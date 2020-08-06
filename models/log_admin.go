@@ -3,7 +3,9 @@ package models
 import "time"
 
 type LogAdmin struct {
-	IDLogAdmin    string    `json:"admin_username"`
-	AdminUsername string    `json:"admin_password"`
-	CreatedAt     time.Time `json:"created_at"`
+	IDLogAdmin  string    `json:"id_logadmin"`
+	Username 	string    `json:"username"`
+	AccNum		string	  `json:"acc_num"`
+	Action 		string 	  `json:"action"`
+	ActionTime   time.Time `json:"action_time"`
 }

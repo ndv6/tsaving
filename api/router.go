@@ -7,6 +7,7 @@ import (
 
 	"github.com/ndv6/tsaving/database"
 
+	"github.com/ndv6/tsaving/api/admin"
 	"github.com/ndv6/tsaving/api/customers"
 	"github.com/ndv6/tsaving/api/email"
 	"github.com/ndv6/tsaving/api/home"
@@ -29,7 +30,7 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 	ch := customers.NewCustomerHandler(jwt, db)
 	va := virtual_accounts.NewVAHandler(jwt, db) // David, Jocelyn, Joseph , Azizah
 	eh := database.NewEmailHandler(db)           // Joseph
-	eh := database.NewLogAdminHandler(db)         
+	la := admin.NewLogAdminHandler(jwt, db)
 	// da := customers.NewDashboardHandler(jwt)
 
 	// Home endpoint
@@ -63,7 +64,8 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 	chiRouter.With(jwt.AuthMiddleware).Get("/me/transaction/{page}", ch.HistoryTransactionHandler(db)) //Yuly
 
 	// Log Admin
-	chiRouter.With(jwt.AuthMiddleware).Get("/me/{username}/admin")
+	chiRouter.With(jwt.AuthMiddleware).Get("/admin/log/{page}", la.Get)
+	chiRouter.With(jwt.AuthMiddleware).Post("/admin/log/insert", la.Insert)
 
 	// Not Found Endpoint
 	chiRouter.NotFound(not_found.NotFoundHandler) // Joseph

@@ -22,7 +22,8 @@ type LoginAdminRequest struct {
 }
 
 type LoginAdminResponse struct {
-	Token string `json:"token"`
+	Token    string `json:"token"`
+	Username string `json:"username"`
 }
 
 func LoginAdminHandler(jwt *tokens.JWT, db *sql.DB) http.HandlerFunc { // Handle by Caesar Gusti
@@ -50,7 +51,8 @@ func LoginAdminHandler(jwt *tokens.JWT, db *sql.DB) http.HandlerFunc { // Handle
 		})
 
 		data := LoginAdminResponse{
-			Token: tokenLoginAdmin,
+			Token:    tokenLoginAdmin,
+			Username: objAdmin.Username,
 		}
 
 		_, res, err := helpers.NewResponseBuilder(w, true, constants.LoginSucceed, data)

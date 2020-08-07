@@ -95,32 +95,74 @@ func GetTotalTransactionCount(db *sql.DB) (total int, err error) {
 	return
 }
 
-func GetNewUserTodayYesterday(db *sql.DB) (objData models.CountData, err error) {
-	err = db.QueryRow("SELECT count(cust_id) FROM customers WHERE created_at > current_date - 1").Scan(&objData.Total)
+func GetNewUserToday(db *sql.DB) (total int, err error) {
+	err = db.QueryRow("SELECT count(cust_id) FROM customers WHERE created_at > current_date").Scan(&total)
 	return
 }
 
-func GetNewUserThisWeek(db *sql.DB) (objData models.CountData, err error) {
-	err = db.QueryRow("SELECT count(cust_id) FROM customers WHERE created_at > current_date - 7").Scan(&objData.Total)
+func GetNewUserYesterday(db *sql.DB) (total int, err error) {
+	err = db.QueryRow("SELECT count(cust_id) FROM customers WHERE created_at::date = current_date - 1").Scan(&total)
 	return
 }
 
-func GetNewUserThisMonth(db *sql.DB) (objData models.CountData, err error) {
-	err = db.QueryRow("SELECT count(cust_id) FROM customers WHERE created_at > date_trunc('month', CURRENT_DATE)").Scan(&objData.Total)
+func GetNewUserThisWeek(db *sql.DB) (total int, err error) {
+	err = db.QueryRow("SELECT count(cust_id) FROM customers WHERE created_at > current_date - 7").Scan(&total)
 	return
 }
 
-func GetTransactionAmount(db *sql.DB) (objData models.CountData, err error) {
-	err = db.QueryRow("SELECT sum(tran_amount) FROM transaction_logs WHERE created_at > current_date - 1 ").Scan(&objData.Total)
+func GetNewUserThisMonth(db *sql.DB) (total int, err error) {
+	err = db.QueryRow("SELECT count(cust_id) FROM customers WHERE created_at > date_trunc('month', CURRENT_DATE)").Scan(&total)
 	return
 }
 
-func GetLogTransactionToday(db *sql.DB) (objTransactionLog models.TransactionLogs, err error) {
-	err = db.QueryRow("SELECT tl_id, account_num, from_account, dest_account, tran_amount, description, created_at FROM transaction_logs WHERE created_at > current_date order by 1 desc ").Scan(&objTransactionLog.TlId, &objTransactionLog.AccountNum, &objTransactionLog.DestAccount, &objTransactionLog.FromAccount, &objTransactionLog.TranAmount, &objTransactionLog.Description, &objTransactionLog.CreatedAt)
+func GetTransactionAmountToday(db *sql.DB) (total int, err error) {
+	err = db.QueryRow("SELECT sum(tran_amount) FROM transaction_logs WHERE created_at > current_date").Scan(&total)
 	return
 }
 
-func GetLogAdminToday(db *sql.DB) (objLogAdmin models.LogAdmin, err error) {
-	err = db.QueryRow("SELECT id, username, account_num, action, action_time FROM log_admins WHERE action_time > current_date order by 1 desc ").Scan(&objLogAdmin.IDLogAdmin, &objLogAdmin.Username, &objLogAdmin.Action, &objLogAdmin.AccNum, &objLogAdmin.ActionTime)
+func GetTransactionAmountYesterday(db *sql.DB) (total int, err error) {
+	err = db.QueryRow("SELECT sum(tran_amount) FROM transaction_logs WHERE created_at::date = current_date - 1").Scan(&total)
 	return
+}
+
+func GetLogTransactionToday(db *sql.DB) (res []models.TransactionLogs, err error) {
+	rows, err := db.Query("SELECT tl_id, account_num, from_account, dest_account, tran_amount, description, created_at FROM transaction_logs WHERE created_at > current_date order by 1 desc ")
+
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var objTransactionLog models.TransactionLogs
+		err = rows.Scan(&objTransactionLog.TlId, &objTransactionLog.AccountNum, &objTransactionLog.DestAccount, &objTransactionLog.FromAccount, &objTransactionLog.TranAmount, &objTransactionLog.Description, &objTransactionLog.CreatedAt)
+		if err != nil {
+			return
+		}
+		res = append(res, objTransactionLog)
+	}
+	return res, nil
+}
+
+func GetLogAdminToday(db *sql.DB) (res []models.LogAdmin, err error) {
+	rows, err := db.Query("SELECT id, username, account_num, action, action_time FROM log_admins WHERE action_time > current_date order by 1 desc ")
+
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var objLogAdmin models.LogAdmin
+		err = rows.Scan(&objLogAdmin.IDLogAdmin, &objLogAdmin.Username, &objLogAdmin.Action, &objLogAdmin.AccNum, &objLogAdmin.ActionTime)
+		if err != nil {
+			return
+		}
+		res = append(res, objLogAdmin)
+	}
+	return res, nil
 }

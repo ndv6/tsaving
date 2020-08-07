@@ -18,6 +18,7 @@ type DashboardUserResponse struct {
 }
 
 type DashboardTransactionResponse struct {
+	TotalTransactionMonth     int `json:"total_transaction_month"`
 	TotalTransactionToday     int `json:"total_transaction_today"`
 	TotalTransactionYesterday int `json:"total_transaction_yesterday"`
 	TransactionMonth          []TransactionMonth

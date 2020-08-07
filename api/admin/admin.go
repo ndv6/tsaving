@@ -116,6 +116,12 @@ func (ah *AdminHandler) GetDashboard() http.HandlerFunc {
 			return
 		}
 
+		totalTransactionAmountMonth, err := database.GetTransactionAmountMonth(ah.db)
+		if err != nil {
+			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+			return
+		}
+
 		totalTransactionAmountToday, err := database.GetTransactionAmountToday(ah.db)
 		if err != nil {
 			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
@@ -140,7 +146,7 @@ func (ah *AdminHandler) GetDashboard() http.HandlerFunc {
 			return
 		}
 
-		transactionMonth, err := database.GetTransactionByWeek(ah.db)
+		transactionMonthbyWeek, err := database.GetTransactionByWeek(ah.db)
 		if err != nil {
 			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
 			return
@@ -157,9 +163,10 @@ func (ah *AdminHandler) GetDashboard() http.HandlerFunc {
 		}
 
 		dashboardTransaction := models.DashboardTransactionResponse{
+			TotalTransactionMonth:     totalTransactionAmountMonth,
 			TotalTransactionToday:     totalTransactionAmountToday,
 			TotalTransactionYesterday: totalTransactionAmountYesterday,
-			TransactionMonth:          transactionMonth,
+			TransactionMonth:          transactionMonthbyWeek,
 		}
 
 		dashboardAdm := models.DashboardAdmin{

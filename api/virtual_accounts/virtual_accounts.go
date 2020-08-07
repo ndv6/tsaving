@@ -39,6 +39,11 @@ type VAResponse struct {
 	Message string `json:"message"`
 }
 
+type VAListAdminResponse struct {
+	Total  int `json:"total"`
+	VAList []models.VirtualAccounts `json:"data"`
+}
+
 type VAHandler struct {
 	jwt *tokens.JWT
 	db  *sql.DB
@@ -367,14 +372,19 @@ func (va *VAHandler) VacListAdmin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	
-	data, err := database.GetListVAAdmin(va.db, custId, page)
+	data, count, err := database.GetListVAAdmin(va.db, custId, page)
 	if err != nil {
 		w.Header().Set(constants.ContentType, constants.Json)
 		helpers.HTTPError(w, http.StatusBadRequest, "Cannot get va list")
 		return
 	}
 
-	_, res, err := helpers.NewResponseBuilder(w, true, constants.GetListSuccess, data)
+	responseBody := VAListAdminResponse{
+		Total: count,
+		VAList: data,
+	}
+
+	_, res, err := helpers.NewResponseBuilder(w, true, constants.GetListSuccess, responseBody)
 	if err != nil {
 		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
 		return

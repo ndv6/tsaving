@@ -86,6 +86,9 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 
 		// admin dashboard
 		r.With(jwt.AuthAdminMiddleware).Get("/dashboard", adm.GetDashboard())
+
+		// va list for admin
+		r.With(jwt.AuthAdminMiddleware).Get("/va/{cust_id}", va.VacListAdmin)
 	})
 
 	// Not Found Endpoint

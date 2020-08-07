@@ -452,14 +452,13 @@ func GenerateRandomNumber(min, max int) int {
 func (ch *CustomerHandler) GetListCustomers(w http.ResponseWriter, r *http.Request) {
 	helpers.EnableCORS(&w)
 	w.Header().Set(constants.ContentType, constants.Json)
-	// access for web
 
-	// tokens := ch.jwt.GetTokenAdmin(r)
-	// err := tokens.Valid()
-	// if err != nil {
-	// 	helpers.HTTPError(w, http.StatusBadRequest, err.Error())
-	// 	return
-	// }
+	tokens := ch.jwt.GetTokenAdmin(r)
+	err := tokens.Valid()
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+		return
+	}
 
 	page, err := strconv.Atoi(chi.URLParam(r, "page"))
 	if err != nil {

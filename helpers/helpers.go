@@ -45,6 +45,6 @@ func LoadConfig(file string) (models.Config, error) {
 	return cfg, err
 }
 
-func EnableCors(w *http.ResponseWriter) {
+func EnableCORS(w *http.ResponseWriter) {
 	(*w).Header().Set("Access-Control-Allow-Origin", "*")
 }

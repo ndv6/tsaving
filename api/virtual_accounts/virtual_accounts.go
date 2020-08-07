@@ -354,7 +354,8 @@ func (va *VAHandler) VacListAdmin(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set(constants.ContentType, constants.Json)
 
 	custId, _ := strconv.Atoi(chi.URLParam(r, "cust_id"))
-	data, err := database.GetListVA(va.db, custId)
+	page, _ := strconv.Atoi(chi.URLParam(r, "page"))
+	data, err := database.GetListVAAdmin(va.db, custId, page)
 
 	if err != nil {
 		helper.HTTPError(w, http.StatusBadRequest, "id must be integer")

@@ -16,10 +16,10 @@ func InsertLogAdmin(db *sql.DB, la models.LogAdmin, username string) (err error)
 	return err
 }
 
-func GetLogAdmin(db *sql.DB, username string, page int) (LogAdmin []models.LogAdmin, err error) {
+func GetLogAdmin(db *sql.DB, page int) (LogAdmin []models.LogAdmin, err error) {
 
 	offset := (page - 1) * 20
-	rows, err := db.Query("SELECT id,username,action,account_num,action_time FROM log_admins WHERE username = $1 ORDER BY action_time OFFSET $2 LIMIT 20", username, offset)
+	rows, err := db.Query("SELECT id,username,action,account_num,action_time FROM log_admins ORDER BY action_time OFFSET $1 LIMIT 20", offset)
 	if err != nil {
 		return
 	}

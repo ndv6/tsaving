@@ -81,9 +81,12 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 
 		// transaction log
 		r.Route("/transactions", func(r chi.Router) {
-			r.With(jwt.AuthAdminMiddleware).Get("/", adm.TransactionHistoryHandler)                  // Azizah
-			r.With(jwt.AuthAdminMiddleware).Get("/{accNum}", adm.TransactionHistoryHandler)          // Yuly
-			r.With(jwt.AuthAdminMiddleware).Get("/{accNum}/{search}", adm.TransactionHistoryHandler) // Yuly
+			r.With(jwt.AuthAdminMiddleware).Get("/", adm.TransactionHistoryHandler)                                              // Azizah
+			r.With(jwt.AuthAdminMiddleware).Get("/{accNum}/{page}", adm.TransactionHistoryHandler)                               // Yuly
+			r.With(jwt.AuthAdminMiddleware).Get("/{accNum}/{day}-{month}-{year}/{page}", adm.TransactionHistoryHandler)          // Yuly
+			r.With(jwt.AuthAdminMiddleware).Get("/{accNum}/{search}/{page}", adm.TransactionHistoryHandler)                      // Yuly
+			r.With(jwt.AuthAdminMiddleware).Get("/{accNum}/{day}-{month}-{year}/{search}/{page}", adm.TransactionHistoryHandler) // Yuly
+
 		})
 
 		// Log Admin
@@ -94,7 +97,7 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 		r.With(jwt.AuthAdminMiddleware).Get("/dashboard", adm.GetDashboard())
 
 		// va list for admin
-		r.With(jwt.AuthAdminMiddleware).Get("/va/{cust_id}", va.VacListAdmin)
+		r.With(jwt.AuthAdminMiddleware).Get("/va/{cust_id}/{page}", va.VacListAdmin)
 	})
 
 	// Not Found Endpoint

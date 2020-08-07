@@ -91,7 +91,7 @@ func GetAccountByVA(db *sql.DB, vacNum string) (AccountNum string, err error) {
 }
 
 func GetListVA(db *sql.DB, id int) (VirAcc []models.VirtualAccounts, err error) {
-	rows, err := db.Query("SELECT va_id, va_num, virtual_accounts.account_num, COALESCE(va_label,'') as va_label, COALESCE(va_color,'') as va_color, va_balance, COALESCE(virtual_accounts.created_at,now()) as created_at, COALESCE(virtual_accounts.created_at,now()) as updated_at FROM virtual_accounts INNER JOIN customers ON virtual_accounts.account_num = customers.account_num WHERE cust_id = $1 ORDER BY virtual_accounts.va_balance DESC", id)
+	rows, err := db.Query("SELECT va_id, va_num, virtual_accounts.account_num, COALESCE(va_label,'') as va_label, COALESCE(va_color,'') as va_color, va_balance, COALESCE(virtual_accounts.created_at,now()) as created_at, COALESCE(virtual_accounts.updated_at,now()) as updated_at FROM virtual_accounts INNER JOIN customers ON virtual_accounts.account_num = customers.account_num WHERE cust_id = $1 ORDER BY virtual_accounts.va_balance DESC", id)
 	if err != nil {
 		return VirAcc, err
 	}
@@ -112,6 +112,43 @@ func GetListVA(db *sql.DB, id int) (VirAcc []models.VirtualAccounts, err error) 
 	}
 
 	return res, nil
+}
+
+func GetListVAAdmin(db *sql.DB, id int, page int) (virAcc []models.VirtualAccounts, count int, err error) {
+
+	offset := (page - 1) * 20
+	rows, err := db.Query("SELECT va_id, va_num, virtual_accounts.account_num, COALESCE(va_label,'') as va_label, COALESCE(va_color,'') as va_color, va_balance, COALESCE(virtual_accounts.created_at,now()) as created_at, COALESCE(virtual_accounts.updated_at,now()) as updated_at FROM virtual_accounts INNER JOIN customers ON virtual_accounts.account_num = customers.account_num WHERE cust_id = $1 ORDER BY virtual_accounts.created_at OFFSET $2 LIMIT 20", id, offset)
+	if err != nil {
+		return
+	}
+
+	var accNum string
+
+	err = db.QueryRow("SELECT account_num FROM customers WHERE cust_id = $1", id).Scan(&accNum)
+	if err != nil {
+		return
+	}
+
+	err = db.QueryRow("SELECT COUNT(*) FROM virtual_accounts WHERE account_num = $1", accNum).Scan(&count)
+	if err != nil {
+		return
+	}
+
+	defer rows.Close()
+	//defer -> yang harus dipanggil di akhir (biar ga lugitpa
+
+	// res := make([]models.VirtualAccounts, 0)
+
+	for rows.Next() {
+		var va models.VirtualAccounts
+		err = rows.Scan(&va.VaId, &va.VaNum, &va.AccountNum, &va.VaLabel, &va.VaColor, &va.VaBalance, &va.CreatedAt, &va.UpdatedAt)
+		if err != nil {
+			return
+		}
+		virAcc = append(virAcc, va)
+	}
+
+	return
 }
 
 //untuk ngecek input rekening apakah benar atau tidak.

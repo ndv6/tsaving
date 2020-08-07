@@ -98,6 +98,6 @@ func GetTotalTransactionCount(db *sql.DB) (total int, err error) {
 
 //SOFT DELETE
 func SoftDeleteCustomer(db *sql.DB, AccNum string) (err error) {
-	_, err = db.Exec("UPDATE customer SET is_deleted = $1 WHERE account_num = $2", time.Now(), AccNum)
+	_, err = db.Exec("UPDATE customers SET is_deleted = $1 WHERE account_num = $2", time.Now(), AccNum)
 	return
 }

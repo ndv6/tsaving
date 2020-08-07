@@ -492,7 +492,12 @@ func (ch *CustomerHandler) GetListCustomers(w http.ResponseWriter, r *http.Reque
 
 func (ch *CustomerHandler) SoftDelete(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set(constants.ContentType, constants.Json)
-	helpers.EnableCORS(&w)
+	tokens := ch.jwt.GetTokenAdmin(r)
+	err := tokens.Valid()
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+		return
+	}
 
 	b, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -515,6 +520,7 @@ func (ch *CustomerHandler) SoftDelete(w http.ResponseWriter, r *http.Request) {
 
 	err = database.SoftDeleteCustomer(ch.db, Cust.AccountNum)
 	if err != nil {
+		fmt.Fprint(w, err)
 		helpers.HTTPError(w, http.StatusBadRequest, constants.SoftDeleteCustFailed)
 		return
 	}

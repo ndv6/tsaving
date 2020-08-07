@@ -29,7 +29,6 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type"},
 		AllowCredentials: true,
 	}))
-
 	// Handler objects initialization
 	ph := database.NewPartnerHandler(db)
 	ah := database.NewAccountHandler(db)
@@ -37,7 +36,7 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 	va := virtual_accounts.NewVAHandler(jwt, db) // David, Jocelyn, Joseph , Azizah
 	eh := database.NewEmailHandler(db)           // Joseph
 	adm := admin.NewAdminHandler(db)             // Azizah
-	la := admin.NewLogAdminHandler(db)
+	la := admin.NewLogAdminHandler(jwt, db)
 	// da := customers.NewDashboardHandler(jwt)
 
 	// Home endpoint
@@ -78,7 +77,7 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 		r.With(jwt.AuthAdminMiddleware).Post("/customers/list/{page}", ch.GetListCustomers)        //David
 		r.With(jwt.AuthAdminMiddleware).Get("/customers/cards/{account_num}", ch.GetCardCustomers) //Caesar
 		r.With(jwt.AuthAdminMiddleware).Get("/customers/{cust_id}", ch.GetProfileforAdmin)         //Caesar
-		r.With(jwt.AuthAdminMiddleware).Get("/customers/delete/{cust_id}", ch.SoftDelete)          //Jocelyn
+		r.With(jwt.AuthAdminMiddleware).Post("/customers/delete", ch.SoftDelete)                   //Jocelyn
 
 		// transaction log
 		r.Route("/transactions", func(r chi.Router) {

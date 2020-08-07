@@ -75,15 +75,18 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 		r.Post("/login", admin.LoginAdminHandler(jwt, db)) //Caesar
 
 		// customer details
-		r.With(jwt.AuthAdminMiddleware).Post("/customers/list/{page}", ch.GetListCustomers)              //David
+		r.With(jwt.AuthAdminMiddleware).Post("/customers/list/{page}", ch.GetListCustomers)        //David
 		r.With(jwt.AuthAdminMiddleware).Get("/customers/cards/{account_num}", ch.GetCardCustomers) //Caesar
 		r.With(jwt.AuthAdminMiddleware).Get("/customers/{cust_id}", ch.GetProfileforAdmin)         //Caesar
 
 		// transaction log
 		r.Route("/transactions", func(r chi.Router) {
-			r.With(jwt.AuthAdminMiddleware).Get("/", adm.TransactionHistoryHandler)                  // Azizah
-			r.With(jwt.AuthAdminMiddleware).Get("/{accNum}", adm.TransactionHistoryHandler)          // Yuly
-			r.With(jwt.AuthAdminMiddleware).Get("/{accNum}/{search}", adm.TransactionHistoryHandler) // Yuly
+			r.With(jwt.AuthAdminMiddleware).Get("/", adm.TransactionHistoryHandler)                                              // Azizah
+			r.With(jwt.AuthAdminMiddleware).Get("/{accNum}/{page}", adm.TransactionHistoryHandler)                               // Yuly
+			r.With(jwt.AuthAdminMiddleware).Get("/{accNum}/{day}-{month}-{year}/{page}", adm.TransactionHistoryHandler)          // Yuly
+			r.With(jwt.AuthAdminMiddleware).Get("/{accNum}/{search}/{page}", adm.TransactionHistoryHandler)                      // Yuly
+			r.With(jwt.AuthAdminMiddleware).Get("/{accNum}/{day}-{month}-{year}/{search}/{page}", adm.TransactionHistoryHandler) // Yuly
+
 		})
 
 		// Log Admin

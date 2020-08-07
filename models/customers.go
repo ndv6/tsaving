@@ -24,6 +24,10 @@ type Customers struct {
 	IsDeleted    bool      `json:is_deleted`
 }
 
+type CountData struct {
+	Total int `json:"total"`
+}
+
 type Card struct {
 	Number  string
 	Cvv     string

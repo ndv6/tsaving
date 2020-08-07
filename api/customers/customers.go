@@ -42,6 +42,18 @@ type GetPasswordRequest struct {
 	NewPassword string `json:"new_password"`
 }
 
+type GetListCustomersRequest struct {
+	FilterDate   string `json:"filter_date"`
+	FilterSearch string `json:"filter_search"`
+}
+
+type GetListCustomersResponse struct {
+	Total int         `json:"total"`
+	List  interface{} `json:"list"`
+}
+
+// type Get
+
 func NewCustomerHandler(jwt *tokens.JWT, db *sql.DB) *CustomerHandler {
 	return &CustomerHandler{jwt, db}
 }
@@ -438,7 +450,15 @@ func GenerateRandomNumber(min, max int) int {
 }
 
 func (ch *CustomerHandler) GetListCustomers(w http.ResponseWriter, r *http.Request) {
+	helpers.EnableCORS(&w)
 	w.Header().Set(constants.ContentType, constants.Json)
+
+	tokens := ch.jwt.GetTokenAdmin(r)
+	err := tokens.Valid()
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+		return
+	}
 
 	page, err := strconv.Atoi(chi.URLParam(r, "page"))
 	if err != nil {
@@ -446,13 +466,25 @@ func (ch *CustomerHandler) GetListCustomers(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	listCustomers, err := database.GetListCustomers(ch.db, page)
+	var cus GetListCustomersRequest
+	err = json.NewDecoder(r.Body).Decode(&cus)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
+		return
+	}
+
+	listCustomers, total, err := database.GetListCustomers(ch.db, page, cus.FilterDate, cus.FilterSearch)
 	if err != nil {
 		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	_, res, err := helpers.NewResponseBuilder(w, true, constants.Success, listCustomers)
+	dataResponse := GetListCustomersResponse{
+		Total: total,
+		List:  listCustomers,
+	}
+
+	_, res, err := helpers.NewResponseBuilder(w, true, constants.Success, dataResponse)
 	if err != nil {
 		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
 		return

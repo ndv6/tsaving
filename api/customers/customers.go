@@ -492,3 +492,27 @@ func (ch *CustomerHandler) GetListCustomers(w http.ResponseWriter, r *http.Reque
 
 	fmt.Fprint(w, res)
 }
+
+func (ch *CustomerHandler) SoftDelete(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set(constants.ContentType, constants.Json)
+
+	b, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotReadRequest)
+		return
+	}
+
+	var Cust models.Customers
+	err = json.Unmarshal(b, &Cust)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotParseRequest)
+		return
+	}
+
+	err = database.CheckAccount(ch.db, Cust.AccountNum)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, constants.InvalidAccountNumber)
+		return
+	}
+
+}

@@ -128,20 +128,6 @@ func CheckAccountVA(db *sql.DB, VaNum string, id int) (err error) {
 	return
 }
 
-func CheckAccount(db *sql.DB, AccountNum string, id int) (err error) {
-	// AccountNumber := 0
-	var exist bool
-	err = db.QueryRow("SELECT EXISTS(SELECT account_num FROM customers WHERE account_num = $1 AND cust_id = $2)", AccountNum, id).Scan(&exist)
-	if err != nil {
-		return
-	}
-	if !exist {
-		err = errors.New("invalid account number")
-		return
-	}
-	return
-}
-
 func CreateVA(vaNum string, accNum string, vaColor string, vaLabel string, db *sql.DB) (va models.VirtualAccounts, err error) {
 	_, err = db.Exec("INSERT INTO virtual_accounts (va_num, account_num, va_balance, va_color, va_label, created_at, updated_at)"+
 		" VALUES ($1, $2, $3, $4, $5, $6, $7) ", vaNum, accNum, 0, vaColor, vaLabel, time.Now(), time.Now())

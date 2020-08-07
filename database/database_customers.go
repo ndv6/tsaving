@@ -21,7 +21,7 @@ func GetListCustomers(db *sql.DB, page int, date string, keyword string) (list [
 
 	offset := (page - 1) * 20
 
-	query := fmt.Sprintf("SELECT COALESCE(account_num,'') as account_num, cust_name, cust_address, cust_phone, cust_email, cust_password, is_verified, COALESCE(channel,'') as channel, COALESCE(card_num,'') as card_num, COALESCE(cvv,'') as cvv, COALESCE(expired,now()) as expired, COALESCE(created_at,now()) as created_at, COALESCE(updated_at,now()) as updated_at, is_deleted FROM customers WHERE 1 = 1 %v ORDER BY created_at ", where)
+	query := fmt.Sprintf("SELECT COALESCE(account_num,'') as account_num, cust_name, cust_address, cust_phone, cust_email, cust_password, is_verified, COALESCE(channel,'') as channel, COALESCE(card_num,'') as card_num, COALESCE(cvv,'') as cvv, COALESCE(expired,now()) as expired, COALESCE(created_at,now()) as created_at, COALESCE(updated_at,now()) as updated_at, COALESCE(is_deleted,now()) as is_deleted FROM customers WHERE 1 = 1 %v ORDER BY created_at ", where)
 
 	query = query + "DESC OFFSET " + strconv.Itoa(offset) + " LIMIT 20"
 
@@ -49,5 +49,19 @@ func GetListCustomers(db *sql.DB, page int, date string, keyword string) (list [
 		return
 	}
 
+	return
+}
+
+func CheckAccount(db *sql.DB, AccountNum string) (err error) {
+	// AccountNumber := 0
+	var exist bool
+	err = db.QueryRow("SELECT EXISTS(SELECT account_num FROM customers WHERE account_num = $1)", AccountNum).Scan(&exist)
+	if err != nil {
+		return
+	}
+	if !exist {
+		err = errors.New("invalid account number")
+		return
+	}
 	return
 }

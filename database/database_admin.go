@@ -94,3 +94,8 @@ func GetTotalTransactionCount(db *sql.DB) (total int, err error) {
 	err = db.QueryRow("SELECT COUNT(tl_id) FROM transaction_logs").Scan(&total)
 	return
 }
+
+//SOFT DELETE
+// func SoftDeleteCustomer(db *sql.DB, AccNum int) (err error) {
+// 	err = db.Exec("UPDATE customer")
+// }

@@ -58,6 +58,7 @@ const (
 	InsertAdminLogFailed    = "Insert Admin Log Failed"
 	CustomersNotFound       = "List Customers Not Found"
 	GetAllTransactionFailed = "Failed to get all transaction"
+	InvalidAccountNumber    = "Invalid account number"
 )
 
 // Response messages

@@ -69,7 +69,7 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 		r.Post("/login", admin.LoginAdminHandler(jwt, db)) //Caesar
 
 		// customer details
-		r.With(jwt.AuthAdminMiddleware).Get("/customers/{page}", ch.GetListCustomers)              //David
+		r.With(jwt.AuthAdminMiddleware).Post("/customers/list/{page}", ch.GetListCustomers)              //David
 		r.With(jwt.AuthAdminMiddleware).Get("/customers/cards/{account_num}", ch.GetCardCustomers) //Caesar
 		r.With(jwt.AuthAdminMiddleware).Get("/customers/{cust_id}", ch.GetProfileforAdmin)         //Caesar
 

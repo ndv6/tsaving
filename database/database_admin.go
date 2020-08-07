@@ -3,6 +3,7 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	"time"
 
 	"github.com/ndv6/tsaving/models"
 )
@@ -162,5 +163,11 @@ func GetActInActUserCount(db *sql.DB) (act, inact int, err error) {
 
 func GetTotalTransactionCount(db *sql.DB) (total int, err error) {
 	err = db.QueryRow("SELECT COUNT(tl_id) FROM transaction_logs").Scan(&total)
+	return
+}
+
+//SOFT DELETE
+func SoftDeleteCustomer(db *sql.DB, AccNum string) (err error) {
+	_, err = db.Exec("UPDATE customers SET is_deleted = $1 WHERE account_num = $2", time.Now(), AccNum)
 	return
 }

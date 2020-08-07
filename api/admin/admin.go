@@ -18,6 +18,11 @@ type AdminHandler struct {
 	db *sql.DB
 }
 
+type GetTransactionResponse struct {
+	Total           int                      `json:"count"`
+	TransactionList []models.TransactionLogs `json:"list"`
+}
+
 func NewAdminHandler(db *sql.DB) *AdminHandler {
 	return &AdminHandler{db}
 }
@@ -39,14 +44,19 @@ func (adm *AdminHandler) TransactionHistoryHandler(w http.ResponseWriter, r *htt
 	year := chi.URLParam(r, "year")
 
 	if accNum != "" && search == "" && day == "" && month == "" && year == "" {
-		transactions, err := database.CustomerHistoryTransaction(adm.db, accNum, page)
+		transactions, count, err := database.CustomerHistoryTransaction(adm.db, accNum, page)
 
 		if err != nil {
 			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
 			return
 		}
 
-		_, res, err := helpers.NewResponseBuilder(w, true, constants.GetAllTransactionSuccess, transactions)
+		responseBody := GetTransactionResponse{
+			Total:           count,
+			TransactionList: transactions,
+		}
+
+		_, res, err := helpers.NewResponseBuilder(w, true, constants.GetAllTransactionSuccess, responseBody)
 		if err != nil {
 			helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
 			return
@@ -55,7 +65,7 @@ func (adm *AdminHandler) TransactionHistoryHandler(w http.ResponseWriter, r *htt
 		fmt.Fprintln(w, string(res))
 		return
 	} else if accNum != "" && search != "" && day == "" && month == "" && year == "" {
-		transactions, err := database.CustomerHistoryTransactionFiltered(adm.db, accNum, search, page)
+		transactions, count, err := database.CustomerHistoryTransactionFiltered(adm.db, accNum, search, page)
 
 		if err != nil {
 			fmt.Println(err)
@@ -63,7 +73,12 @@ func (adm *AdminHandler) TransactionHistoryHandler(w http.ResponseWriter, r *htt
 			return
 		}
 
-		_, res, err := helpers.NewResponseBuilder(w, true, constants.GetAllTransactionSuccess, transactions)
+		responseBody := GetTransactionResponse{
+			Total:           count,
+			TransactionList: transactions,
+		}
+
+		_, res, err := helpers.NewResponseBuilder(w, true, constants.GetAllTransactionSuccess, responseBody)
 		if err != nil {
 			fmt.Println(err)
 			helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
@@ -73,7 +88,7 @@ func (adm *AdminHandler) TransactionHistoryHandler(w http.ResponseWriter, r *htt
 		fmt.Fprintln(w, string(res))
 		return
 	} else if accNum != "" && day != "" && month != "" && year != "" && search == "" {
-		transactions, err := database.CustomerHistoryTransactionDateFiltered(adm.db, accNum, day, month, year, page)
+		transactions, count, err := database.CustomerHistoryTransactionDateFiltered(adm.db, accNum, day, month, year, page)
 
 		if err != nil {
 			fmt.Println(err)
@@ -81,7 +96,12 @@ func (adm *AdminHandler) TransactionHistoryHandler(w http.ResponseWriter, r *htt
 			return
 		}
 
-		_, res, err := helpers.NewResponseBuilder(w, true, constants.GetAllTransactionSuccess, transactions)
+		responseBody := GetTransactionResponse{
+			Total:           count,
+			TransactionList: transactions,
+		}
+
+		_, res, err := helpers.NewResponseBuilder(w, true, constants.GetAllTransactionSuccess, responseBody)
 		if err != nil {
 			fmt.Println(err)
 			helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
@@ -91,7 +111,7 @@ func (adm *AdminHandler) TransactionHistoryHandler(w http.ResponseWriter, r *htt
 		fmt.Fprintln(w, string(res))
 		return
 	} else if accNum != "" && day != "" && month != "" && year != "" && search != "" {
-		transactions, err := database.CustomerHistoryTransactionAllFiltered(adm.db, accNum, search, day, month, year, page)
+		transactions, count, err := database.CustomerHistoryTransactionAllFiltered(adm.db, accNum, search, day, month, year, page)
 
 		if err != nil {
 			fmt.Println(err)
@@ -99,7 +119,12 @@ func (adm *AdminHandler) TransactionHistoryHandler(w http.ResponseWriter, r *htt
 			return
 		}
 
-		_, res, err := helpers.NewResponseBuilder(w, true, constants.GetAllTransactionSuccess, transactions)
+		responseBody := GetTransactionResponse{
+			Total:           count,
+			TransactionList: transactions,
+		}
+
+		_, res, err := helpers.NewResponseBuilder(w, true, constants.GetAllTransactionSuccess, responseBody)
 		if err != nil {
 			fmt.Println(err)
 			helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)

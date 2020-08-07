@@ -349,3 +349,24 @@ func (va *VAHandler) VacList(w http.ResponseWriter, r *http.Request) {
 	}
 
 }
+
+func (va *VAHandler) VacListAdmin(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set(constants.ContentType, constants.Json)
+
+	custId, _ := strconv.Atoi(chi.URLParam(r, "cust_id"))
+	data, err := database.GetListVA(va.db, custId)
+
+	if err != nil {
+		helper.HTTPError(w, http.StatusBadRequest, "id must be integer")
+		return
+	}
+
+	_, res, err := helpers.NewResponseBuilder(w, true, constants.GetListSuccess, data)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
+		return
+	}
+
+	fmt.Fprintln(w, string(res))
+
+}

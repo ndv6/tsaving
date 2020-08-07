@@ -7,6 +7,8 @@ import (
 
 	"github.com/ndv6/tsaving/database"
 
+	"github.com/go-chi/chi"
+	"github.com/go-chi/cors"
 	"github.com/ndv6/tsaving/api/admin"
 	"github.com/ndv6/tsaving/api/customers"
 	"github.com/ndv6/tsaving/api/email"
@@ -14,8 +16,6 @@ import (
 	"github.com/ndv6/tsaving/api/not_found"
 	"github.com/ndv6/tsaving/api/virtual_accounts"
 	"github.com/ndv6/tsaving/tokens"
-
-	"github.com/go-chi/chi"
 )
 
 func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
@@ -23,6 +23,12 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 
 	chiRouter.Use(middleware.Logger)
 	chiRouter.Use(middleware.Recoverer)
+	chiRouter.Use(cors.Handler(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type"},
+		AllowCredentials: true,
+	}))
 
 	// Handler objects initialization
 	ph := database.NewPartnerHandler(db)

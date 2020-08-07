@@ -22,7 +22,6 @@ func NewAdminHandler(db *sql.DB) *AdminHandler {
 }
 
 func (adm *AdminHandler) TransactionHistoryHandler(w http.ResponseWriter, r *http.Request) {
-	helpers.EnableCORS(&w)
 	w.Header().Set(constants.ContentType, constants.Json)
 
 	search := chi.URLParam(r, "search")

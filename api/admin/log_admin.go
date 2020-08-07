@@ -8,12 +8,12 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/ndv6/tsaving/helpers"
 	"github.com/ndv6/tsaving/models"
 
 	"github.com/go-chi/chi"
 	"github.com/ndv6/tsaving/constants"
 	"github.com/ndv6/tsaving/database"
-	"github.com/ndv6/tsaving/helpers"
 	helper "github.com/ndv6/tsaving/helpers"
 )
 
@@ -26,10 +26,8 @@ func NewLogAdminHandler(db *sql.DB) *LogAdminHandler {
 }
 
 func (la *LogAdminHandler) Get(w http.ResponseWriter, r *http.Request) {
-
 	w.Header().Set(constants.ContentType, constants.Json)
-
-	var username = "admin" //get from token (later)
+	helper.EnableCORS(&w)
 
 	page, err := strconv.Atoi(chi.URLParam(r, "page"))
 	if err != nil {
@@ -37,7 +35,7 @@ func (la *LogAdminHandler) Get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	LogAdmin, err := database.GetLogAdmin(la.db, username, page)
+	LogAdmin, err := database.GetLogAdmin(la.db, page)
 	if err != nil {
 		helper.HTTPError(w, http.StatusBadRequest, constants.LogAdminFailed)
 		return
@@ -55,6 +53,7 @@ func (la *LogAdminHandler) Get(w http.ResponseWriter, r *http.Request) {
 
 func (la *LogAdminHandler) Insert(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set(constants.ContentType, constants.Json)
+	helper.EnableCORS(&w)
 
 	var username = "admin" //get from token (later)
 

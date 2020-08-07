@@ -405,7 +405,6 @@ func isEmailValid(e string) bool {
 }
 
 func (ch *CustomerHandler) sendMail(w http.ResponseWriter, OTPEmail string, cusEmail string) (err error) {
-
 	requestBody, err := json.Marshal(map[string]string{
 		"email": cusEmail,
 		"token": OTPEmail,

@@ -77,6 +77,7 @@ const (
 	SuccessGetToken          = "Success to get the token"
 	AddLogAdminSuccess       = "Add admin log success"
 	GetLogAdminSuccess       = "Get admin log success"
+	SuccessSoftDelete        = "Customer deleted successfully."
 )
 
 // Headers

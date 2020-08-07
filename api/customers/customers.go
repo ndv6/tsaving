@@ -525,7 +525,7 @@ func (ch *CustomerHandler) SoftDelete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, res, err := helpers.NewResponseBuilder(w, true, constants.Success, nil)
+	_, res, err := helpers.NewResponseBuilder(w, true, constants.SuccessSoftDelete, nil)
 	if err != nil {
 		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
 		return

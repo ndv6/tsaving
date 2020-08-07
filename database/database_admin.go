@@ -167,7 +167,7 @@ func GetTotalTransactionCount(db *sql.DB) (total int, err error) {
 }
 
 func GetNewUserToday(db *sql.DB) (total int, err error) {
-	err = db.QueryRow("SELECT count(cust_id) FROM customers WHERE created_at > current_date").Scan(&total)
+	err = db.QueryRow("SELECT count(cust_id) FROM customers WHERE created_at::date = current_date").Scan(&total)
 	return
 }
 
@@ -187,17 +187,17 @@ func GetNewUserThisMonth(db *sql.DB) (total int, err error) {
 }
 
 func GetTransactionAmountToday(db *sql.DB) (total int, err error) {
-	err = db.QueryRow("SELECT sum(tran_amount) FROM transaction_logs WHERE created_at > current_date").Scan(&total)
+	err = db.QueryRow("SELECT COALESCE(sum(tran_amount),0) FROM transaction_logs WHERE created_at::date = current_date").Scan(&total)
 	return
 }
 
 func GetTransactionAmountYesterday(db *sql.DB) (total int, err error) {
-	err = db.QueryRow("SELECT sum(tran_amount) FROM transaction_logs WHERE created_at::date = current_date - 1").Scan(&total)
+	err = db.QueryRow("SELECT COALESCE(sum(tran_amount),0) FROM transaction_logs WHERE created_at::date = current_date - 1").Scan(&total)
 	return
 }
 
 func GetTransactionAmountMonth(db *sql.DB) (total int, err error) {
-	err = db.QueryRow("SELECT sum(tran_amount) FROM transaction_logs WHERE created_at > date_trunc('month', CURRENT_DATE)").Scan(&total)
+	err = db.QueryRow("SELECT COALESCE(sum(tran_amount),0) FROM transaction_logs WHERE created_at > date_trunc('month', CURRENT_DATE)").Scan(&total)
 	return
 }
 
@@ -218,7 +218,7 @@ func GetTransactionByWeek(db *sql.DB) (res []models.TransactionMonth, err error)
 }
 
 func GetLogTransactionToday(db *sql.DB) (res []models.TransactionLogs, err error) {
-	rows, err := db.Query("SELECT tl_id, account_num, from_account, dest_account, tran_amount, description, created_at FROM transaction_logs WHERE created_at > current_date order by 1 desc ")
+	rows, err := db.Query("SELECT tl_id, account_num, from_account, dest_account, tran_amount, description, created_at FROM transaction_logs WHERE created_at::date = current_date order by 1 desc ")
 	defer rows.Close()
 
 	for rows.Next() {
@@ -233,7 +233,7 @@ func GetLogTransactionToday(db *sql.DB) (res []models.TransactionLogs, err error
 }
 
 func GetLogAdminToday(db *sql.DB) (res []models.LogAdmin, err error) {
-	rows, err := db.Query("SELECT id, username, account_num, action, action_time FROM log_admins WHERE action_time > current_date order by 1 desc ")
+	rows, err := db.Query("SELECT id, username, account_num, action, action_time FROM log_admins WHERE action_time::date = current_date order by 1 desc ")
 
 	defer rows.Close()
 

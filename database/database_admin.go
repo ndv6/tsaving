@@ -125,6 +125,27 @@ func GetTransactionAmountYesterday(db *sql.DB) (total int, err error) {
 	return
 }
 
+func GetTransactionByWeek(db *sql.DB) (res []models.TransactionMonth, err error) {
+	rows, err := db.Query("SELECT ROW_NUMBER () OVER (ORDER BY extract(week from created_at)) as week, extract(week from created_at) as realweek, sum(tran_amount) as amount FROM transaction_logs where created_at > date_trunc('month', CURRENT_DATE) group by 2 order by 1 asc")
+
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var objTransactionByWeek models.TransactionMonth
+		err = rows.Scan(&objTransactionByWeek.Week, &objTransactionByWeek.RealWeek, &objTransactionByWeek.Amount)
+		if err != nil {
+			return
+		}
+		res = append(res, objTransactionByWeek)
+	}
+	return res, nil
+}
+
 func GetLogTransactionToday(db *sql.DB) (res []models.TransactionLogs, err error) {
 	rows, err := db.Query("SELECT tl_id, account_num, from_account, dest_account, tran_amount, description, created_at FROM transaction_logs WHERE created_at > current_date order by 1 desc ")
 

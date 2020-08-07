@@ -140,18 +140,33 @@ func (ah *AdminHandler) GetDashboard() http.HandlerFunc {
 			return
 		}
 
-		dashboardAdm := models.DashboardAdmin{
-			ActUser:                   act,
-			InactUser:                 inact,
-			TotalTransaction:          total,
-			NewUserToday:              newUserToday,
-			NewUserYesterday:          newUserYesterday,
-			NewUserThisWeek:           newUserThisWeek,
-			NewUserThisMonth:          newUserThisMonth,
+		transactionMonth, err := database.GetTransactionByWeek(ah.db)
+		if err != nil {
+			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		dashboardUser := models.DashboardUserResponse{
+			ActUser:          act,
+			InactUser:        inact,
+			TotalTransaction: total,
+			NewUserToday:     newUserToday,
+			NewUserYesterday: newUserYesterday,
+			NewUserThisWeek:  newUserThisWeek,
+			NewUserThisMonth: newUserThisMonth,
+		}
+
+		dashboardTransaction := models.DashboardTransactionResponse{
 			TotalTransactionToday:     totalTransactionAmountToday,
 			TotalTransactionYesterday: totalTransactionAmountYesterday,
-			LogTransactionToday:       logTransactionToday,
-			LogAdminToday:             logAdminToday,
+			TransactionMonth:          transactionMonth,
+		}
+
+		dashboardAdm := models.DashboardAdmin{
+			DashboardUser:        dashboardUser,
+			DashboardTransaction: dashboardTransaction,
+			LogTransactionToday:  logTransactionToday,
+			LogAdminToday:        logAdminToday,
 		}
 
 		w, res, err := helpers.NewResponseBuilder(w, true, "Success fetching dashboard data", dashboardAdm)

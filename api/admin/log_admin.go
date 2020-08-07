@@ -27,7 +27,6 @@ func NewLogAdminHandler(db *sql.DB) *LogAdminHandler {
 
 func (la *LogAdminHandler) Get(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set(constants.ContentType, constants.Json)
-	helper.EnableCORS(&w)
 
 	page, err := strconv.Atoi(chi.URLParam(r, "page"))
 	if err != nil {
@@ -53,7 +52,6 @@ func (la *LogAdminHandler) Get(w http.ResponseWriter, r *http.Request) {
 
 func (la *LogAdminHandler) Insert(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set(constants.ContentType, constants.Json)
-	helper.EnableCORS(&w)
 
 	var username = "admin" //get from token (later)
 

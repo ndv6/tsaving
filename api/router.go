@@ -70,8 +70,8 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 	chiRouter.With(jwt.AuthAdminMiddleware).Get("/admin/transactions", adm.TransactionHistoryHandler)  //Azizah
 
 	// Log Admin
-	chiRouter.With(jwt.AuthAdminMiddleware).Get("/admin/log/{page}", la.Get)
-	chiRouter.With(jwt.AuthAdminMiddleware).Post("/admin/log/insert", la.Insert)
+	chiRouter.Get("/admin/log/{page}", la.Get)
+	chiRouter.Post("/admin/log/insert", la.Insert)
 
 	// admin dashboard
 	chiRouter.Get("/admin/dashboard", adm.GetDashboard())

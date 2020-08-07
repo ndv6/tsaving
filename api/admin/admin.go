@@ -340,6 +340,7 @@ func (adm *AdminHandler) TransactionHistoryAll(w http.ResponseWriter, r *http.Re
 
 func (ah *AdminHandler) GetDashboard() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set(constants.ContentType, constants.Json)
 		act, inact, err := database.GetActInActUserCount(ah.db)
 		if err != nil {
 			helpers.HTTPError(w, http.StatusBadRequest, err.Error())

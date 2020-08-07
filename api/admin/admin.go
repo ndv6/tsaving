@@ -164,10 +164,88 @@ func (ah *AdminHandler) GetDashboard() http.HandlerFunc {
 			return
 		}
 
-		dashboardAdm := models.DashboardAdmin{
+		newUserToday, err := database.GetNewUserToday(ah.db)
+		if err != nil {
+			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		newUserYesterday, err := database.GetNewUserYesterday(ah.db)
+		if err != nil {
+			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		newUserThisWeek, err := database.GetNewUserThisWeek(ah.db)
+		if err != nil {
+			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		newUserThisMonth, err := database.GetNewUserThisMonth(ah.db)
+		if err != nil {
+			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		totalTransactionAmountMonth, err := database.GetTransactionAmountMonth(ah.db)
+		if err != nil {
+			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		totalTransactionAmountToday, err := database.GetTransactionAmountToday(ah.db)
+		if err != nil {
+			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		totalTransactionAmountYesterday, err := database.GetTransactionAmountYesterday(ah.db)
+		if err != nil {
+			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		logTransactionToday, err := database.GetLogTransactionToday(ah.db)
+		if err != nil {
+			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		logAdminToday, err := database.GetLogAdminToday(ah.db)
+		if err != nil {
+			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		transactionMonthbyWeek, err := database.GetTransactionByWeek(ah.db)
+		if err != nil {
+			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		dashboardUser := models.DashboardUserResponse{
 			ActUser:          act,
 			InactUser:        inact,
 			TotalTransaction: total,
+			NewUserToday:     newUserToday,
+			NewUserYesterday: newUserYesterday,
+			NewUserThisWeek:  newUserThisWeek,
+			NewUserThisMonth: newUserThisMonth,
+		}
+
+		dashboardTransaction := models.DashboardTransactionResponse{
+			TotalTransactionMonth:     totalTransactionAmountMonth,
+			TotalTransactionToday:     totalTransactionAmountToday,
+			TotalTransactionYesterday: totalTransactionAmountYesterday,
+			TransactionMonth:          transactionMonthbyWeek,
+		}
+
+		dashboardAdm := models.DashboardAdmin{
+			DashboardUser:        dashboardUser,
+			DashboardTransaction: dashboardTransaction,
+			LogTransactionToday:  logTransactionToday,
+			LogAdminToday:        logAdminToday,
 		}
 
 		w, res, err := helpers.NewResponseBuilder(w, true, "Success fetching dashboard data", dashboardAdm)

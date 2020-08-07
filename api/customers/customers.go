@@ -12,17 +12,24 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/xlzd/gotp"
-
+	"github.com/go-chi/chi"
 	"github.com/ndv6/tsaving/constants"
+	"github.com/ndv6/tsaving/database"
 	"github.com/ndv6/tsaving/helpers"
 	"github.com/ndv6/tsaving/models"
 	"github.com/ndv6/tsaving/tokens"
 	"github.com/theplant/luhn"
+	"github.com/xlzd/gotp"
 )
 
 type EmailResponse struct {
 	Email string `json:"email"`
+}
+
+type CardResponse struct {
+	CardNum string    `json:"card_num"`
+	CVV     string    `json:"cvv"`
+	Expired time.Time `json:"expired"`
 }
 
 type CustomerHandler struct {
@@ -34,6 +41,18 @@ type GetPasswordRequest struct {
 	OldPassword string `json:"old_password"`
 	NewPassword string `json:"new_password"`
 }
+
+type GetListCustomersRequest struct {
+	FilterDate   string `json:"filter_date"`
+	FilterSearch string `json:"filter_search"`
+}
+
+type GetListCustomersResponse struct {
+	Total int         `json:"total"`
+	List  interface{} `json:"list"`
+}
+
+// type Get
 
 func NewCustomerHandler(jwt *tokens.JWT, db *sql.DB) *CustomerHandler {
 	return &CustomerHandler{jwt, db}
@@ -55,6 +74,50 @@ func (ch *CustomerHandler) GetProfile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	_, res, err := helpers.NewResponseBuilder(w, true, constants.GetProfilSuccess, cus)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
+		return
+	}
+
+	fmt.Fprintln(w, string(res))
+}
+
+func (ch *CustomerHandler) GetProfileforAdmin(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set(constants.ContentType, constants.Json)
+
+	CustId, _ := strconv.Atoi(chi.URLParam(r, "cust_id"))
+	cus, err := models.GetProfile(ch.db, CustId)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	_, res, err := helpers.NewResponseBuilder(w, true, constants.GetProfilSuccess, cus)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
+		return
+	}
+
+	fmt.Fprintln(w, string(res))
+}
+
+func (ch *CustomerHandler) GetCardCustomers(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set(constants.ContentType, constants.Json)
+
+	AccountNum := chi.URLParam(r, "account_num")
+	cardDetails, err := models.GetDetailsCard(ch.db, AccountNum)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	data := CardResponse{
+		CardNum: cardDetails.CardNum,
+		CVV:     cardDetails.Cvv,
+		Expired: cardDetails.Expired,
+	}
+
+	_, res, err := helpers.NewResponseBuilder(w, true, constants.GetCardSuccess, data)
 	if err != nil {
 		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
 		return
@@ -342,7 +405,6 @@ func isEmailValid(e string) bool {
 }
 
 func (ch *CustomerHandler) sendMail(w http.ResponseWriter, OTPEmail string, cusEmail string) (err error) {
-
 	requestBody, err := json.Marshal(map[string]string{
 		"email": cusEmail,
 		"token": OTPEmail,
@@ -384,4 +446,47 @@ func GenerateCardNumber(accNum string, date time.Time) (card models.Card, err er
 
 func GenerateRandomNumber(min, max int) int {
 	return min + rand.Intn(max-min)
+}
+
+func (ch *CustomerHandler) GetListCustomers(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set(constants.ContentType, constants.Json)
+
+	tokens := ch.jwt.GetTokenAdmin(r)
+	err := tokens.Valid()
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	page, err := strconv.Atoi(chi.URLParam(r, "page"))
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotParseURLParams)
+		return
+	}
+
+	var cus GetListCustomersRequest
+	err = json.NewDecoder(r.Body).Decode(&cus)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
+		return
+	}
+
+	listCustomers, total, err := database.GetListCustomers(ch.db, page, cus.FilterDate, cus.FilterSearch)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	dataResponse := GetListCustomersResponse{
+		Total: total,
+		List:  listCustomers,
+	}
+
+	_, res, err := helpers.NewResponseBuilder(w, true, constants.Success, dataResponse)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
+		return
+	}
+
+	fmt.Fprint(w, res)
 }

@@ -54,19 +54,27 @@ const (
 	VerifyEmailTokenFailed  = "Unable to verify email token: "
 	DeleteEmailTokenFailed  = "Unable to delete verified email"
 	SuccessVerifyEmail      = "Email has been successfully verified"
+	LogAdminFailed          = "Failed to get admin log."
+	InsertAdminLogFailed    = "Insert Admin Log Failed"
+	CustomersNotFound       = "List Customers Not Found"
+	GetAllTransactionFailed = "Failed to get all transaction"
 )
 
 // Response messages
 const (
-	AddBalanceVASuccess   = "Successfully add balance to your virtual account"
-	LoginSucceed          = "Login Succeed"
-	RegisterSucceed       = "Register Succeeded"
-	GetListSuccess        = "Success to get the list data"
-	GetProfilSuccess      = "Get profile success"
-	UpdateProfileSuccess  = "Update profile success"
-	UpdatePasswordSuccess = "Update password success"
-	UpdatePhotoSuccess    = "Update photo success"
-	SuccessGetToken       = "Success to get the token"
+	AddBalanceVASuccess      = "Successfully add balance to your virtual account"
+	LoginSucceed             = "Login Succeed"
+	RegisterSucceed          = "Register Succeeded"
+	GetListSuccess           = "Success to get the list data"
+	GetAllTransactionSuccess = "Success Get All Transactions"
+	GetProfilSuccess         = "Get profile success"
+	GetCardSuccess           = "Get Cards Success"
+	UpdateProfileSuccess     = "Update profile success"
+	UpdatePasswordSuccess    = "Update password success"
+	UpdatePhotoSuccess       = "Update photo success"
+	SuccessGetToken          = "Success to get the token"
+	AddLogAdminSuccess       = "Add admin log success"
+	GetLogAdminSuccess       = "Get admin log success"
 )
 
 // Headers

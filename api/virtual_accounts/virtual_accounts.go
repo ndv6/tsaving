@@ -39,6 +39,11 @@ type VAResponse struct {
 	Message string `json:"message"`
 }
 
+type VAListAdminResponse struct {
+	Total  int `json:"total"`
+	VAList []models.VirtualAccounts `json:"data"`
+}
+
 type VAHandler struct {
 	jwt *tokens.JWT
 	db  *sql.DB
@@ -347,5 +352,44 @@ func (va *VAHandler) VacList(w http.ResponseWriter, r *http.Request) {
 		helper.HTTPError(w, http.StatusBadRequest, "unable to parse json request")
 		return
 	}
+
+}
+
+func (va *VAHandler) VacListAdmin(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set(constants.ContentType, constants.Json)
+
+	custId, err := strconv.Atoi(chi.URLParam(r, "cust_id"))
+	if err != nil {
+		w.Header().Set(constants.ContentType, constants.Json)
+		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotParseURLParams)
+		return
+	}
+	
+	page, err := strconv.Atoi(chi.URLParam(r, "page"))
+	if err != nil {
+		w.Header().Set(constants.ContentType, constants.Json)
+		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotParseURLParams)
+		return
+	}
+	
+	data, count, err := database.GetListVAAdmin(va.db, custId, page)
+	if err != nil {
+		w.Header().Set(constants.ContentType, constants.Json)
+		helpers.HTTPError(w, http.StatusBadRequest, "Cannot get va list")
+		return
+	}
+
+	responseBody := VAListAdminResponse{
+		Total: count,
+		VAList: data,
+	}
+
+	_, res, err := helpers.NewResponseBuilder(w, true, constants.GetListSuccess, responseBody)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
+		return
+	}
+
+	fmt.Fprintln(w, string(res))
 
 }

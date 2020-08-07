@@ -8,7 +8,7 @@ import (
 	"github.com/ndv6/tsaving/models"
 )
 
-func GetListCustomers(db *sql.DB, page int) (list []models.Customers, err error) {
+func GetListCustomers(db *sql.DB, page int) (list []models.Customers, total int, err error) {
 	offset := (page - 1) * 20
 	rows, err := db.Query("SELECT COALESCE(account_num,'') as account_num, cust_name, cust_address, cust_phone, cust_email, cust_password, is_verified, COALESCE(channel,'') as channel, COALESCE(card_num,'') as card_num, COALESCE(cvv,'') as cvv, COALESCE(expired,now()) as expired, COALESCE(created_at,now()) as created_at, COALESCE(updated_at,now()) as updated_at, is_deleted FROM customers ORDER BY created_at DESC OFFSET $1 LIMIT 20", offset)
 	if err != nil {
@@ -25,5 +25,12 @@ func GetListCustomers(db *sql.DB, page int) (list []models.Customers, err error)
 		}
 		list = append(list, cus)
 	}
+
+	err = db.QueryRow("SELECT COUNT(cust_id) as total FROM customers").Scan(&total)
+	if err != nil{
+		err = errors.New(constants.CustomersNotFound)
+		return
+	}
+
 	return
 }

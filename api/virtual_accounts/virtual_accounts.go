@@ -353,12 +353,24 @@ func (va *VAHandler) VacList(w http.ResponseWriter, r *http.Request) {
 func (va *VAHandler) VacListAdmin(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set(constants.ContentType, constants.Json)
 
-	custId, _ := strconv.Atoi(chi.URLParam(r, "cust_id"))
-	page, _ := strconv.Atoi(chi.URLParam(r, "page"))
-	data, err := database.GetListVAAdmin(va.db, custId, page)
-
+	custId, err := strconv.Atoi(chi.URLParam(r, "cust_id"))
 	if err != nil {
-		helper.HTTPError(w, http.StatusBadRequest, "id must be integer")
+		w.Header().Set(constants.ContentType, constants.Json)
+		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotParseURLParams)
+		return
+	}
+	
+	page, err := strconv.Atoi(chi.URLParam(r, "page"))
+	if err != nil {
+		w.Header().Set(constants.ContentType, constants.Json)
+		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotParseURLParams)
+		return
+	}
+	
+	data, err := database.GetListVAAdmin(va.db, custId, page)
+	if err != nil {
+		w.Header().Set(constants.ContentType, constants.Json)
+		helpers.HTTPError(w, http.StatusBadRequest, "Cannot get va list")
 		return
 	}
 

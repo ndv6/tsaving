@@ -75,9 +75,10 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 		r.Post("/login", admin.LoginAdminHandler(jwt, db)) //Caesar
 
 		// customer details
-		r.With(jwt.AuthAdminMiddleware).Post("/customers/list/{page}", ch.GetListCustomers)              //David
+		r.With(jwt.AuthAdminMiddleware).Post("/customers/list/{page}", ch.GetListCustomers)        //David
 		r.With(jwt.AuthAdminMiddleware).Get("/customers/cards/{account_num}", ch.GetCardCustomers) //Caesar
 		r.With(jwt.AuthAdminMiddleware).Get("/customers/{cust_id}", ch.GetProfileforAdmin)         //Caesar
+		r.With(jwt.AuthAdminMiddleware).Get("/customers/delete/{cust_id}", ch.SoftDelete)          //Jocelyn
 
 		// transaction log
 		r.Route("/transactions", func(r chi.Router) {
@@ -87,8 +88,8 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 		})
 
 		// Log Admin
-		r.With(jwt.AuthAdminMiddleware).Get("/log/{page}", la.Get)
-		r.With(jwt.AuthAdminMiddleware).Post("/log/insert", la.Insert)
+		r.With(jwt.AuthAdminMiddleware).Get("/log/{page}", la.Get)     //Jocelyn
+		r.With(jwt.AuthAdminMiddleware).Post("/log/insert", la.Insert) //Jocelyn
 
 		// admin dashboard
 		r.With(jwt.AuthAdminMiddleware).Get("/dashboard", adm.GetDashboard())

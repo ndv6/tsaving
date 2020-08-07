@@ -59,6 +59,7 @@ const (
 	CustomersNotFound       = "List Customers Not Found"
 	GetAllTransactionFailed = "Failed to get all transaction"
 	InvalidAccountNumber    = "Invalid account number"
+	SoftDeleteCustFailed    = "Soft delete customer failed"
 )
 
 // Response messages

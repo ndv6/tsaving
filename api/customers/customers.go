@@ -41,7 +41,6 @@ type GetPasswordRequest struct {
 	OldPassword string `json:"old_password"`
 	NewPassword string `json:"new_password"`
 }
-
 type GetListCustomersRequest struct {
 	FilterDate   string `json:"filter_date"`
 	FilterSearch string `json:"filter_search"`
@@ -493,6 +492,7 @@ func (ch *CustomerHandler) GetListCustomers(w http.ResponseWriter, r *http.Reque
 
 func (ch *CustomerHandler) SoftDelete(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set(constants.ContentType, constants.Json)
+	helpers.EnableCORS(&w)
 
 	b, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -512,5 +512,19 @@ func (ch *CustomerHandler) SoftDelete(w http.ResponseWriter, r *http.Request) {
 		helpers.HTTPError(w, http.StatusBadRequest, constants.InvalidAccountNumber)
 		return
 	}
+
+	err = database.SoftDeleteCustomer(ch.db, Cust.AccountNum)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, constants.SoftDeleteCustFailed)
+		return
+	}
+
+	_, res, err := helpers.NewResponseBuilder(w, true, constants.Success, nil)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
+		return
+	}
+
+	fmt.Fprint(w, res)
 
 }

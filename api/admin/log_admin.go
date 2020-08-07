@@ -10,6 +10,7 @@ import (
 
 	"github.com/ndv6/tsaving/helpers"
 	"github.com/ndv6/tsaving/models"
+	"github.com/ndv6/tsaving/tokens"
 
 	"github.com/go-chi/chi"
 	"github.com/ndv6/tsaving/constants"
@@ -18,11 +19,12 @@ import (
 )
 
 type LogAdminHandler struct {
-	db *sql.DB
+	jwt *tokens.JWT
+	db  *sql.DB
 }
 
-func NewLogAdminHandler(db *sql.DB) *LogAdminHandler {
-	return &LogAdminHandler{db}
+func NewLogAdminHandler(jwt *tokens.JWT, db *sql.DB) *LogAdminHandler {
+	return &LogAdminHandler{jwt, db}
 }
 
 func (la *LogAdminHandler) Get(w http.ResponseWriter, r *http.Request) {

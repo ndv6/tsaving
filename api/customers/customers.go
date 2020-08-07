@@ -41,7 +41,6 @@ type GetPasswordRequest struct {
 	OldPassword string `json:"old_password"`
 	NewPassword string `json:"new_password"`
 }
-
 type GetListCustomersRequest struct {
 	FilterDate   string `json:"filter_date"`
 	FilterSearch string `json:"filter_search"`
@@ -489,4 +488,49 @@ func (ch *CustomerHandler) GetListCustomers(w http.ResponseWriter, r *http.Reque
 	}
 
 	fmt.Fprint(w, res)
+}
+
+func (ch *CustomerHandler) SoftDelete(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set(constants.ContentType, constants.Json)
+	tokens := ch.jwt.GetTokenAdmin(r)
+	err := tokens.Valid()
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	b, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotReadRequest)
+		return
+	}
+
+	var Cust models.Customers
+	err = json.Unmarshal(b, &Cust)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotParseRequest)
+		return
+	}
+
+	err = database.CheckAccount(ch.db, Cust.AccountNum)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, constants.InvalidAccountNumber)
+		return
+	}
+
+	err = database.SoftDeleteCustomer(ch.db, Cust.AccountNum)
+	if err != nil {
+		fmt.Fprint(w, err)
+		helpers.HTTPError(w, http.StatusBadRequest, constants.SoftDeleteCustFailed)
+		return
+	}
+
+	_, res, err := helpers.NewResponseBuilder(w, true, constants.SuccessSoftDelete, nil)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
+		return
+	}
+
+	fmt.Fprint(w, res)
+
 }

@@ -71,6 +71,7 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 		// customer details
 		r.With(jwt.AuthAdminMiddleware).Get("/customers/{page}", ch.GetListCustomers)              //David
 		r.With(jwt.AuthAdminMiddleware).Get("/customers/cards/{account_num}", ch.GetCardCustomers) //Caesar
+		r.With(jwt.AuthAdminMiddleware).Get("/customers/{cust_id}", ch.GetProfileforAdmin)         //Caesar
 
 		// transaction log
 		r.Route("/transactions", func(r chi.Router) {

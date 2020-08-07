@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+
 	"github.com/ndv6/tsaving/constants"
 	"github.com/ndv6/tsaving/models"
 )
@@ -42,4 +43,8 @@ func LoadConfig(file string) (models.Config, error) {
 		return models.Config{}, err
 	}
 	return cfg, err
+}
+
+func EnableCORS(w *http.ResponseWriter) {
+	(*w).Header().Set("Access-Control-Allow-Origin", "*")
 }

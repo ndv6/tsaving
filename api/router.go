@@ -66,7 +66,12 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 
 	// History Endpoint
 	chiRouter.With(jwt.AuthMiddleware).Get("/me/transaction/{page}", ch.HistoryTransactionHandler(db)) //Yuly
-	chiRouter.With(jwt.AuthAdminMiddleware).Get("/admin/transactions", adm.TransactionHistoryHandler)  //Azizah
+	// chiRouter.With(jwt.AuthAdminMiddleware).Get("/admin/transactions", adm.TransactionHistoryHandler)
+	chiRouter.Route("/admin/transactions", func(r chi.Router) {
+		r.With(jwt.AuthAdminMiddleware).Get("/", adm.TransactionHistoryHandler)                  // Azizah
+		r.With(jwt.AuthAdminMiddleware).Get("/{accNum}", adm.TransactionHistoryHandler)          // Yuly
+		r.With(jwt.AuthAdminMiddleware).Get("/{accNum}/{search}", adm.TransactionHistoryHandler) // Yuly
+	})
 
 	// Log Admin
 	chiRouter.With(jwt.AuthAdminMiddleware).Get("/admin/log/{page}", la.Get)

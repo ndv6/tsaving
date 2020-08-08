@@ -60,6 +60,9 @@ const (
 	GetAllTransactionFailed = "Failed to get all transaction"
 	InvalidAccountNumber    = "Invalid account number"
 	SoftDeleteCustFailed    = "Soft delete customer failed"
+	LogAdminCannotBeNull    = "Username or Filter cannot be null"
+	DateCannotBeNull        = "Date cannot be null"
+	UsernameCannotBeNull    = "Username cannot be null"
 )
 
 // Response messages

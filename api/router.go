@@ -91,8 +91,13 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 		})
 
 		// Log Admin
-		r.With(jwt.AuthAdminMiddleware).Get("/log/{page}", la.Get)
-		r.With(jwt.AuthAdminMiddleware).Post("/log/insert", la.Insert)
+		r.Route("/log", func(r chi.Router) {
+			r.With(jwt.AuthAdminMiddleware).Get("/{page}", la.Get)                              //Jocelyn
+			r.With(jwt.AuthAdminMiddleware).Post("/insert", la.Insert)                          //Jocelyn
+			r.With(jwt.AuthAdminMiddleware).Get("/d/{date}/{page}", la.GetFilteredLog)          //Azizah
+			r.With(jwt.AuthAdminMiddleware).Get("/u/{username}/{page}", la.GetFilteredLog)      //Azizah
+			r.With(jwt.AuthAdminMiddleware).Get("/{username}/{date}/{page}", la.GetFilteredLog) //Azizah
+		})
 
 		// admin dashboard
 		r.With(jwt.AuthAdminMiddleware).Get("/dashboard", adm.GetDashboard())

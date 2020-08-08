@@ -28,6 +28,114 @@ func AllHistoryTransaction(db *sql.DB) (res []models.TransactionLogs, err error)
 	return res, nil
 }
 
+func AllHistoryTransactionPaged(db *sql.DB, page int) (res []models.TransactionLogs, count int, err error) {
+	offset := (page - 1) * 20
+	rows, err := db.Query("SELECT * FROM transaction_logs OFFSET $1 LIMIT 20", offset)
+
+	if err != nil {
+		return
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var mtl models.TransactionLogs
+		err = rows.Scan(&mtl.TlId, &mtl.AccountNum, &mtl.DestAccount, &mtl.FromAccount, &mtl.TranAmount, &mtl.Description, &mtl.CreatedAt)
+		if err != nil {
+			return
+		}
+		res = append(res, mtl)
+	}
+
+	err = db.QueryRow("SELECT COUNT(*) FROM transaction_logs").Scan(&count)
+	if err != nil {
+		return
+	}
+
+	return res, count, nil
+}
+
+func AllHistoryTransactionFilteredAccNum(db *sql.DB, accNum string, page int) (res []models.TransactionLogs, count int, err error) {
+	offset := (page - 1) * 20
+	rows, err := db.Query("SELECT * FROM transaction_logs WHERE account_num = $1 OFFSET $2 LIMIT 20", accNum, offset)
+
+	if err != nil {
+		return
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var mtl models.TransactionLogs
+		err = rows.Scan(&mtl.TlId, &mtl.AccountNum, &mtl.DestAccount, &mtl.FromAccount, &mtl.TranAmount, &mtl.Description, &mtl.CreatedAt)
+		if err != nil {
+			return
+		}
+		res = append(res, mtl)
+	}
+
+	err = db.QueryRow("SELECT COUNT(*) FROM transaction_logs WHERE account_num = $1", accNum).Scan(&count)
+	if err != nil {
+		return
+	}
+
+	return res, count, nil
+}
+
+func AllHistoryTransactionFilteredDate(db *sql.DB, date string, page int) (res []models.TransactionLogs, count int, err error) {
+	offset := (page - 1) * 20
+	rows, err := db.Query("SELECT * FROM transaction_logs WHERE CAST(created_at as VARCHAR) like '%'||$1||'%' OFFSET $2 LIMIT 20", date, offset)
+
+	if err != nil {
+		return
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var mtl models.TransactionLogs
+		err = rows.Scan(&mtl.TlId, &mtl.AccountNum, &mtl.DestAccount, &mtl.FromAccount, &mtl.TranAmount, &mtl.Description, &mtl.CreatedAt)
+		if err != nil {
+			return
+		}
+		res = append(res, mtl)
+	}
+
+	err = db.QueryRow("SELECT COUNT(*) FROM transaction_logs WHERE CAST(created_at as VARCHAR) like '%'||$1||'%'", date).Scan(&count)
+	if err != nil {
+		return
+	}
+
+	return res, count, nil
+}
+
+func AllHistoryTransactionFilteredAccNumDate(db *sql.DB, accNum string, date string, page int) (res []models.TransactionLogs, count int, err error) {
+	offset := (page - 1) * 20
+	rows, err := db.Query("SELECT * FROM transaction_logs WHERE account_num = $1 AND CAST(created_at as VARCHAR) like '%'||$2||'%' OFFSET $3 LIMIT 20", accNum, date, offset)
+
+	if err != nil {
+		return
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var mtl models.TransactionLogs
+		err = rows.Scan(&mtl.TlId, &mtl.AccountNum, &mtl.DestAccount, &mtl.FromAccount, &mtl.TranAmount, &mtl.Description, &mtl.CreatedAt)
+		if err != nil {
+			return
+		}
+		res = append(res, mtl)
+	}
+
+	err = db.QueryRow("SELECT COUNT(*) FROM transaction_logs WHERE account_num = $1 AND CAST(created_at as VARCHAR) like '%'||$2||'%'", accNum, date).Scan(&count)
+	if err != nil {
+		return
+	}
+
+	return res, count, nil
+}
+
 func CustomerHistoryTransaction(db *sql.DB, accNum string, page int) (res []models.TransactionLogs, count int, err error) {
 	offset := (page - 1) * 20
 	rows, err := db.Query("SELECT * FROM transaction_logs WHERE account_num = $1 OFFSET $2 LIMIT 20", accNum, offset)

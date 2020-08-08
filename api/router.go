@@ -35,7 +35,7 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 	ch := customers.NewCustomerHandler(jwt, db)
 	va := virtual_accounts.NewVAHandler(jwt, db) // David, Jocelyn, Joseph , Azizah
 	eh := database.NewEmailHandler(db)           // Joseph
-	adm := admin.NewAdminHandler(db)             // Azizah
+	adm := admin.NewAdminHandler(jwt, db)        // Azizah
 	la := admin.NewLogAdminHandler(jwt, db)
 	// da := customers.NewDashboardHandler(jwt)
 
@@ -81,17 +81,18 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 
 		// transaction log
 		r.Route("/transactions", func(r chi.Router) {
-			r.With(jwt.AuthAdminMiddleware).Get("/", adm.TransactionHistoryHandler)                                              // Azizah
-			r.With(jwt.AuthAdminMiddleware).Get("/{accNum}/{page}", adm.TransactionHistoryHandler)                               // Yuly
-			r.With(jwt.AuthAdminMiddleware).Get("/{accNum}/{day}-{month}-{year}/{page}", adm.TransactionHistoryHandler)          // Yuly
-			r.With(jwt.AuthAdminMiddleware).Get("/{accNum}/{search}/{page}", adm.TransactionHistoryHandler)                      // Yuly
-			r.With(jwt.AuthAdminMiddleware).Get("/{accNum}/{day}-{month}-{year}/{search}/{page}", adm.TransactionHistoryHandler) // Yuly
-
+			r.With(jwt.AuthAdminMiddleware).Get("/", adm.TransactionHistoryHandler)                        // Azizah
+			r.With(jwt.AuthAdminMiddleware).Get("/{accNum}", adm.TransactionHistoryHandler)                // Yuly
+			r.With(jwt.AuthAdminMiddleware).Get("/{accNum}/{search}", adm.TransactionHistoryHandler)       // Yuly
+			r.With(jwt.AuthAdminMiddleware).Get("/list/{page}", adm.TransactionHistoryAll)                 // Azizah
+			r.With(jwt.AuthAdminMiddleware).Get("/list/d/{date}/{page}", adm.TransactionHistoryAll)        // Azizah
+			r.With(jwt.AuthAdminMiddleware).Get("/list/a/{accNum}/{page}", adm.TransactionHistoryAll)      // Azizah
+			r.With(jwt.AuthAdminMiddleware).Get("/list/{accNum}/{date}/{page}", adm.TransactionHistoryAll) // Azizah
 		})
 
 		// Log Admin
-		r.With(jwt.AuthAdminMiddleware).Get("/log/{page}", la.Get)     //Jocelyn
-		r.With(jwt.AuthAdminMiddleware).Post("/log/insert", la.Insert) //Jocelyn
+		r.With(jwt.AuthAdminMiddleware).Get("/log/{page}", la.Get)
+		r.With(jwt.AuthAdminMiddleware).Post("/log/insert", la.Insert)
 
 		// admin dashboard
 		r.With(jwt.AuthAdminMiddleware).Get("/dashboard", adm.GetDashboard())

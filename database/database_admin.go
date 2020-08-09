@@ -5,10 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-<<<<<<< HEAD
-=======
 	"net/http"
->>>>>>> feat: edit customer data for admin api
 	"time"
 
 	"github.com/ndv6/tsaving/constants"

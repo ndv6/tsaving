@@ -28,10 +28,6 @@ type LogAdminHandler struct {
 	db  *sql.DB
 }
 
-type responseCount struct {
-	count int
-}
-
 func NewLogAdminHandler(jwt *tokens.JWT, db *sql.DB) *LogAdminHandler {
 	return &LogAdminHandler{jwt, db}
 }

@@ -7,6 +7,8 @@ import (
 
 	"github.com/ndv6/tsaving/database"
 
+	"github.com/go-chi/chi"
+	"github.com/go-chi/cors"
 	"github.com/ndv6/tsaving/api/admin"
 	"github.com/ndv6/tsaving/api/customers"
 	"github.com/ndv6/tsaving/api/email"
@@ -14,8 +16,6 @@ import (
 	"github.com/ndv6/tsaving/api/not_found"
 	"github.com/ndv6/tsaving/api/virtual_accounts"
 	"github.com/ndv6/tsaving/tokens"
-
-	"github.com/go-chi/chi"
 )
 
 func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
@@ -23,15 +23,20 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 
 	chiRouter.Use(middleware.Logger)
 	chiRouter.Use(middleware.Recoverer)
-
+	chiRouter.Use(cors.Handler(cors.Options{
+		AllowedOrigins:   []string{"*"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type"},
+		AllowCredentials: true,
+	}))
 	// Handler objects initialization
 	ph := database.NewPartnerHandler(db)
 	ah := database.NewAccountHandler(db)
 	ch := customers.NewCustomerHandler(jwt, db)
 	va := virtual_accounts.NewVAHandler(jwt, db) // David, Jocelyn, Joseph , Azizah
 	eh := database.NewEmailHandler(db)           // Joseph
-	adm := admin.NewAdminHandler(db)             // Azizah
-	la := admin.NewLogAdminHandler(db)
+	adm := admin.NewAdminHandler(jwt, db)        // Azizah
+	la := admin.NewLogAdminHandler(jwt, db)
 	// da := customers.NewDashboardHandler(jwt)
 
 	// Home endpoint
@@ -69,23 +74,41 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 		r.Post("/login", admin.LoginAdminHandler(jwt, db)) //Caesar
 
 		// customer details
-		r.With(jwt.AuthAdminMiddleware).Get("/customers/{page}", ch.GetListCustomers)              //David
+		r.With(jwt.AuthAdminMiddleware).Post("/customers/list/{page}", ch.GetListCustomers)        //David
 		r.With(jwt.AuthAdminMiddleware).Get("/customers/cards/{account_num}", ch.GetCardCustomers) //Caesar
 		r.With(jwt.AuthAdminMiddleware).Get("/customers/{cust_id}", ch.GetProfileforAdmin)         //Caesar
+		r.With(jwt.AuthAdminMiddleware).Post("/customers/delete", ch.SoftDelete)                   //Jocelyn
 
 		// transaction log
 		r.Route("/transactions", func(r chi.Router) {
-			r.With(jwt.AuthAdminMiddleware).Get("/", adm.TransactionHistoryHandler)                  // Azizah
-			r.With(jwt.AuthAdminMiddleware).Get("/{accNum}", adm.TransactionHistoryHandler)          // Yuly
-			r.With(jwt.AuthAdminMiddleware).Get("/{accNum}/{search}", adm.TransactionHistoryHandler) // Yuly
+			r.With(jwt.AuthAdminMiddleware).Get("/", adm.TransactionHistoryHandler)                                              // Azizah
+			r.With(jwt.AuthAdminMiddleware).Get("/{accNum}/{page}", adm.TransactionHistoryHandler)                               // Yuly
+			r.With(jwt.AuthAdminMiddleware).Get("/{accNum}/{day}-{month}-{year}/{page}", adm.TransactionHistoryHandler)          // Yuly
+			r.With(jwt.AuthAdminMiddleware).Get("/{accNum}/{search}/{page}", adm.TransactionHistoryHandler)                      // Yuly
+			r.With(jwt.AuthAdminMiddleware).Get("/{accNum}/{day}-{month}-{year}/{search}/{page}", adm.TransactionHistoryHandler) // Yuly
+			r.With(jwt.AuthAdminMiddleware).Get("/list/{page}", adm.TransactionHistoryAll)                                       // Azizah
+			r.With(jwt.AuthAdminMiddleware).Get("/list/d/{date}/{page}", adm.TransactionHistoryAll)                              // Azizah
+			r.With(jwt.AuthAdminMiddleware).Get("/list/a/{accNum}/{page}", adm.TransactionHistoryAll)                            // Azizah
+			r.With(jwt.AuthAdminMiddleware).Get("/list/{accNum}/{date}/{page}", adm.TransactionHistoryAll)                       // Azizah
 		})
 
 		// Log Admin
-		r.With(jwt.AuthAdminMiddleware).Get("/log/{page}", la.Get)
-		r.With(jwt.AuthAdminMiddleware).Post("/log/insert", la.Insert)
+		r.Route("/log", func(r chi.Router) {
+			r.With(jwt.AuthAdminMiddleware).Get("/{page}", la.Get)                              //Jocelyn
+			r.With(jwt.AuthAdminMiddleware).Post("/insert", la.Insert)                          //Jocelyn
+			r.With(jwt.AuthAdminMiddleware).Get("/d/{date}/{page}", la.GetFilteredLog)          //Azizah
+			r.With(jwt.AuthAdminMiddleware).Get("/u/{username}/{page}", la.GetFilteredLog)      //Azizah
+			r.With(jwt.AuthAdminMiddleware).Get("/{username}/{date}/{page}", la.GetFilteredLog) //Azizah
+		})
 
 		// admin dashboard
 		r.With(jwt.AuthAdminMiddleware).Get("/dashboard", adm.GetDashboard())
+
+		// va list for admin
+		r.With(jwt.AuthAdminMiddleware).Get("/va/{cust_id}/{page}", va.VacListAdmin)
+
+		// get token for resend email
+		r.With(jwt.AuthAdminMiddleware).Post("/get-token", email.GetEmailToken(eh))
 	})
 
 	// Not Found Endpoint

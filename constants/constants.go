@@ -58,6 +58,11 @@ const (
 	InsertAdminLogFailed    = "Insert Admin Log Failed"
 	CustomersNotFound       = "List Customers Not Found"
 	GetAllTransactionFailed = "Failed to get all transaction"
+	InvalidAccountNumber    = "Invalid account number"
+	SoftDeleteCustFailed    = "Soft delete customer failed"
+	LogAdminCannotBeNull    = "Username or Filter cannot be null"
+	DateCannotBeNull        = "Date cannot be null"
+	UsernameCannotBeNull    = "Username cannot be null"
 )
 
 // Response messages
@@ -75,6 +80,7 @@ const (
 	SuccessGetToken          = "Success to get the token"
 	AddLogAdminSuccess       = "Add admin log success"
 	GetLogAdminSuccess       = "Get admin log success"
+	SuccessSoftDelete        = "Customer deleted successfully."
 )
 
 // Headers

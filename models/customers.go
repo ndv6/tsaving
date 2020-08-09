@@ -21,7 +21,8 @@ type Customers struct {
 	Expired      time.Time `json:"expired"`
 	CreatedAt    time.Time `json:"created_at"`
 	UpdatedAt    time.Time `json:"updated_at"`
-	IsDeleted    bool      `json:is_deleted`
+	IsDeleted    time.Time `json:"is_deleted"`
+
 }
 
 type Card struct {

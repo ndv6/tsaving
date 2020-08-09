@@ -10,6 +10,7 @@ import (
 
 	"github.com/ndv6/tsaving/helpers"
 	"github.com/ndv6/tsaving/models"
+	"github.com/ndv6/tsaving/tokens"
 
 	"github.com/go-chi/chi"
 	"github.com/ndv6/tsaving/constants"
@@ -17,17 +18,22 @@ import (
 	helper "github.com/ndv6/tsaving/helpers"
 )
 
-type LogAdminHandler struct {
-	db *sql.DB
+type GetLogAdminResponse struct {
+	Total        int               `json:"count"`
+	LogAdminList []models.LogAdmin `json:"list"`
 }
 
-func NewLogAdminHandler(db *sql.DB) *LogAdminHandler {
-	return &LogAdminHandler{db}
+type LogAdminHandler struct {
+	jwt *tokens.JWT
+	db  *sql.DB
+}
+
+func NewLogAdminHandler(jwt *tokens.JWT, db *sql.DB) *LogAdminHandler {
+	return &LogAdminHandler{jwt, db}
 }
 
 func (la *LogAdminHandler) Get(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set(constants.ContentType, constants.Json)
-	helper.EnableCORS(&w)
 
 	page, err := strconv.Atoi(chi.URLParam(r, "page"))
 	if err != nil {
@@ -53,7 +59,6 @@ func (la *LogAdminHandler) Get(w http.ResponseWriter, r *http.Request) {
 
 func (la *LogAdminHandler) Insert(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set(constants.ContentType, constants.Json)
-	helper.EnableCORS(&w)
 
 	var username = "admin" //get from token (later)
 
@@ -85,4 +90,81 @@ func (la *LogAdminHandler) Insert(w http.ResponseWriter, r *http.Request) {
 
 	return
 
+}
+
+func (la *LogAdminHandler) GetFilteredLog(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set(constants.ContentType, constants.Json)
+
+	date := chi.URLParam(r, "date")
+	username := chi.URLParam(r, "username")
+	page, err := strconv.Atoi(chi.URLParam(r, "page"))
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotParseURLParams)
+		return
+	}
+
+	if date != "" && username == "" {
+		LogAdmin, count, err := database.GetLogAdminFilteredDate(la.db, date, page)
+
+		if err != nil {
+			helper.HTTPError(w, http.StatusBadRequest, constants.LogAdminFailed)
+			return
+		}
+
+		responseBody := GetLogAdminResponse{
+			Total:        count,
+			LogAdminList: LogAdmin,
+		}
+
+		_, res, err := helpers.NewResponseBuilder(w, true, constants.GetLogAdminSuccess, responseBody)
+		if err != nil {
+			helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
+			return
+		}
+
+		fmt.Fprintln(w, string(res))
+		return
+	} else if date == "" && username != "" {
+		LogAdmin, count, err := database.GetLogAdminFilteredUsername(la.db, username, page)
+
+		if err != nil {
+			helper.HTTPError(w, http.StatusBadRequest, constants.LogAdminFailed)
+			return
+		}
+
+		responseBody := GetLogAdminResponse{
+			Total:        count,
+			LogAdminList: LogAdmin,
+		}
+
+		_, res, err := helpers.NewResponseBuilder(w, true, constants.GetLogAdminSuccess, responseBody)
+		if err != nil {
+			helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
+			return
+		}
+
+		fmt.Fprintln(w, string(res))
+		return
+	} else if date != "" && username != "" {
+		LogAdmin, count, err := database.GetLogAdminFilteredUsernameDate(la.db, username, date, page)
+
+		if err != nil {
+			helper.HTTPError(w, http.StatusBadRequest, constants.LogAdminFailed)
+			return
+		}
+
+		responseBody := GetLogAdminResponse{
+			Total:        count,
+			LogAdminList: LogAdmin,
+		}
+
+		_, res, err := helpers.NewResponseBuilder(w, true, constants.GetLogAdminSuccess, responseBody)
+		if err != nil {
+			helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
+			return
+		}
+
+		fmt.Fprintln(w, string(res))
+		return
+	}
 }

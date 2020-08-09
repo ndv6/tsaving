@@ -3,6 +3,7 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	"time"
 
 	"github.com/ndv6/tsaving/models"
 )
@@ -27,8 +28,10 @@ func AllHistoryTransaction(db *sql.DB) (res []models.TransactionLogs, err error)
 	return res, nil
 }
 
-func CustomerHistoryTransaction(db *sql.DB, accNum string) (res []models.TransactionLogs, err error) {
-	rows, err := db.Query("SELECT * FROM transaction_logs WHERE account_num = $1", accNum)
+func AllHistoryTransactionPaged(db *sql.DB, page int) (res []models.TransactionLogs, count int, err error) {
+	offset := (page - 1) * 20
+	rows, err := db.Query("SELECT * FROM transaction_logs OFFSET $1 LIMIT 20", offset)
+
 	if err != nil {
 		return
 	}
@@ -43,11 +46,125 @@ func CustomerHistoryTransaction(db *sql.DB, accNum string) (res []models.Transac
 		}
 		res = append(res, mtl)
 	}
-	return res, nil
+
+	err = db.QueryRow("SELECT COUNT(*) FROM transaction_logs").Scan(&count)
+	if err != nil {
+		return
+	}
+
+	return res, count, nil
 }
 
-func CustomerHistoryTransactionFiltered(db *sql.DB, accNum, search string) (res []models.TransactionLogs, err error) {
-	rows, err := db.Query(`SELECT * FROM transaction_logs WHERE account_num = $1 AND (from_account like '%'||$2||'%' OR dest_account like '%'||$2||'%' OR description like '%'||$2||'%')`, accNum, search)
+func AllHistoryTransactionFilteredAccNum(db *sql.DB, accNum string, page int) (res []models.TransactionLogs, count int, err error) {
+	offset := (page - 1) * 20
+	rows, err := db.Query("SELECT * FROM transaction_logs WHERE account_num = $1 OFFSET $2 LIMIT 20", accNum, offset)
+
+	if err != nil {
+		return
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var mtl models.TransactionLogs
+		err = rows.Scan(&mtl.TlId, &mtl.AccountNum, &mtl.DestAccount, &mtl.FromAccount, &mtl.TranAmount, &mtl.Description, &mtl.CreatedAt)
+		if err != nil {
+			return
+		}
+		res = append(res, mtl)
+	}
+
+	err = db.QueryRow("SELECT COUNT(*) FROM transaction_logs WHERE account_num = $1", accNum).Scan(&count)
+	if err != nil {
+		return
+	}
+
+	return res, count, nil
+}
+
+func AllHistoryTransactionFilteredDate(db *sql.DB, date string, page int) (res []models.TransactionLogs, count int, err error) {
+	offset := (page - 1) * 20
+	rows, err := db.Query("SELECT * FROM transaction_logs WHERE CAST(created_at as VARCHAR) like '%'||$1||'%' OFFSET $2 LIMIT 20", date, offset)
+
+	if err != nil {
+		return
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var mtl models.TransactionLogs
+		err = rows.Scan(&mtl.TlId, &mtl.AccountNum, &mtl.DestAccount, &mtl.FromAccount, &mtl.TranAmount, &mtl.Description, &mtl.CreatedAt)
+		if err != nil {
+			return
+		}
+		res = append(res, mtl)
+	}
+
+	err = db.QueryRow("SELECT COUNT(*) FROM transaction_logs WHERE CAST(created_at as VARCHAR) like '%'||$1||'%'", date).Scan(&count)
+	if err != nil {
+		return
+	}
+
+	return res, count, nil
+}
+
+func AllHistoryTransactionFilteredAccNumDate(db *sql.DB, accNum string, date string, page int) (res []models.TransactionLogs, count int, err error) {
+	offset := (page - 1) * 20
+	rows, err := db.Query("SELECT * FROM transaction_logs WHERE account_num = $1 AND CAST(created_at as VARCHAR) like '%'||$2||'%' OFFSET $3 LIMIT 20", accNum, date, offset)
+
+	if err != nil {
+		return
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var mtl models.TransactionLogs
+		err = rows.Scan(&mtl.TlId, &mtl.AccountNum, &mtl.DestAccount, &mtl.FromAccount, &mtl.TranAmount, &mtl.Description, &mtl.CreatedAt)
+		if err != nil {
+			return
+		}
+		res = append(res, mtl)
+	}
+
+	err = db.QueryRow("SELECT COUNT(*) FROM transaction_logs WHERE account_num = $1 AND CAST(created_at as VARCHAR) like '%'||$2||'%'", accNum, date).Scan(&count)
+	if err != nil {
+		return
+	}
+
+	return res, count, nil
+}
+
+func CustomerHistoryTransaction(db *sql.DB, accNum string, page int) (res []models.TransactionLogs, count int, err error) {
+	offset := (page - 1) * 20
+	rows, err := db.Query("SELECT * FROM transaction_logs WHERE account_num = $1 OFFSET $2 LIMIT 20", accNum, offset)
+	if err != nil {
+		return
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var mtl models.TransactionLogs
+		err = rows.Scan(&mtl.TlId, &mtl.AccountNum, &mtl.DestAccount, &mtl.FromAccount, &mtl.TranAmount, &mtl.Description, &mtl.CreatedAt)
+		if err != nil {
+			return
+		}
+		res = append(res, mtl)
+	}
+
+	err = db.QueryRow("SELECT COUNT(*) FROM transaction_logs WHERE account_num = $1", accNum).Scan(&count)
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+func CustomerHistoryTransactionFiltered(db *sql.DB, accNum, search string, page int) (res []models.TransactionLogs, count int, err error) {
+	offset := (page - 1) * 20
+	rows, err := db.Query(`SELECT * FROM transaction_logs WHERE account_num = $1 AND (from_account like '%'||$2||'%' OR dest_account like '%'||$2||'%' OR description like '%'||$2||'%') OFFSET $3 LIMIT 20`, accNum, search, offset)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -63,7 +180,69 @@ func CustomerHistoryTransactionFiltered(db *sql.DB, accNum, search string) (res 
 		}
 		res = append(res, mtl)
 	}
-	return res, nil
+
+	err = db.QueryRow("SELECT COUNT(*) FROM transaction_logs WHERE account_num = $1 AND (from_account like '%'||$2||'%' OR dest_account like '%'||$2||'%' OR description like '%'||$2||'%')", accNum, search).Scan(&count)
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+func CustomerHistoryTransactionDateFiltered(db *sql.DB, accNum, day, month, year string, page int) (res []models.TransactionLogs, count int, err error) {
+	offset := (page - 1) * 20
+	date := year + "-" + month + "-" + day
+	rows, err := db.Query(`SELECT * FROM transaction_logs WHERE account_num = $1 AND DATE(created_at) = $2 OFFSET $3 LIMIT 20`, accNum, date, offset)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var mtl models.TransactionLogs
+		err = rows.Scan(&mtl.TlId, &mtl.AccountNum, &mtl.DestAccount, &mtl.FromAccount, &mtl.TranAmount, &mtl.Description, &mtl.CreatedAt)
+		if err != nil {
+			return
+		}
+		res = append(res, mtl)
+	}
+
+	err = db.QueryRow("SELECT COUNT(*) FROM transaction_logs WHERE account_num = $1 AND DATE(created_at) = $2", accNum, date).Scan(&count)
+	if err != nil {
+		return
+	}
+	return
+}
+
+func CustomerHistoryTransactionAllFiltered(db *sql.DB, accNum, search, day, month, year string, page int) (res []models.TransactionLogs, count int, err error) {
+	offset := (page - 1) * 20
+	date := year + "-" + month + "-" + day
+
+	rows, err := db.Query(`SELECT * FROM transaction_logs WHERE account_num = $1 AND (from_account like '%'||$2||'%' OR dest_account like '%'||$2||'%' OR description like '%'||$2||'%') AND DATE(created_at) = $3 OFFSET $4 LIMIT 20`, accNum, search, date, offset)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var mtl models.TransactionLogs
+		err = rows.Scan(&mtl.TlId, &mtl.AccountNum, &mtl.DestAccount, &mtl.FromAccount, &mtl.TranAmount, &mtl.Description, &mtl.CreatedAt)
+		if err != nil {
+			return
+		}
+		res = append(res, mtl)
+	}
+
+	err = db.QueryRow("SELECT COUNT(*) FROM transaction_logs WHERE account_num = $1 AND (from_account like '%'||$2||'%' OR dest_account like '%'||$2||'%' OR description like '%'||$2||'%') AND DATE(created_at) = $3", accNum, search, date).Scan(&count)
+	if err != nil {
+		return
+	}
+
+	return
 }
 
 func GetActInActUserCount(db *sql.DB) (act, inact int, err error) {
@@ -92,5 +271,93 @@ func GetActInActUserCount(db *sql.DB) (act, inact int, err error) {
 
 func GetTotalTransactionCount(db *sql.DB) (total int, err error) {
 	err = db.QueryRow("SELECT COUNT(tl_id) FROM transaction_logs").Scan(&total)
+	return
+}
+
+func GetNewUserToday(db *sql.DB) (total int, err error) {
+	err = db.QueryRow("SELECT count(cust_id) FROM customers WHERE created_at::date = current_date").Scan(&total)
+	return
+}
+
+func GetNewUserYesterday(db *sql.DB) (total int, err error) {
+	err = db.QueryRow("SELECT count(cust_id) FROM customers WHERE created_at::date = current_date - 1").Scan(&total)
+	return
+}
+
+func GetNewUserThisWeek(db *sql.DB) (total int, err error) {
+	err = db.QueryRow("SELECT count(cust_id) FROM customers WHERE created_at > current_date - 7").Scan(&total)
+	return
+}
+
+func GetNewUserThisMonth(db *sql.DB) (total int, err error) {
+	err = db.QueryRow("SELECT count(cust_id) FROM customers WHERE created_at > date_trunc('month', CURRENT_DATE)").Scan(&total)
+	return
+}
+
+func GetTransactionAmountToday(db *sql.DB) (total int, err error) {
+	err = db.QueryRow("SELECT COALESCE(sum(tran_amount),0) FROM transaction_logs WHERE created_at::date = current_date").Scan(&total)
+	return
+}
+
+func GetTransactionAmountYesterday(db *sql.DB) (total int, err error) {
+	err = db.QueryRow("SELECT COALESCE(sum(tran_amount),0) FROM transaction_logs WHERE created_at::date = current_date - 1").Scan(&total)
+	return
+}
+
+func GetTransactionAmountMonth(db *sql.DB) (total int, err error) {
+	err = db.QueryRow("SELECT COALESCE(sum(tran_amount),0) FROM transaction_logs WHERE created_at > date_trunc('month', CURRENT_DATE)").Scan(&total)
+	return
+}
+
+func GetTransactionByWeek(db *sql.DB) (res []models.TransactionMonth, err error) {
+	rows, err := db.Query("SELECT ROW_NUMBER () OVER (ORDER BY extract(week from created_at)) as week, extract(week from created_at) as realweek, sum(tran_amount) as amount FROM transaction_logs where created_at > date_trunc('month', CURRENT_DATE) group by 2 order by 1 asc")
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var objTransactionByWeek models.TransactionMonth
+		err = rows.Scan(&objTransactionByWeek.Week, &objTransactionByWeek.RealWeek, &objTransactionByWeek.Amount)
+		if err != nil {
+			return
+		}
+		res = append(res, objTransactionByWeek)
+	}
+	return res, nil
+}
+
+func GetLogTransactionToday(db *sql.DB) (res []models.TransactionLogs, err error) {
+	rows, err := db.Query("SELECT tl_id, account_num, from_account, dest_account, tran_amount, description, created_at FROM transaction_logs WHERE created_at::date = current_date order by 1 desc ")
+	defer rows.Close()
+
+	for rows.Next() {
+		var objTransactionLog models.TransactionLogs
+		err = rows.Scan(&objTransactionLog.TlId, &objTransactionLog.AccountNum, &objTransactionLog.DestAccount, &objTransactionLog.FromAccount, &objTransactionLog.TranAmount, &objTransactionLog.Description, &objTransactionLog.CreatedAt)
+		if err != nil {
+			return
+		}
+		res = append(res, objTransactionLog)
+	}
+	return res, nil
+}
+
+func GetLogAdminToday(db *sql.DB) (res []models.LogAdmin, err error) {
+	rows, err := db.Query("SELECT id, username, account_num, action, action_time FROM log_admins WHERE action_time::date = current_date order by 1 desc ")
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var objLogAdmin models.LogAdmin
+		err = rows.Scan(&objLogAdmin.IDLogAdmin, &objLogAdmin.Username, &objLogAdmin.Action, &objLogAdmin.AccNum, &objLogAdmin.ActionTime)
+		if err != nil {
+			return
+		}
+		res = append(res, objLogAdmin)
+	}
+	return res, nil
+}
+
+//SOFT DELETE
+func SoftDeleteCustomer(db *sql.DB, AccNum string) (err error) {
+	_, err = db.Exec("UPDATE customers SET is_deleted = $1 WHERE account_num = $2", time.Now(), AccNum)
 	return
 }

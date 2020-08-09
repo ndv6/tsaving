@@ -93,8 +93,8 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 			r.With(jwt.AuthAdminMiddleware).Get("/{accNum}/{day}-{month}-{year}/{search}/{page}", adm.TransactionHistoryHandler) // Yuly
 			r.With(jwt.AuthAdminMiddleware).Get("/list/{page}", adm.TransactionHistoryAll)                                       // Azizah
 			r.With(jwt.AuthAdminMiddleware).Get("/list/d/{date}/{page}", adm.TransactionHistoryAll)                              // Azizah
-			r.With(jwt.AuthAdminMiddleware).Get("/list/a/{accNum}/{page}", adm.TransactionHistoryAll)                            // Azizah
-			r.With(jwt.AuthAdminMiddleware).Get("/list/{accNum}/{date}/{page}", adm.TransactionHistoryAll)                       // Azizah
+			r.With(jwt.AuthAdminMiddleware).Get("/list/a/{search}/{page}", adm.TransactionHistoryAll)                            // Azizah
+			r.With(jwt.AuthAdminMiddleware).Get("/list/{search}/{date}/{page}", adm.TransactionHistoryAll)                       // Azizah
 		})
 
 		// Log Admin

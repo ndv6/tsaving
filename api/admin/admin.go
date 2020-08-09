@@ -242,7 +242,7 @@ func (adm *AdminHandler) TransactionHistoryAll(w http.ResponseWriter, r *http.Re
 	w.Header().Set(constants.ContentType, constants.Json)
 
 	date := chi.URLParam(r, "date")
-	accNum := chi.URLParam(r, "accNum")
+	search := chi.URLParam(r, "search")
 	page, err := strconv.Atoi(chi.URLParam(r, "page"))
 	if err != nil {
 		w.Header().Set(constants.ContentType, constants.Json)
@@ -250,7 +250,7 @@ func (adm *AdminHandler) TransactionHistoryAll(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	if accNum == "" && date == "" {
+	if search == "" && date == "" {
 		transactions, count, err := database.AllHistoryTransactionPaged(adm.db, page)
 
 		if err != nil {
@@ -271,8 +271,8 @@ func (adm *AdminHandler) TransactionHistoryAll(w http.ResponseWriter, r *http.Re
 
 		fmt.Fprintln(w, string(res))
 		return
-	} else if accNum != "" && date == "" {
-		transactions, count, err := database.AllHistoryTransactionFilteredAccNum(adm.db, accNum, page)
+	} else if search != "" && date == "" {
+		transactions, count, err := database.AllHistoryTransactionFilteredAccNum(adm.db, search, page)
 
 		if err != nil {
 			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
@@ -292,7 +292,7 @@ func (adm *AdminHandler) TransactionHistoryAll(w http.ResponseWriter, r *http.Re
 
 		fmt.Fprintln(w, string(res))
 		return
-	} else if accNum == "" && date != "" {
+	} else if search == "" && date != "" {
 		transactions, count, err := database.AllHistoryTransactionFilteredDate(adm.db, date, page)
 
 		if err != nil {
@@ -313,8 +313,8 @@ func (adm *AdminHandler) TransactionHistoryAll(w http.ResponseWriter, r *http.Re
 
 		fmt.Fprintln(w, string(res))
 		return
-	} else if accNum != "" && date != "" {
-		transactions, count, err := database.AllHistoryTransactionFilteredAccNumDate(adm.db, accNum, date, page)
+	} else if search != "" && date != "" {
+		transactions, count, err := database.AllHistoryTransactionFilteredAccNumDate(adm.db, search, date, page)
 
 		if err != nil {
 			helpers.HTTPError(w, http.StatusBadRequest, err.Error())

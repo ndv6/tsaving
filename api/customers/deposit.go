@@ -50,7 +50,7 @@ func DepositToMainAccount(partner PartnerInterface, trx Transactor) http.Handler
 			return
 		}
 
-		if !isValidRequest(request) {
+		if !helpers.IsRequestValid(request.AccountNumber, request.AuthCode) || !helpers.IsValidInt(request.BalanceAdded, request.ClientId) {
 			helpers.HTTPError(w, http.StatusBadRequest, constants.RequestHasInvalidFields)
 			return
 		}
@@ -100,14 +100,5 @@ func isValidPartnerAuthCode(request DepositRequest, partner PartnerInterface) (i
 		isValidCode = true
 	}
 
-	return
-}
-
-func isValidRequest(request DepositRequest) (isValidRequest bool) {
-	isValidRequest = false
-
-	if !(request.AccountNumber == "") && !(request.AuthCode == "") && !(request.BalanceAdded <= 0) && !(request.ClientId == 0) {
-		isValidRequest = true
-	}
 	return
 }

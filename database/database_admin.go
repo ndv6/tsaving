@@ -1,12 +1,73 @@
 package database
 
 import (
+	"bytes"
 	"database/sql"
+	"encoding/json"
 	"fmt"
+	"net/http"
 	"time"
 
+	"github.com/ndv6/tsaving/constants"
 	"github.com/ndv6/tsaving/models"
 )
+
+type AdminDatabaseHandler struct {
+	db *sql.DB
+}
+
+func NewAdminDatabaseHandler(db *sql.DB) *AdminDatabaseHandler {
+	return &AdminDatabaseHandler{
+		db,
+	}
+}
+
+func (adm *AdminDatabaseHandler) SendMail(w http.ResponseWriter, OTPEmail string, cusEmail string) (err error) {
+	requestBody, err := json.Marshal(map[string]string{
+		"email": cusEmail,
+		"token": OTPEmail,
+	})
+
+	if err != nil {
+		return
+	}
+
+	_, err = http.Post(constants.TnotifLocal, constants.Json, bytes.NewBuffer(requestBody))
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+func (adh *AdminDatabaseHandler) EditCustomerData(customerData models.Customers, adminUsername string) (err error) {
+	tx, err := adh.db.Begin()
+	if err != nil {
+		tx.Rollback()
+		return
+	}
+
+	_, err = tx.Exec("UPDATE customers SET cust_phone = ($1), cust_email = ($2), is_verified=($3) WHERE account_num=($4) AND cust_phone IS DISTINCT FROM ($1) OR cust_email IS DISTINCT FROM ($2) OR is_verified IS DISTINCT FROM ($3)", customerData.CustPhone, customerData.CustEmail, customerData.IsVerified, customerData.AccountNum)
+	if err != nil {
+		tx.Rollback()
+		return
+	}
+
+	editCustomerDataLog := models.LogAdmin{
+		Username:   adminUsername,
+		AccNum:     customerData.AccountNum,
+		Action:     constants.EditCustomerData,
+		ActionTime: time.Now(),
+	}
+	err = InsertLogAdminWithDbTransaction(tx, editCustomerDataLog, adminUsername)
+	if err != nil {
+		tx.Rollback()
+		return
+	}
+
+	err = tx.Commit()
+	return
+}
 
 func AllHistoryTransaction(db *sql.DB) (res []models.TransactionLogs, err error) {
 	rows, err := db.Query("SELECT * FROM transaction_logs")

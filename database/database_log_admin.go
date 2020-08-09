@@ -16,6 +16,15 @@ func InsertLogAdmin(db *sql.DB, la models.LogAdmin, username string) (err error)
 	return err
 }
 
+func InsertLogAdminWithDbTransaction(trx *sql.Tx, adminLog models.LogAdmin, adminUsername string) (err error) {
+	_, err = trx.Exec("INSERT INTO log_admins (username,account_num,action,action_time) VALUES ($1, $2, $3, $4);",
+		adminUsername,
+		adminLog.AccNum,
+		adminLog.Action,
+		time.Now())
+	return err
+}
+
 func GetLogAdmin(db *sql.DB, page int) (LogAdmin []models.LogAdmin, err error) {
 
 	offset := (page - 1) * 20

@@ -6,9 +6,9 @@ import (
 )
 
 type Admins struct {
-	AdminId     int       `json:"id"`
-	Username   	string    `json:"username"`
-	CreatedAt   time.Time `json:"created_at"`
+	AdminId   int       `json:"id"`
+	Username  string    `json:"username"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 func LoginAdmin(db *sql.DB, username string, password string) (objAdmin Admins, err error) {

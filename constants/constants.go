@@ -7,10 +7,9 @@ const (
 	TransferToMainAccount    = "VA_TO_MAIN"
 )
 
-// Response status
+// Admin Activity Types (for Admin Activity Log)
 const (
-	DepositSuccess = "Deposit completed successfully"
-	DepositFailed  = "Failed to make deposit"
+	EditCustomerData = "EDIT_CUSTOMER_DATA"
 )
 
 const (
@@ -67,6 +66,9 @@ const (
 
 // Response messages
 const (
+	DepositSuccess           = "Deposit completed successfully"
+	DepositFailed            = "Failed to make deposit"
+	EditCustomerDataSuccess  = "Customer data updated successfully."
 	AddBalanceVASuccess      = "Successfully add balance to your virtual account"
 	LoginSucceed             = "Login Succeed"
 	RegisterSucceed          = "Register Succeeded"
@@ -96,4 +98,9 @@ const (
 // Card Company
 const (
 	Mastercard = "51"
+)
+
+// URLs
+const (
+	TnotifLocal = "http://localhost:8082/sendMail"
 )

@@ -44,3 +44,26 @@ func LoadConfig(file string) (models.Config, error) {
 	}
 	return cfg, err
 }
+
+// Function to check if one of request field is empty
+func IsRequestValid(strings ...string) (result bool) {
+	result = true
+	for _, s := range strings {
+		if s == "" {
+			result = false
+			return
+		}
+	}
+	return
+}
+
+func IsValidInt(ints ...int) (result bool) {
+	result = true
+	for _, i := range ints {
+		if i <= 0 {
+			result = false
+			return
+		}
+	}
+	return
+}

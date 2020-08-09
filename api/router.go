@@ -3,6 +3,8 @@ package api
 import (
 	"database/sql"
 
+	"github.com/ndv6/tsaving/models"
+
 	"github.com/go-chi/chi/middleware"
 
 	"github.com/ndv6/tsaving/database"
@@ -30,6 +32,8 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 		AllowCredentials: true,
 	}))
 	// Handler objects initialization
+	th := models.NewTokenHandler(db)
+	admDb := database.NewAdminDatabaseHandler(db)
 	ph := database.NewPartnerHandler(db)
 	ah := database.NewAccountHandler(db)
 	ch := customers.NewCustomerHandler(jwt, db)
@@ -78,6 +82,7 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 		r.With(jwt.AuthAdminMiddleware).Get("/customers/cards/{account_num}", ch.GetCardCustomers) //Caesar
 		r.With(jwt.AuthAdminMiddleware).Get("/customers/{cust_id}", ch.GetProfileforAdmin)         //Caesar
 		r.With(jwt.AuthAdminMiddleware).Post("/customers/delete", ch.SoftDelete)                   //Jocelyn
+		r.With(jwt.AuthAdminMiddleware).Put("/customers/edit", adm.EditCustomerData(admDb, th))    //Vici
 
 		// transaction log
 		r.Route("/transactions", func(r chi.Router) {

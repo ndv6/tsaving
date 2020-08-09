@@ -48,7 +48,7 @@ type TokenInterface interface {
 
 type EditCustomerDataRequest struct {
 	AdminUsername  string `json:"username"`
-	AccountNum     string `json:"acc_num"`
+	AccountNum     string `json:"account_num"`
 	CustEmail      string `json:"cust_email"`
 	CustPhone      string `json:"cust_phone"`
 	IsVerified     bool   `json:"is_verified"`

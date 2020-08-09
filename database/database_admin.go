@@ -70,7 +70,7 @@ func (adh *AdminDatabaseHandler) EditCustomerData(customerData models.Customers,
 }
 
 func AllHistoryTransaction(db *sql.DB) (res []models.TransactionLogs, err error) {
-	rows, err := db.Query("SELECT * FROM transaction_logs")
+	rows, err := db.Query("SELECT tl_id, account_num, dest_account, from_account, tran_amount, description, created_at FROM transaction_logs")
 
 	if err != nil {
 		return
@@ -91,7 +91,7 @@ func AllHistoryTransaction(db *sql.DB) (res []models.TransactionLogs, err error)
 
 func AllHistoryTransactionPaged(db *sql.DB, page int) (res []models.TransactionLogs, count int, err error) {
 	offset := (page - 1) * 20
-	rows, err := db.Query("SELECT * FROM transaction_logs OFFSET $1 LIMIT 20", offset)
+	rows, err := db.Query("SELECT tl_id, account_num, dest_account, from_account, tran_amount, description, created_at FROM transaction_logs OFFSET $1 LIMIT 20", offset)
 
 	if err != nil {
 		return
@@ -118,7 +118,7 @@ func AllHistoryTransactionPaged(db *sql.DB, page int) (res []models.TransactionL
 
 func AllHistoryTransactionFilteredAccNum(db *sql.DB, accNum string, page int) (res []models.TransactionLogs, count int, err error) {
 	offset := (page - 1) * 20
-	rows, err := db.Query("SELECT * FROM transaction_logs WHERE account_num = $1 OFFSET $2 LIMIT 20", accNum, offset)
+	rows, err := db.Query("SELECT tl_id, account_num, dest_account, from_account, tran_amount, description, created_at FROM transaction_logs WHERE account_num = $1 OFFSET $2 LIMIT 20", accNum, offset)
 
 	if err != nil {
 		return
@@ -145,7 +145,7 @@ func AllHistoryTransactionFilteredAccNum(db *sql.DB, accNum string, page int) (r
 
 func AllHistoryTransactionFilteredDate(db *sql.DB, date string, page int) (res []models.TransactionLogs, count int, err error) {
 	offset := (page - 1) * 20
-	rows, err := db.Query("SELECT * FROM transaction_logs WHERE CAST(created_at as VARCHAR) like '%'||$1||'%' OFFSET $2 LIMIT 20", date, offset)
+	rows, err := db.Query("SELECT tl_id, account_num, dest_account, from_account, tran_amount, description, created_at FROM transaction_logs WHERE CAST(created_at as VARCHAR) like '%'||$1||'%' OFFSET $2 LIMIT 20", date, offset)
 
 	if err != nil {
 		return
@@ -172,7 +172,7 @@ func AllHistoryTransactionFilteredDate(db *sql.DB, date string, page int) (res [
 
 func AllHistoryTransactionFilteredAccNumDate(db *sql.DB, accNum string, date string, page int) (res []models.TransactionLogs, count int, err error) {
 	offset := (page - 1) * 20
-	rows, err := db.Query("SELECT * FROM transaction_logs WHERE account_num = $1 AND CAST(created_at as VARCHAR) like '%'||$2||'%' OFFSET $3 LIMIT 20", accNum, date, offset)
+	rows, err := db.Query("SELECT tl_id, account_num, dest_account, from_account, tran_amount, description, created_at FROM transaction_logs WHERE account_num = $1 AND CAST(created_at as VARCHAR) like '%'||$2||'%' OFFSET $3 LIMIT 20", accNum, date, offset)
 
 	if err != nil {
 		return
@@ -199,7 +199,7 @@ func AllHistoryTransactionFilteredAccNumDate(db *sql.DB, accNum string, date str
 
 func CustomerHistoryTransaction(db *sql.DB, accNum string, page int) (res []models.TransactionLogs, count int, err error) {
 	offset := (page - 1) * 20
-	rows, err := db.Query("SELECT * FROM transaction_logs WHERE account_num = $1 OFFSET $2 LIMIT 20", accNum, offset)
+	rows, err := db.Query("SELECT tl_id, account_num, dest_account, from_account, tran_amount, description, created_at FROM transaction_logs WHERE account_num = $1 OFFSET $2 LIMIT 20", accNum, offset)
 	if err != nil {
 		return
 	}
@@ -225,7 +225,7 @@ func CustomerHistoryTransaction(db *sql.DB, accNum string, page int) (res []mode
 
 func CustomerHistoryTransactionFiltered(db *sql.DB, accNum, search string, page int) (res []models.TransactionLogs, count int, err error) {
 	offset := (page - 1) * 20
-	rows, err := db.Query(`SELECT * FROM transaction_logs WHERE account_num = $1 AND (from_account like '%'||$2||'%' OR dest_account like '%'||$2||'%' OR description like '%'||$2||'%') OFFSET $3 LIMIT 20`, accNum, search, offset)
+	rows, err := db.Query(`SELECT tl_id, account_num, dest_account, from_account, tran_amount, description, created_at FROM transaction_logs WHERE account_num = $1 AND (from_account like '%'||$2||'%' OR dest_account like '%'||$2||'%' OR description like '%'||$2||'%') OFFSET $3 LIMIT 20`, accNum, search, offset)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -253,7 +253,7 @@ func CustomerHistoryTransactionFiltered(db *sql.DB, accNum, search string, page 
 func CustomerHistoryTransactionDateFiltered(db *sql.DB, accNum, day, month, year string, page int) (res []models.TransactionLogs, count int, err error) {
 	offset := (page - 1) * 20
 	date := year + "-" + month + "-" + day
-	rows, err := db.Query(`SELECT * FROM transaction_logs WHERE account_num = $1 AND DATE(created_at) = $2 OFFSET $3 LIMIT 20`, accNum, date, offset)
+	rows, err := db.Query(`SELECT tl_id, account_num, dest_account, from_account, tran_amount, description, created_at FROM transaction_logs WHERE account_num = $1 AND DATE(created_at) = $2 OFFSET $3 LIMIT 20`, accNum, date, offset)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -281,7 +281,7 @@ func CustomerHistoryTransactionAllFiltered(db *sql.DB, accNum, search, day, mont
 	offset := (page - 1) * 20
 	date := year + "-" + month + "-" + day
 
-	rows, err := db.Query(`SELECT * FROM transaction_logs WHERE account_num = $1 AND (from_account like '%'||$2||'%' OR dest_account like '%'||$2||'%' OR description like '%'||$2||'%') AND DATE(created_at) = $3 OFFSET $4 LIMIT 20`, accNum, search, date, offset)
+	rows, err := db.Query(`SELECT tl_id, account_num, dest_account, from_account, tran_amount, description, created_at FROM transaction_logs WHERE account_num = $1 AND (from_account like '%'||$2||'%' OR dest_account like '%'||$2||'%' OR description like '%'||$2||'%') AND DATE(created_at) = $3 OFFSET $4 LIMIT 20`, accNum, search, date, offset)
 	if err != nil {
 		fmt.Println(err)
 		return

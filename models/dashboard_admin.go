@@ -1,16 +1,14 @@
 package models
 
 type DashboardAdmin struct {
-	DashboardUser        DashboardUserResponse        `json:"dashboard_user"`
-	DashboardTransaction DashboardTransactionResponse `json:"dashboard_transaction"`
-	LogTransactionToday  []TransactionLogs            `json:"log_transaction_today"`
-	LogAdminToday        []LogAdmin                   `json:"log_admin_today"`
+	DashboardUser             DashboardUserResponse             `json:"dashboard_user"`
+	DashboardTransaction      DashboardTransactionResponse      `json:"dashboard_amount"`
+	DashboardTotalTransaction DashboardTotalTransactionResponse `json:"dashboard_transaction"`
 }
 
 type DashboardUserResponse struct {
 	ActUser          int `json:"active_user"`
 	InactUser        int `json:"inact_user"`
-	TotalTransaction int `json:"total_transaction"`
 	NewUserToday     int `json:"new_user_today"`
 	NewUserYesterday int `json:"new_user_yesterday"`
 	NewUserThisWeek  int `json:"new_user_this_week"`
@@ -18,10 +16,22 @@ type DashboardUserResponse struct {
 }
 
 type DashboardTransactionResponse struct {
-	TotalTransactionMonth     int                `json:"total_transaction_month"`
-	TotalTransactionToday     int                `json:"total_transaction_today"`
-	TotalTransactionYesterday int                `json:"total_transaction_yesterday"`
-	TransactionMonth          []TransactionMonth `json:"transaction_month"`
+	TotalTransactionAmount        int                `json:"total_transaction_amount"`
+	TotalTransactionMonth         int                `json:"total_transaction_month"`
+	TotalTransactionWeek          int                `json:"total_transaction_week"`
+	TotalTransactionToday         int                `json:"total_transaction_today"`
+	TotalTransactionYesterday     int                `json:"total_transaction_yesterday"`
+	TotalTransactionAmountVa      int                `json:"total_transaction_amount_va"`
+	TotalTransactionAmountMain    int                `json:"total_transaction_amount_main"`
+	TotalTransactionAmountDeposit int                `json:"total_transaction_amount_deposit"`
+	TransactionMonth              []TransactionMonth `json:"transaction_month"`
+}
+
+type DashboardTotalTransactionResponse struct {
+	TotalTransaction            int `json:"total_transaction"`
+	TotalTransactionVa          int `json:"total_transaction_va"`
+	TotalTransactionMainAccount int `json:"total_transaction_main"`
+	TotalTransactionDeposit     int `json:"total_transaction_deposit"`
 }
 
 type TransactionMonth struct {

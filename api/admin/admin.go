@@ -395,19 +395,35 @@ func (ah *AdminHandler) GetDashboard() http.HandlerFunc {
 			return
 		}
 
-		logTransactionToday, err := database.GetLogTransactionToday(ah.db)
-		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
-			return
-		}
-
-		logAdminToday, err := database.GetLogAdminToday(ah.db)
-		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
-			return
-		}
-
 		transactionMonthbyWeek, err := database.GetTransactionByWeek(ah.db)
+		if err != nil {
+			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		transactionAmount, err := database.GetTransactionAmount(ah.db)
+		if err != nil {
+			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		totalVa, amountVa, err := database.GetTotalFromLog(ah.db, constants.TransferToMainAccount)
+		if err != nil {
+			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+			return
+		}
+		totalMain, amountMain, err := database.GetTotalFromLog(ah.db, constants.TransferToVirtualAccount)
+		if err != nil {
+			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+			return
+		}
+		totalDeposit, amountDeposit, err := database.GetTotalFromLog(ah.db, constants.Deposit)
+		if err != nil {
+			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		transactionAmountWeek, err := database.GetTransactionAmountWeek(ah.db)
 		if err != nil {
 			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
 			return
@@ -416,7 +432,6 @@ func (ah *AdminHandler) GetDashboard() http.HandlerFunc {
 		dashboardUser := models.DashboardUserResponse{
 			ActUser:          act,
 			InactUser:        inact,
-			TotalTransaction: total,
 			NewUserToday:     newUserToday,
 			NewUserYesterday: newUserYesterday,
 			NewUserThisWeek:  newUserThisWeek,
@@ -424,17 +439,28 @@ func (ah *AdminHandler) GetDashboard() http.HandlerFunc {
 		}
 
 		dashboardTransaction := models.DashboardTransactionResponse{
-			TotalTransactionMonth:     totalTransactionAmountMonth,
-			TotalTransactionToday:     totalTransactionAmountToday,
-			TotalTransactionYesterday: totalTransactionAmountYesterday,
-			TransactionMonth:          transactionMonthbyWeek,
+			TotalTransactionMonth:         totalTransactionAmountMonth,
+			TotalTransactionToday:         totalTransactionAmountToday,
+			TotalTransactionAmount:        transactionAmount,
+			TotalTransactionAmountVa:      amountVa,
+			TotalTransactionAmountMain:    amountMain,
+			TotalTransactionAmountDeposit: amountDeposit,
+			TotalTransactionYesterday:     totalTransactionAmountYesterday,
+			TotalTransactionWeek:          transactionAmountWeek,
+			TransactionMonth:              transactionMonthbyWeek,
+		}
+
+		dashboardTotalTransaction := models.DashboardTotalTransactionResponse{
+			TotalTransaction:            total,
+			TotalTransactionVa:          totalVa,
+			TotalTransactionMainAccount: totalMain,
+			TotalTransactionDeposit:     totalDeposit,
 		}
 
 		dashboardAdm := models.DashboardAdmin{
-			DashboardUser:        dashboardUser,
-			DashboardTransaction: dashboardTransaction,
-			LogTransactionToday:  logTransactionToday,
-			LogAdminToday:        logAdminToday,
+			DashboardUser:             dashboardUser,
+			DashboardTransaction:      dashboardTransaction,
+			DashboardTotalTransaction: dashboardTotalTransaction,
 		}
 
 		w, res, err := helpers.NewResponseBuilder(w, true, "Success fetching dashboard data", dashboardAdm)

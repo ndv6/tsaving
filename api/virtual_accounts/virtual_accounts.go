@@ -40,7 +40,7 @@ type VAResponse struct {
 }
 
 type VAListAdminResponse struct {
-	Total  int `json:"total"`
+	Total  int                      `json:"total"`
 	VAList []models.VirtualAccounts `json:"data"`
 }
 
@@ -364,14 +364,14 @@ func (va *VAHandler) VacListAdmin(w http.ResponseWriter, r *http.Request) {
 		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotParseURLParams)
 		return
 	}
-	
+
 	page, err := strconv.Atoi(chi.URLParam(r, "page"))
 	if err != nil {
 		w.Header().Set(constants.ContentType, constants.Json)
 		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotParseURLParams)
 		return
 	}
-	
+
 	data, count, err := database.GetListVAAdmin(va.db, custId, page)
 	if err != nil {
 		w.Header().Set(constants.ContentType, constants.Json)
@@ -380,7 +380,48 @@ func (va *VAHandler) VacListAdmin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	responseBody := VAListAdminResponse{
-		Total: count,
+		Total:  count,
+		VAList: data,
+	}
+
+	_, res, err := helpers.NewResponseBuilder(w, true, constants.GetListSuccess, responseBody)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
+		return
+	}
+
+	fmt.Fprintln(w, string(res))
+
+}
+
+func (va *VAHandler) VacListAdminFilter(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set(constants.ContentType, constants.Json)
+
+	custId, err := strconv.Atoi(chi.URLParam(r, "cust_id"))
+	if err != nil {
+		w.Header().Set(constants.ContentType, constants.Json)
+		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotParseURLParams)
+		return
+	}
+
+	color := chi.URLParam(r, "color")
+	page, err := strconv.Atoi(chi.URLParam(r, "page"))
+	if err != nil {
+		w.Header().Set(constants.ContentType, constants.Json)
+		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotParseURLParams)
+		return
+	}
+
+	data, count, err := database.GetListVAAdminFilter(va.db, custId, color, page)
+	if err != nil {
+		w.Header().Set(constants.ContentType, constants.Json)
+		fmt.Println(err)
+		helpers.HTTPError(w, http.StatusBadRequest, "Cannot get va list")
+		return
+	}
+
+	responseBody := VAListAdminResponse{
+		Total:  count,
 		VAList: data,
 	}
 

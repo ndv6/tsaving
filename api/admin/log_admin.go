@@ -108,14 +108,14 @@ func (la *LogAdminHandler) GetFilteredLog(w http.ResponseWriter, r *http.Request
 	w.Header().Set(constants.ContentType, constants.Json)
 
 	date := chi.URLParam(r, "date")
-	username := chi.URLParam(r, "username")
+	search := chi.URLParam(r, "search")
 	page, err := strconv.Atoi(chi.URLParam(r, "page"))
 	if err != nil {
 		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotParseURLParams)
 		return
 	}
 
-	if date != "" && username == "" {
+	if date != "" && search == "" {
 		LogAdmin, count, err := database.GetLogAdminFilteredDate(la.db, date, page)
 
 		if err != nil {
@@ -136,8 +136,8 @@ func (la *LogAdminHandler) GetFilteredLog(w http.ResponseWriter, r *http.Request
 
 		fmt.Fprintln(w, string(res))
 		return
-	} else if date == "" && username != "" {
-		LogAdmin, count, err := database.GetLogAdminFilteredUsername(la.db, username, page)
+	} else if date == "" && search != "" {
+		LogAdmin, count, err := database.GetLogAdminFilteredSearch(la.db, search, page)
 
 		if err != nil {
 			helper.HTTPError(w, http.StatusBadRequest, constants.LogAdminFailed)
@@ -157,8 +157,8 @@ func (la *LogAdminHandler) GetFilteredLog(w http.ResponseWriter, r *http.Request
 
 		fmt.Fprintln(w, string(res))
 		return
-	} else if date != "" && username != "" {
-		LogAdmin, count, err := database.GetLogAdminFilteredUsernameDate(la.db, username, date, page)
+	} else if date != "" && search != "" {
+		LogAdmin, count, err := database.GetLogAdminFilteredSearchDate(la.db, search, date, page)
 
 		if err != nil {
 			helper.HTTPError(w, http.StatusBadRequest, constants.LogAdminFailed)

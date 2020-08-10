@@ -77,9 +77,9 @@ func GetLogAdminFilteredDate(db *sql.DB, date string, page int) (res []models.Lo
 	return res, count, nil
 }
 
-func GetLogAdminFilteredUsername(db *sql.DB, username string, page int) (res []models.LogAdmin, count int, err error) {
+func GetLogAdminFilteredSearch(db *sql.DB, search string, page int) (res []models.LogAdmin, count int, err error) {
 	offset := (page - 1) * 20
-	rows, err := db.Query("SELECT id,username,action,account_num,action_time FROM log_admins WHERE username = $1 ORDER BY action_time OFFSET $2 LIMIT 20", username, offset)
+	rows, err := db.Query("SELECT id,username,action,account_num,action_time FROM log_admins WHERE username LIKE '%'||$1||'%' OR action LIKE '%'||$1||'%' OR account_num LIKE '%'||$1||'%' ORDER BY action_time OFFSET $2 LIMIT 20", search, offset)
 	if err != nil {
 		return
 	}
@@ -95,7 +95,7 @@ func GetLogAdminFilteredUsername(db *sql.DB, username string, page int) (res []m
 		res = append(res, mla)
 	}
 
-	err = db.QueryRow("SELECT COUNT(*) FROM log_admins WHERE username = $1", username).Scan(&count)
+	err = db.QueryRow("SELECT COUNT(*) FROM log_admins WHERE username LIKE '%'||$1||'%' OR action LIKE '%'||$1||'%' OR account_num LIKE '%'||$1||'%'", search).Scan(&count)
 	if err != nil {
 		return
 	}
@@ -103,9 +103,9 @@ func GetLogAdminFilteredUsername(db *sql.DB, username string, page int) (res []m
 	return res, count, nil
 }
 
-func GetLogAdminFilteredUsernameDate(db *sql.DB, username string, date string, page int) (res []models.LogAdmin, count int, err error) {
+func GetLogAdminFilteredSearchDate(db *sql.DB, username string, date string, page int) (res []models.LogAdmin, count int, err error) {
 	offset := (page - 1) * 20
-	rows, err := db.Query("SELECT id,username,action,account_num,action_time FROM log_admins WHERE username = $1 AND CAST(action_time as VARCHAR) LIKE '%'||$2||'%' ORDER BY action_time LIMIT 20 OFFSET $3", username, date, offset)
+	rows, err := db.Query("SELECT id,username,action,account_num,action_time FROM log_admins WHERE username LIKE '%'||$1||'%' OR action LIKE '%'||$1||'%' OR account_num LIKE '%'||$1||'%' AND CAST(action_time as VARCHAR) LIKE '%'||$2||'%' ORDER BY action_time LIMIT 20 OFFSET $3", username, date, offset)
 	if err != nil {
 		return
 	}
@@ -121,7 +121,7 @@ func GetLogAdminFilteredUsernameDate(db *sql.DB, username string, date string, p
 		res = append(res, mla)
 	}
 
-	err = db.QueryRow("SELECT COUNT(*) FROM log_admins WHERE username = $1 AND CAST(action_time as VARCHAR) LIKE '%'||$2||'%'", username, date).Scan(&count)
+	err = db.QueryRow("SELECT COUNT(*) FROM log_admins WHERE username LIKE '%'||$1||'%' OR action LIKE '%'||$1||'%' OR account_num LIKE '%'||$1||'%' AND CAST(action_time as VARCHAR) LIKE '%'||$2||'%'", username, date).Scan(&count)
 	if err != nil {
 		return
 	}

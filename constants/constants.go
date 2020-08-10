@@ -9,14 +9,8 @@ const (
 
 // Admin Activity Types (for Admin Activity Log)
 const (
-<<<<<<< HEAD
-	DepositSuccess   = "Deposit completed successfully"
-	DepositFailed    = "Failed to make deposit"
 	EditCustomerData = "EDIT"
 	DELETE           = "DELETE"
-=======
-	EditCustomerData = "EDIT_CUSTOMER_DATA"
->>>>>>> 23daf4f5f49530eee4ce18b2e7c17eb58606c57c
 )
 
 const (

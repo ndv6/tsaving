@@ -65,8 +65,14 @@ func (la *LogAdminHandler) Get(w http.ResponseWriter, r *http.Request) {
 
 func (la *LogAdminHandler) Insert(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set(constants.ContentType, constants.Json)
+	tokens := la.jwt.GetTokenAdmin(r)
+	err := tokens.Valid()
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+		return
+	}
 
-	var username = "admin" //get from token (later)
+	var username = tokens.Username
 
 	req, err := ioutil.ReadAll(r.Body)
 	if err != nil {

@@ -370,6 +370,11 @@ func GetTransactionAmountMonth(db *sql.DB) (total int, err error) {
 	return
 }
 
+func GetTransactionAmount(db *sql.DB) (total int, err error) {
+	err = db.QueryRow("SELECT COALESCE(sum(tran_amount), 0) FROM transaction_logs").Scan(&total)
+	return
+}
+
 func GetTransactionByWeek(db *sql.DB) (res []models.TransactionMonth, err error) {
 	rows, err := db.Query("SELECT ROW_NUMBER () OVER (ORDER BY extract(week from created_at)) as week, extract(week from created_at) as realweek, sum(tran_amount) as amount FROM transaction_logs where created_at > date_trunc('month', CURRENT_DATE) group by 2 order by 1 asc")
 
@@ -415,6 +420,16 @@ func GetLogAdminToday(db *sql.DB) (res []models.LogAdmin, err error) {
 		res = append(res, objLogAdmin)
 	}
 	return res, nil
+}
+
+func GetTransactionAmountWeek(db *sql.DB) (total int, err error) {
+	err = db.QueryRow("SELECT COALESCE(SUM(tran_amount), 0) FROM transaction_logs WHERE created_at > current_date - 7").Scan(&total)
+	return
+}
+
+func GetTotalFromLog(db *sql.DB, cons string) (totalVa int, totalAmount int, err error) {
+	err = db.QueryRow("SELECT COUNT(tl_id), COALESCE(SUM(tran_amount), 0) FROM transaction_logs WHERE description = $1", cons).Scan(&totalVa, &totalAmount)
+	return
 }
 
 //SOFT DELETE

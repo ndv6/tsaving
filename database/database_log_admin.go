@@ -25,7 +25,7 @@ func InsertLogAdminWithDbTransaction(trx *sql.Tx, adminLog models.LogAdmin, admi
 	return err
 }
 
-func GetLogAdmin(db *sql.DB, page int) (LogAdmin []models.LogAdmin, err error) {
+func GetLogAdmin(db *sql.DB, page int) (LogAdmin []models.LogAdmin, count int, err error) {
 
 	offset := (page - 1) * 20
 	rows, err := db.Query("SELECT id,username,action,account_num,action_time FROM log_admins ORDER BY action_time OFFSET $1 LIMIT 20", offset)
@@ -43,6 +43,11 @@ func GetLogAdmin(db *sql.DB, page int) (LogAdmin []models.LogAdmin, err error) {
 		}
 		LogAdmin = append(LogAdmin, la)
 	}
+	err = db.QueryRow("SELECT COUNT(*) FROM log_admins").Scan(&count)
+	if err != nil {
+		return
+	}
+
 	return
 }
 

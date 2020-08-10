@@ -41,13 +41,19 @@ func (la *LogAdminHandler) Get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	LogAdmin, err := database.GetLogAdmin(la.db, page)
+	LogAdmin, count, err := database.GetLogAdmin(la.db, page)
 	if err != nil {
+		fmt.Fprint(w, err)
 		helper.HTTPError(w, http.StatusBadRequest, constants.LogAdminFailed)
 		return
 	}
 
-	_, res, err := helpers.NewResponseBuilder(w, true, constants.GetLogAdminSuccess, LogAdmin)
+	responseBody := GetLogAdminResponse{
+		Total:        count,
+		LogAdminList: LogAdmin,
+	}
+
+	_, res, err := helpers.NewResponseBuilder(w, true, constants.GetLogAdminSuccess, responseBody)
 	if err != nil {
 		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
 		return

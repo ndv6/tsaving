@@ -518,7 +518,7 @@ func (ch *CustomerHandler) SoftDelete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = database.SoftDeleteCustomer(ch.db, Cust.AccountNum)
+	err = database.SoftDeleteCustomer(ch.db, Cust.AccountNum, tokens.Username)
 	if err != nil {
 		fmt.Fprint(w, err)
 		helpers.HTTPError(w, http.StatusBadRequest, constants.SoftDeleteCustFailed)

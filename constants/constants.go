@@ -9,7 +9,8 @@ const (
 
 // Admin Activity Types (for Admin Activity Log)
 const (
-	EditCustomerData = "EDIT_CUSTOMER_DATA"
+	EditCustomerData = "EDIT"
+	DELETE           = "DELETE"
 )
 
 const (

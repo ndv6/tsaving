@@ -16,7 +16,7 @@ func GetListCustomers(db *sql.DB, page int, date string, keyword string) (list [
 		where = where + " AND created_at::date = date '" + date + "' "
 	}
 	if keyword != "" {
-		where = where + " AND (account_num LIKE '%" + keyword + "%' OR cust_name LIKE '%" + keyword + "%' OR cust_address LIKE '%" + keyword + "%' OR cust_phone LIKE '%" + keyword + "%' OR cust_email LIKE '%" + keyword + "%' OR channel LIKE '%" + keyword + "%' OR card_num LIKE '%" + keyword + "%' ) "
+		where = where + " AND (LOWER(account_num) LIKE LOWER('%" + keyword + "%') OR LOWER(cust_name) LIKE LOWER('%" + keyword + "%') OR LOWER(cust_address) LIKE LOWER('%" + keyword + "%') OR LOWER(cust_phone) LIKE LOWER('%" + keyword + "%') OR LOWER(cust_email) LIKE LOWER('%" + keyword + "%') OR LOWER(channel) LIKE LOWER('%" + keyword + "%') OR LOWER(card_num) LIKE LOWER('%" + keyword + "%') ) "
 	}
 
 	offset := (page - 1) * 20

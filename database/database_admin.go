@@ -47,7 +47,7 @@ func (adh *AdminDatabaseHandler) EditCustomerData(customerData models.Customers,
 		return
 	}
 
-	_, err = tx.Exec("UPDATE customers SET cust_phone = ($1), cust_email = ($2), is_verified=($3) WHERE account_num=($4) AND cust_phone IS DISTINCT FROM ($1) OR cust_email IS DISTINCT FROM ($2) OR is_verified IS DISTINCT FROM ($3)", customerData.CustPhone, customerData.CustEmail, customerData.IsVerified, customerData.AccountNum)
+	_, err = tx.Exec("UPDATE customers SET cust_phone = ($1), cust_email = ($2), is_verified=($3) WHERE account_num=($4)", customerData.CustPhone, customerData.CustEmail, customerData.IsVerified, customerData.AccountNum)
 	if err != nil {
 		tx.Rollback()
 		return

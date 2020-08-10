@@ -118,7 +118,7 @@ func AllHistoryTransactionPaged(db *sql.DB, page int) (res []models.TransactionL
 
 func AllHistoryTransactionFilteredAccNum(db *sql.DB, search string, page int) (res []models.TransactionLogs, count int, err error) {
 	offset := (page - 1) * 20
-	rows, err := db.Query("SELECT tl_id, account_num, dest_account, from_account, tran_amount, description, created_at FROM transaction_logs WHERE (account_num like '%'||$1||'%' OR from_account like '%'||$1||'%' OR dest_account like '%'||$1||'%' OR description like '%'||$1||'%') OFFSET $2 LIMIT 20", search, offset)
+	rows, err := db.Query("SELECT tl_id, account_num, dest_account, from_account, tran_amount, description, created_at FROM transaction_logs WHERE (LOWER(account_num) like LOWER('%'||$1||'%') OR LOWER(from_account) like LOWER('%'||$1||'%') OR LOWER(dest_account) like LOWER('%'||$1||'%') OR LOWER(description) like LOWER('%'||$1||'%') ) OFFSET $2 LIMIT 20", search, offset)
 
 	if err != nil {
 		return
@@ -135,7 +135,7 @@ func AllHistoryTransactionFilteredAccNum(db *sql.DB, search string, page int) (r
 		res = append(res, mtl)
 	}
 
-	err = db.QueryRow("SELECT COUNT(*) FROM transaction_logs WHERE (account_num like '%'||$1||'%' OR from_account like '%'||$1||'%' OR dest_account like '%'||$1||'%' OR description like '%'||$1||'%')", search).Scan(&count)
+	err = db.QueryRow("SELECT COUNT(*) FROM transaction_logs WHERE (LOWER(account_num) like LOWER('%'||$1||'%') OR LOWER(from_account) like LOWER('%'||$1||'%') OR LOWER(dest_account) like LOWER('%'||$1||'%') OR LOWER(description) like LOWER('%'||$1||'%') )", search).Scan(&count)
 	if err != nil {
 		return
 	}
@@ -172,7 +172,7 @@ func AllHistoryTransactionFilteredDate(db *sql.DB, date string, page int) (res [
 
 func AllHistoryTransactionFilteredAccNumDate(db *sql.DB, search string, date string, page int) (res []models.TransactionLogs, count int, err error) {
 	offset := (page - 1) * 20
-	rows, err := db.Query("SELECT tl_id, account_num, dest_account, from_account, tran_amount, description, created_at FROM transaction_logs WHERE (account_num like '%'||$1||'%' OR from_account like '%'||$1||'%' OR dest_account like '%'||$1||'%' OR description like '%'||$1||'%') AND CAST(created_at as VARCHAR) like '%'||$2||'%' OFFSET $3 LIMIT 20", search, date, offset)
+	rows, err := db.Query("SELECT tl_id, account_num, dest_account, from_account, tran_amount, description, created_at FROM transaction_logs WHERE (LOWER(account_num) like LOWER('%'||$1||'%') OR LOWER(from_account) like LOWER('%'||$1||'%') OR LOWER(dest_account) like LOWER('%'||$1||'%') OR LOWER(description) like LOWER('%'||$1||'%') ) AND CAST(created_at as VARCHAR) like '%'||$2||'%' OFFSET $3 LIMIT 20", search, date, offset)
 
 	if err != nil {
 		return
@@ -189,7 +189,7 @@ func AllHistoryTransactionFilteredAccNumDate(db *sql.DB, search string, date str
 		res = append(res, mtl)
 	}
 
-	err = db.QueryRow("SELECT COUNT(*) FROM transaction_logs WHERE (account_num like '%'||$1||'%' OR from_account like '%'||$1||'%' OR dest_account like '%'||$1||'%' OR description like '%'||$1||'%') AND CAST(created_at as VARCHAR) like '%'||$2||'%'", search, date).Scan(&count)
+	err = db.QueryRow("SELECT COUNT(*) FROM transaction_logs WHERE (LOWER(account_num) like LOWER('%'||$1||'%') OR LOWER(from_account) like LOWER('%'||$1||'%') OR LOWER(dest_account) like LOWER('%'||$1||'%') OR LOWER(description) like LOWER('%'||$1||'%') ) AND CAST(created_at as VARCHAR) like '%'||$2||'%'", search, date).Scan(&count)
 	if err != nil {
 		return
 	}

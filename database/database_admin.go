@@ -429,9 +429,6 @@ func GetTransactionAmountWeek(db *sql.DB) (total int, err error) {
 
 func GetTotalFromLog(db *sql.DB, cons string) (totalVa int, totalAmount int, err error) {
 	err = db.QueryRow("SELECT COUNT(tl_id), COALESCE(SUM(tran_amount), 0) FROM transaction_logs WHERE description = $1", cons).Scan(&totalVa, &totalAmount)
-	if err != nil {
-		return
-	}
 	return
 }
 

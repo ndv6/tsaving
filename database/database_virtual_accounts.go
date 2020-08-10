@@ -151,6 +151,38 @@ func GetListVAAdmin(db *sql.DB, id int, page int) (virAcc []models.VirtualAccoun
 	return
 }
 
+func GetListVAAdminFilter(db *sql.DB, id int, color string, page int) (virAcc []models.VirtualAccounts, count int, err error) {
+	offset := (page - 1) * 20
+	rows, err := db.Query("SELECT va_id, va_num, virtual_accounts.account_num, va_label, va_color, va_balance, virtual_accounts.created_at, virtual_accounts.updated_at FROM virtual_accounts INNER JOIN customers ON virtual_accounts.account_num = customers.account_num WHERE cust_id = $1 AND va_color = $2 ORDER BY virtual_accounts.created_at OFFSET $3 LIMIT 20", id, color, offset)
+	if err != nil {
+		return
+	}
+
+	var accNum string
+
+	err = db.QueryRow("SELECT account_num FROM customers WHERE cust_id = $1", id).Scan(&accNum)
+	if err != nil {
+		return
+	}
+
+	err = db.QueryRow("SELECT COUNT(*) FROM virtual_accounts WHERE account_num = $1 AND va_color = $2", accNum, color).Scan(&count)
+	if err != nil {
+		return
+	}
+
+	defer rows.Close()
+	for rows.Next() {
+		var va models.VirtualAccounts
+		err = rows.Scan(&va.VaId, &va.VaNum, &va.AccountNum, &va.VaLabel, &va.VaColor, &va.VaBalance, &va.CreatedAt, &va.UpdatedAt)
+		if err != nil {
+			return
+		}
+		virAcc = append(virAcc, va)
+	}
+
+	return
+}
+
 //untuk ngecek input rekening apakah benar atau tidak.
 func CheckAccountVA(db *sql.DB, VaNum string, id int) (err error) {
 	var exist bool

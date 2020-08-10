@@ -111,6 +111,7 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 
 		// va list for admin
 		r.With(jwt.AuthAdminMiddleware).Get("/va/{cust_id}/{page}", va.VacListAdmin)
+		r.With(jwt.AuthAdminMiddleware).Get("/va/{cust_id}/{color}/{page}", va.VacListAdminFilter)
 
 		// get token for resend email
 		r.With(jwt.AuthAdminMiddleware).Post("/get-token", email.GetEmailToken(eh))

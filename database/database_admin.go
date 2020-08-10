@@ -451,7 +451,6 @@ func SoftDeleteCustomer(db *sql.DB, AccNum string, username string) (err error) 
 
 	err = InsertLogAdminWithDbTransaction(tx, tLogs, username)
 	if err != nil {
-		fmt.Print(err)
 		tx.Rollback()
 		return
 	}

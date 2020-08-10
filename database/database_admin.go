@@ -242,7 +242,7 @@ func CustomerHistoryTransactionFiltered(db *sql.DB, accNum, search string, page 
 		res = append(res, mtl)
 	}
 
-	err = db.QueryRow("SELECT COUNT(*) FROM transaction_logs WHERE account_num = $1 AND (from_account like '%'||$2||'%' OR dest_account like '%'||$2||'%' OR description like '%'||$2||'%')", accNum, search).Scan(&count)
+	err = db.QueryRow("SELECT COUNT(*) FROM transaction_logs WHERE account_num = $1 AND (LOWER(from_account) like LOWER('%'||$2||'%') OR LOWER(dest_account) like LOWER('%'||$2||'%') OR LOWER(description) like LOWER('%'||$2||'%'))", accNum, search).Scan(&count)
 	if err != nil {
 		return
 	}

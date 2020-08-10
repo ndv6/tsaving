@@ -36,6 +36,7 @@ func LoginAdminHandler(jwt *tokens.JWT, db *sql.DB) http.HandlerFunc { // Handle
 			return
 		}
 
+		fmt.Println(l.Username, l.Password)
 		//Membuat Hash Password
 		Pass := helpers.HashString(l.Password)
 

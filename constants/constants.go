@@ -9,8 +9,10 @@ const (
 
 // Response status
 const (
-	DepositSuccess = "Deposit completed successfully"
-	DepositFailed  = "Failed to make deposit"
+	DepositSuccess   = "Deposit completed successfully"
+	DepositFailed    = "Failed to make deposit"
+	EditCustomerData = "EDIT"
+	DELETE           = "DELETE"
 )
 
 const (

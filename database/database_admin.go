@@ -167,7 +167,28 @@ func GetTotalTransactionCount(db *sql.DB) (total int, err error) {
 }
 
 //SOFT DELETE
-func SoftDeleteCustomer(db *sql.DB, AccNum string) (err error) {
-	_, err = db.Exec("UPDATE customers SET is_deleted = $1 WHERE account_num = $2", time.Now(), AccNum)
+func SoftDeleteCustomer(db *sql.DB, AccNum string, username string) (err error) {
+	tx, err := db.Begin()
+	if err != nil {
+		return
+	}
+	_, err = tx.Exec("UPDATE customers SET is_deleted = $1 WHERE account_num = $2", time.Now(), AccNum)
+	if err != nil {
+		tx.Rollback()
+		return
+	}
+
+	tLogs := models.LogAdmin{
+		AccNum: AccNum,
+		Action: constants.DELETE,
+	}
+
+	err = InsertLogAdminWithDbTransaction(tx, tLogs, username)
+	if err != nil {
+		fmt.Print(err)
+		tx.Rollback()
+		return
+	}
+	tx.Commit()
 	return
 }

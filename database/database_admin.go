@@ -307,7 +307,7 @@ func CustomerHistoryTransactionAllFiltered(db *sql.DB, accNum, search, day, mont
 }
 
 func GetActInActUserCount(db *sql.DB) (act, inact int, err error) {
-	rows, err := db.Query("SELECT is_verified FROM customers")
+	rows, err := db.Query("SELECT COALESCE(is_verified, false) FROM customers")
 	if err != nil {
 		return
 	}

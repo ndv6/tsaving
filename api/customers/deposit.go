@@ -69,6 +69,7 @@ func DepositToMainAccount(partner PartnerInterface, trx Transactor) http.Handler
 			Description: constants.Deposit,
 			CreatedAt:   time.Now(),
 		}
+
 		err = trx.DepositToMainAccountDatabaseAccessor(request.BalanceAdded, request.AccountNumber, log)
 		if err != nil {
 			helpers.HTTPError(w, http.StatusInternalServerError, constants.InsertFailed)

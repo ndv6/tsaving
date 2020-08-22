@@ -2,6 +2,12 @@ package api
 
 import (
 	"database/sql"
+	"fmt"
+	"net/http"
+	"strings"
+
+	"github.com/ndv6/tsaving/api/static"
+	"github.com/ndv6/tsaving/constants"
 
 	"github.com/ndv6/tsaving/models"
 
@@ -41,7 +47,7 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 	eh := database.NewEmailHandler(db)           // Joseph
 	adm := admin.NewAdminHandler(jwt, db)        // Azizah
 	la := admin.NewLogAdminHandler(jwt, db)
-	// da := customers.NewDashboardHandler(jwt)
+	pph := customers.NewPictureHandler(jwt)
 
 	// Home endpoint
 	chiRouter.Get("/", home.HomeHandler)
@@ -57,7 +63,7 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 	// Customer Endpoint
 	chiRouter.With(jwt.AuthMiddleware).Get("/me/profile", ch.GetProfile)                                 //Andreas
 	chiRouter.With(jwt.AuthMiddleware).Put("/me/update", ch.UpdateProfile)                               //Andreas
-	chiRouter.With(jwt.AuthMiddleware).Patch("/me/update-photo", ch.UpdatePhoto)                         //Andreas
+	chiRouter.With(jwt.AuthMiddleware).Patch("/me/update-photo", pph.V2UpdatePhoto)                      //Andreas
 	chiRouter.With(jwt.AuthMiddleware).Patch("/me/update-password", ch.UpdatePassword)                   //Andreas
 	chiRouter.With(jwt.ValidateAccount).Post("/me/deposit", customers.DepositToMainAccount(ph, ah))      //Vici
 	chiRouter.With(jwt.AuthMiddleware).With(jwt.ValidateAccount).Put("/me/transfer-va", va.AddBalanceVA) //David
@@ -117,8 +123,27 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 		r.With(jwt.AuthAdminMiddleware).Post("/get-token", email.GetEmailToken(eh))
 	})
 
+	FileServer(chiRouter, "/static", http.Dir("./static"), jwt)
+
 	// Not Found Endpoint
 	chiRouter.NotFound(not_found.NotFoundHandler) // Joseph
 
 	return chiRouter
+}
+
+// since go chi doesnt provide file server, they make a workaround for that
+// https://github.com/go-chi/chi/blob/master/_examples/fileserver/main.go
+func FileServer(r chi.Router, path string, root http.FileSystem, jwt *tokens.JWT) {
+	if strings.ContainsAny(path, "{}*") {
+		panic(constants.FileServerConfigError)
+	}
+
+	if path != "/" && path[len(path)-1] != '/' {
+		r.Get(path, http.RedirectHandler(path+"/", 301).ServeHTTP)
+		path += "/"
+	}
+	path += "*"
+
+	fmt.Println("Server is serving static files at: host/static")
+	r.With(jwt.AuthMiddleware).Get(path, static.StaticHandler(root))
 }

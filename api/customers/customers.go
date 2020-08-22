@@ -8,9 +8,13 @@ import (
 	"io/ioutil"
 	"math/rand"
 	"net/http"
+	"os"
 	"regexp"
 	"strconv"
 	"time"
+
+	_ "image/jpeg"
+	_ "image/png"
 
 	"github.com/go-chi/chi"
 	"github.com/ndv6/tsaving/constants"
@@ -51,10 +55,26 @@ type GetListCustomersResponse struct {
 	List  interface{} `json:"list"`
 }
 
+type ProfilePictureHandler struct {
+	jwt *tokens.JWT
+}
+
+type ProfilePictureRequest struct {
+	Picture string `json:"profile_picture"`
+}
+
+type ProfilePictureResponse struct {
+	Picture_path string `json:"path"`
+}
+
 // type Get
 
 func NewCustomerHandler(jwt *tokens.JWT, db *sql.DB) *CustomerHandler {
 	return &CustomerHandler{jwt, db}
+}
+
+func NewPictureHandler(jwt *tokens.JWT) *ProfilePictureHandler {
+	return &ProfilePictureHandler{jwt}
 }
 
 func (ch *CustomerHandler) GetProfile(w http.ResponseWriter, r *http.Request) {
@@ -126,9 +146,9 @@ func (ch *CustomerHandler) GetCardCustomers(w http.ResponseWriter, r *http.Reque
 }
 
 func (ch *CustomerHandler) Create(w http.ResponseWriter, r *http.Request) { // Handle by Caesar Gusti
-	b, err := ioutil.ReadAll(r.Body)
 	w.Header().Set(constants.ContentType, constants.Json)
 
+	b, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotReadRequest)
 		return
@@ -138,6 +158,11 @@ func (ch *CustomerHandler) Create(w http.ResponseWriter, r *http.Request) { // H
 
 	if err != nil {
 		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotParseRequest)
+		return
+	}
+
+	if !helpers.IsRequestValid(cus.CustAddress, cus.CustEmail, cus.CustName, cus.CustPassword, cus.CustPhone) {
+		helpers.HTTPError(w, http.StatusBadRequest, constants.RequestHasInvalidFields)
 		return
 	}
 
@@ -225,6 +250,11 @@ func (ch *CustomerHandler) UpdateProfile(w http.ResponseWriter, r *http.Request)
 	}
 	cus.CustId = userToken.CustId
 
+	if !helpers.IsRequestValid(cus.CustEmail, cus.CustPhone, cus.CustAddress, cus.CustName) {
+		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotReadRequest)
+		return
+	}
+
 	//check if email address is valid
 	isValid := isEmailValid(cus.CustEmail)
 	isEmailChanged, err := models.IsEmailChanged(ch.db, cus.CustEmail, userToken.CustId)
@@ -261,6 +291,7 @@ func (ch *CustomerHandler) UpdateProfile(w http.ResponseWriter, r *http.Request)
 	err = models.UpdateProfile(ch.db, cus)
 	if err != nil {
 		helpers.HTTPError(w, http.StatusBadRequest, constants.UpdateFailed+err.Error())
+		return
 	}
 
 	if isEmailChanged {
@@ -286,57 +317,78 @@ func (ch *CustomerHandler) UpdateProfile(w http.ResponseWriter, r *http.Request)
 	fmt.Fprintln(w, string(res))
 }
 
-func (ch *CustomerHandler) UpdatePhoto(w http.ResponseWriter, r *http.Request) {
+func (ph *ProfilePictureHandler) V2UpdatePhoto(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set(constants.ContentType, constants.Json)
-	tokens := ch.jwt.GetToken(r)
-	err := tokens.Valid()
+	token := ph.jwt.GetToken(r)
+
+	b, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotReadRequest)
 		return
 	}
 
-	// Parse our multipart form, 10 << 20 specifies a maximum upload of 10 MB files.
-	r.ParseMultipartForm(10 << 20)
-	// FormFile returns the first file for the given key `myFile`
-	file, _, err := r.FormFile("myPhoto")
+	var pictRequest ProfilePictureRequest
+
+	err = json.Unmarshal(b, &pictRequest)
+
 	if err != nil {
 		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotParseRequest)
 		return
 	}
-	defer file.Close()
 
-	// Create a temporary file within our temp-images directory with particular naming pattern
-	folderLocation := "temp-images"
-	newFileName := tokens.AccountNum + ".png"
-	tempFile, err := ioutil.TempFile(folderLocation, newFileName)
-	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+	if !helpers.IsRequestValid(pictRequest.Picture) {
+		helpers.HTTPError(w, http.StatusBadRequest, constants.RequestHasInvalidFields)
 		return
 	}
-	defer tempFile.Close()
 
-	// read all of the contents of our uploaded file into a byte array
-	fileBytes, err := ioutil.ReadAll(file)
-	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+	ib := helpers.NewImageBuilder(pictRequest.Picture)
+	bfr, format, err := ib.ReconstructBase64Image()
+	if err != nil || !ib.IsImageTypeValid() {
+		helpers.HTTPError(w, http.StatusBadRequest, constants.UpdateImageFailed)
 		return
 	}
-	// write this byte array to our temporary file
-	tempFile.Write(fileBytes)
 
-	pictPath := folderLocation + newFileName
-	err = models.UpdateCustomerPicture(ch.db, pictPath, tokens.CustId)
-	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, constants.UpdateFailed+err.Error())
+	if !ib.IsImageTypeValid() {
+		helpers.HTTPError(w, http.StatusBadRequest, constants.UnsupportedImageType)
+		return
 	}
 
-	_, res, err := helpers.NewResponseBuilder(w, true, constants.UpdatePhotoSuccess, nil)
+	wd, err := os.Getwd()
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, constants.UpdateImageFailed)
+		return
+	}
+
+	dir := wd + helpers.GenerateStaticImagePath(token.CustId)
+
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		err = os.MkdirAll(dir, 0764)
+	} else {
+		err = helpers.RemoveAllFilesInDir(dir)
+	}
+
+	// check wether mkdir or removeallfiles failed
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, constants.UpdateImageFailed)
+		return
+	}
+
+	curr := time.Now()
+	fileName := fmt.Sprintf("%d%d%d.%v", curr.Year(), curr.Month(), curr.Day(), format)
+	err = ioutil.WriteFile(dir+fileName, bfr.Bytes(), 0644)
+	if err != nil {
+		helpers.HTTPError(w, http.StatusBadRequest, constants.UpdateImageFailed)
+		return
+	}
+
+	w, res, err := helpers.NewResponseBuilder(w, true, "Success updating profile picture", ProfilePictureResponse{Picture_path: helpers.GenerateStaticImagePath(token.CustId) + fileName})
 	if err != nil {
 		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
 		return
 	}
 
-	fmt.Fprintln(w, string(res))
+	fmt.Fprint(w, res)
+	return
 }
 
 func (ch *CustomerHandler) UpdatePassword(w http.ResponseWriter, r *http.Request) {
@@ -358,6 +410,11 @@ func (ch *CustomerHandler) UpdatePassword(w http.ResponseWriter, r *http.Request
 	err = json.Unmarshal(requestedBody, &reqPass)
 	if err != nil {
 		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotParseRequest)
+		return
+	}
+
+	if !helpers.IsRequestValid(reqPass.OldPassword, reqPass.NewPassword) {
+		helpers.HTTPError(w, http.StatusBadRequest, constants.RequestHasInvalidFields)
 		return
 	}
 
@@ -509,6 +566,11 @@ func (ch *CustomerHandler) SoftDelete(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(b, &Cust)
 	if err != nil {
 		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotParseRequest)
+		return
+	}
+
+	if !helpers.IsRequestValid(Cust.AccountNum) {
+		helpers.HTTPError(w, http.StatusBadRequest, constants.RequestHasInvalidFields)
 		return
 	}
 

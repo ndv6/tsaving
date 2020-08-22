@@ -32,6 +32,11 @@ func VerifyEmailToken(eh database.EmailHandler) http.HandlerFunc {
 			return
 		}
 
+		if !helpers.IsRequestValid(et.Token, et.Email) {
+			helpers.HTTPError(w, http.StatusBadRequest, constants.RequestHasInvalidFields)
+			return
+		}
+
 		dbEt, err := eh.GetEmailTokenByEmail(et.Email)
 		if err != nil {
 			helpers.HTTPError(w, http.StatusNotFound, constants.EmailTokenNotFound)

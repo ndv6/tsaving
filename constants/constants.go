@@ -65,6 +65,7 @@ const (
 	LogAdminCannotBeNull     = "Username or Filter cannot be null"
 	DateCannotBeNull         = "Date cannot be null"
 	UsernameCannotBeNull     = "Username cannot be null"
+	Base64DecodeFailed       = "Fail to decode input as base64"
 )
 
 // Response messages
@@ -86,6 +87,15 @@ const (
 	AddLogAdminSuccess       = "Add admin log success"
 	GetLogAdminSuccess       = "Get admin log success"
 	SuccessSoftDelete        = "Customer deleted successfully."
+)
+
+// Static Handler
+const (
+	FileServerConfigError = "FileServer does not permit any URL parameters."
+	UpdateImageFailed     = "Fail to update image"
+	UnsupportedImageType  = "Uploaded image extension should be either JPEG or PNG"
+	StaticPath            = "/static"
+	StaticImagePath       = StaticPath + "/images"
 )
 
 // Headers

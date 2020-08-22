@@ -22,7 +22,6 @@ type Customers struct {
 	CreatedAt    time.Time `json:"created_at"`
 	UpdatedAt    time.Time `json:"updated_at"`
 	IsDeleted    time.Time `json:"is_deleted"`
-
 }
 
 type Card struct {
@@ -83,7 +82,7 @@ func GetProfile(db *sql.DB, id int) (Customers, error) {
 }
 
 func UpdateProfile(db *sql.DB, cus Customers) error {
-	_, err := db.Exec("UPDATE customers SET cust_name = $1, cust_address = $2, cust_phone = $3, cust_email = $4, is_verified = $5, channel = $6, updated_at = NOW() WHERE cust_id = $7", cus.CustName, cus.CustAddress, cus.CustPhone, cus.CustEmail, cus.IsVerified, cus.Channel, cus.CustId)
+	_, err := db.Exec("UPDATE customers SET cust_name = $1, cust_address = $2, cust_phone = $3, cust_email = $4, is_verified = $5, updated_at = NOW() WHERE cust_id = $6", cus.CustName, cus.CustAddress, cus.CustPhone, cus.CustEmail, cus.IsVerified, cus.CustId)
 	if err != nil {
 		return err
 	}
@@ -131,6 +130,7 @@ func IsEmailChanged(db *sql.DB, email string, id int) (bool, error) {
 	row := db.QueryRow("SELECT EXISTS(SELECT 1 FROM customers WHERE cust_email = $1 AND cust_id = $2)", email, id)
 	err := row.Scan(&res)
 	if err != nil {
+		println("is email changed " + err.Error())
 		return true, err
 	}
 	return !res, nil

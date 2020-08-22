@@ -2,11 +2,16 @@ package helpers
 
 import (
 	"crypto/sha256"
+	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io"
+	"io/ioutil"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/ndv6/tsaving/constants"
 	"github.com/ndv6/tsaving/models"
@@ -22,8 +27,36 @@ func HTTPError(w http.ResponseWriter, status int, errorMessage string) {
 		json.NewEncoder(w).Encode(map[string]string{"error": constants.CannotEncodeResponse})
 		w.WriteHeader(http.StatusInternalServerError)
 	}
-	// fmt.Println(w.Header())
 	fmt.Fprintln(w, resp)
+}
+
+func Base64Decoder(b64 string) (dec io.Reader, err error) {
+	idx := strings.Index(b64, ",")
+	if idx < 0 {
+		err = errors.New(constants.Base64DecodeFailed)
+		return
+	}
+	dec = base64.NewDecoder(base64.StdEncoding, strings.NewReader(b64[idx+1:]))
+	return
+}
+
+func GenerateStaticImagePath(id int) string {
+	return fmt.Sprintf("%v/customer_%v/", constants.StaticImagePath, id)
+}
+
+func RemoveAllFilesInDir(dirPath string) (err error) {
+	files, err := ioutil.ReadDir(dirPath)
+	if err != nil {
+		return
+	}
+
+	for _, file := range files {
+		err = os.Remove(dirPath + file.Name())
+		if err != nil {
+			return
+		}
+	}
+	return
 }
 
 // Function to hash string, made by Vici

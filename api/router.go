@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/ndv6/tsaving/api/hybrid"
 	"github.com/ndv6/tsaving/api/static"
 	"github.com/ndv6/tsaving/constants"
 
@@ -59,6 +60,9 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 
 	// Login Endpoint
 	chiRouter.Post("/login", customers.LoginHandler(jwt, db)) //Caesar
+
+	// Login V2
+	chiRouter.Post("/login/{role}", hybrid.V2Loginhandler(jwt, db))
 
 	// Customer Endpoint
 	chiRouter.With(jwt.AuthMiddleware).Get("/me/profile", ch.GetProfile)                                 //Andreas

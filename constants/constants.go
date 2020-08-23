@@ -31,6 +31,8 @@ const (
 	UpdateFailed             = "Failed to update to database."
 	InitLogFailed            = "Failed to insert log of this transaction."
 	CannotParseURLParams     = "Failed to parse URL Params"
+	InvalidUrlParams         = "Url params not valid"
+	FailToLogin              = "Unable to login using given credential"
 	MinimumPassword          = "The password must have at least 6 characters"
 	EmailTaken               = "The email you entered is already taken"
 	InvalidEmail             = "Invalid email address format"

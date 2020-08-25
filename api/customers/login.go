@@ -61,7 +61,7 @@ func LoginHandler(jwt *tokens.JWT, db *sql.DB) http.HandlerFunc { // Handle by C
 			CustId:            objCustomer.CustId,
 			AccountNum:        objCustomer.AccountNum,
 			AccountExpiration: objCustomer.Expired,
-			Expired:           time.Now().Add(120 * time.Minute),
+			Expired:           time.Now().Add(constants.TokenExpire * time.Minute),
 		})
 		data := LoginResponse{
 			Token:     tokenLogin,

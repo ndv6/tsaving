@@ -84,11 +84,16 @@ func (ah AdminLoginHandler) ManageLogin(r *http.Request) (obj interface{}, err e
 		err = errors.New("Invalid username or password")
 		return
 	}
-	_, token, _ := ah.jwt.JWTAuth.Encode(&tokens.TokenAdmin{
+	_, token, err := ah.jwt.JWTAuth.Encode(&tokens.TokenAdmin{
 		AdminId:  objAdmin.AdminId,
 		Username: objAdmin.Username,
-		Expired:  time.Now().Add(120 * time.Minute),
+		Expired:  time.Now().Add(constants.TokenExpire * time.Minute),
 	})
+
+	if err != nil {
+		err = errors.New("Something's wrong when generating token")
+		return
+	}
 
 	obj = LoginAdminResponse{
 		Token:    token,
@@ -123,12 +128,17 @@ func (ch CustomerLoginHandler) ManageLogin(r *http.Request) (obj interface{}, er
 		err = errors.New("Wrong Email or Password")
 		return
 	}
-	_, token, _ := ch.jwt.JWTAuth.Encode(&tokens.Token{
+	_, token, err := ch.jwt.JWTAuth.Encode(&tokens.Token{
 		CustId:            objCustomer.CustId,
 		AccountNum:        objCustomer.AccountNum,
 		AccountExpiration: objCustomer.Expired,
-		Expired:           time.Now().Add(120 * time.Minute),
+		Expired:           time.Now().Add(constants.TokenExpire * time.Minute),
 	})
+
+	if err != nil {
+		err = errors.New("Something's wrong when generating token")
+		return
+	}
 
 	obj = LoginResponse{
 		Token:     token,

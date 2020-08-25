@@ -119,3 +119,5 @@ const (
 const (
 	TnotifLocal = "http://localhost:8082/sendMail"
 )
+
+const TokenExpire = 120

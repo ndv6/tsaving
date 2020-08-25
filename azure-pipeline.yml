@@ -10,11 +10,15 @@ stages:
           vmImage: "ubuntu-18.04"
         steps:
           - task: Docker@2
+            displayName: Login
+            inputs:
+              command: login
+              containerRegistry: baitregistry
+          - task: Docker@2
             displayName: "Build and Push"
             inputs:
               command: buildAndPush
-              containerRegistry: 'Container Registry'
-              dockerRegistryEndpoint: baitregistry
+              containerRegistry: baitregistry
               repository: baitregistry.azurecr.io/tsaving:$(BuildNumber)
           - task: HelmInstaller@1
             displayName: Helm installer

@@ -19,7 +19,7 @@ stages:
             inputs:
               command: buildAndPush
               containerRegistry: baitregistry
-              repository: baitregistry.azurecr.io/baitregistry.azurecr.io/tsaving
+              repository: tsaving
               tag: $(Build.BuildId)
           - task: HelmInstaller@1
             displayName: Helm installer

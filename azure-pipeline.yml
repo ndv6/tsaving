@@ -4,13 +4,13 @@ trigger:
 stages:
   - stage: test
     jobs:
-      - job: 'Deploy Tsaving'
-        displayName: "Build and Push Docker"
+      - job: tsaving
+        displayName: "Deploy tsaving"
         pool: 
           vmImage: "ubuntu-18.04"
         steps:
           - task: Docker@2
-            displayName: "build and push"
+            displayName: "Build and Push"
             inputs:
               command: buildAndPush
               containerRegistry: 'Container Registry'

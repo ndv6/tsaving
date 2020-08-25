@@ -28,12 +28,14 @@ stages:
           - task: HelmDeploy@0
             displayName: Helm upgrade
             inputs:
-              azureResourceGroup: database
+              kubernetesServiceEndpoint: baitkubernetescluster
+              connectionType: 'Kubernetes Service Connection'
+              azureResourceGroup: ba-it-tools
               kubernetesCluster: baitkubernetescluster
               command: upgrade
               chartType: filepath
               chartPath: tsavingchart
-              releaseName: azuredevopsdemo
+              releaseName: tsaving
               install: true
               waitForExecution: false
         condition: eq(variables['Build.SourceBranch'], 'refs/heads/feature/azure-pipeline')

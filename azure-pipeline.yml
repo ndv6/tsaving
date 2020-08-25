@@ -25,4 +25,15 @@ stages:
             displayName: Helm installer
             inputs: 
               helmVersionToInstall: 3.3.0
+          - task: HelmDeploy@0
+            displayName: Helm upgrade
+            inputs:
+              azureResourceGroup: database
+              kubernetesCluster: baitkubernetescluster
+              command: upgrade
+              chartType: filepath
+              chartPath: tsavingchart
+              releaseName: azuredevopsdemo
+              install: true
+              waitForExecution: false
         condition: eq(variables['Build.SourceBranch'], 'refs/heads/feature/azure-pipeline')

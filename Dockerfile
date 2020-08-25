@@ -2,8 +2,6 @@ FROM golang:1.14.4-alpine as builder
 
 WORKDIR /app
 COPY . .
-# binary build
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags '-extldflags "-static"' -o /go/bin/app .
 
 EXPOSE 8000
 CMD ["go", "run", "main.go"]

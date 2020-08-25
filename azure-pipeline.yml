@@ -1,0 +1,18 @@
+trigger:
+  - feature/azure-pipeline
+
+stages:
+  - stage: test
+    jobs:
+      - job: test_azure_pipeline
+        displayName: "Test Pipeline"
+        pool:
+          vmImage: "ubuntu-18.04"
+        steps:
+          - checkout: self
+          - task: CmdLine@2
+            displayName: running whoami command
+            inputs:
+              script:
+                lsb_release -a
+        condition: eq(variables['Build.SourceBranch'], 'refs/heads/feature/azure-pipeline')

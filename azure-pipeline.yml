@@ -4,15 +4,20 @@ trigger:
 stages:
   - stage: test
     jobs:
-      - job: test_azure_pipeline
-        displayName: "Test Pipeline"
-        pool:
+      - job: 'Deploy Tsaving'
+        displayName: "Build and Push Docker"
+        pool: 
           vmImage: "ubuntu-18.04"
         steps:
-          - checkout: self
-          - task: CmdLine@2
-            displayName: running whoami command
+          - task: Docker@2
+            displayName: "build and push"
             inputs:
-              script:
-                lsb_release -a
+              command: buildAndPush
+              containerRegistry: 'Container Registry'
+              dockerRegistryEndpoint: baitregistry
+              repository: baitregistry.azurecr.io/tsaving:$(BuildNumber)
+          - task: HelmInstaller@1
+            displayName: Helm installer
+            inputs: 
+              helmVersionToInstall: 3.3.0
         condition: eq(variables['Build.SourceBranch'], 'refs/heads/feature/azure-pipeline')

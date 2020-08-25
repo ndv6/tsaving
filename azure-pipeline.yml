@@ -31,7 +31,7 @@ stages:
               kubernetesServiceEndpoint: baitkubernetescluster
               connectionType: 'Kubernetes Service Connection'
               azureResourceGroup: ba-it-tools
-              kubernetesCluster: baitkubernetescluster
+              kubernetesCluster: ba-it-aks-cluster
               command: upgrade
               chartType: filepath
               chartPath: tsavingchart

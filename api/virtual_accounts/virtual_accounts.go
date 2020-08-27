@@ -400,7 +400,6 @@ func (va *VAHandler) VacListAdminFilter(w http.ResponseWriter, r *http.Request) 
 	custId, err := strconv.Atoi(chi.URLParam(r, "cust_id"))
 	if err != nil {
 		w.Header().Set(constants.ContentType, constants.Json)
-		helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.CannotParseURLParams)
 		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotParseURLParams)
 		return
 	}
@@ -409,7 +408,6 @@ func (va *VAHandler) VacListAdminFilter(w http.ResponseWriter, r *http.Request) 
 	page, err := strconv.Atoi(chi.URLParam(r, "page"))
 	if err != nil {
 		w.Header().Set(constants.ContentType, constants.Json)
-		helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.CannotParseURLParams)
 		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotParseURLParams)
 		return
 	}
@@ -430,7 +428,6 @@ func (va *VAHandler) VacListAdminFilter(w http.ResponseWriter, r *http.Request) 
 
 	_, res, err := helpers.NewResponseBuilder(w, true, constants.GetListSuccess, responseBody)
 	if err != nil {
-		helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.CannotEncodeResponse)
 		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
 		return
 	}

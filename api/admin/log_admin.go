@@ -111,7 +111,6 @@ func (la *LogAdminHandler) GetFilteredLog(w http.ResponseWriter, r *http.Request
 	search := chi.URLParam(r, "search")
 	page, err := strconv.Atoi(chi.URLParam(r, "page"))
 	if err != nil {
-		helper.SendMessageToTelegram(r, http.StatusBadRequest, constants.CannotParseURLParams)
 		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotParseURLParams)
 		return
 	}
@@ -132,7 +131,6 @@ func (la *LogAdminHandler) GetFilteredLog(w http.ResponseWriter, r *http.Request
 
 		_, res, err := helpers.NewResponseBuilder(w, true, constants.GetLogAdminSuccess, responseBody)
 		if err != nil {
-			helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.CannotEncodeResponse)
 			helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
 			return
 		}
@@ -155,7 +153,6 @@ func (la *LogAdminHandler) GetFilteredLog(w http.ResponseWriter, r *http.Request
 
 		_, res, err := helpers.NewResponseBuilder(w, true, constants.GetLogAdminSuccess, responseBody)
 		if err != nil {
-			helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.CannotEncodeResponse)
 			helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
 			return
 		}
@@ -178,7 +175,6 @@ func (la *LogAdminHandler) GetFilteredLog(w http.ResponseWriter, r *http.Request
 
 		_, res, err := helpers.NewResponseBuilder(w, true, constants.GetLogAdminSuccess, responseBody)
 		if err != nil {
-			helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.CannotEncodeResponse)
 			helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
 			return
 		}

@@ -181,7 +181,6 @@ func (va *VAHandler) AddBalanceVA(w http.ResponseWriter, r *http.Request) {
 	var vac AddBalanceVARequest
 	err := json.NewDecoder(r.Body).Decode(&vac)
 	if err != nil {
-		helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.CannotEncodeResponse)
 		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
 		return
 	}
@@ -202,7 +201,6 @@ func (va *VAHandler) AddBalanceVA(w http.ResponseWriter, r *http.Request) {
 
 	_, res, err := helpers.NewResponseBuilder(w, true, fmt.Sprintf("successfully add balance to your virtual account : %v", vac.VaBalance), nil)
 	if err != nil {
-		helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.CannotEncodeResponse)
 		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
 		return
 	}

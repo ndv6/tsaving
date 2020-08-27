@@ -464,14 +464,12 @@ func (ch *CustomerHandler) GetListCustomers(w http.ResponseWriter, r *http.Reque
 	tokens := ch.jwt.GetTokenAdmin(r)
 	err := tokens.Valid()
 	if err != nil {
-		helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
 		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	page, err := strconv.Atoi(chi.URLParam(r, "page"))
 	if err != nil {
-		helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.CannotParseURLParams)
 		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotParseURLParams)
 		return
 	}
@@ -479,7 +477,6 @@ func (ch *CustomerHandler) GetListCustomers(w http.ResponseWriter, r *http.Reque
 	var cus GetListCustomersRequest
 	err = json.NewDecoder(r.Body).Decode(&cus)
 	if err != nil {
-		helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.CannotEncodeResponse)
 		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
 		return
 	}
@@ -498,7 +495,6 @@ func (ch *CustomerHandler) GetListCustomers(w http.ResponseWriter, r *http.Reque
 
 	_, res, err := helpers.NewResponseBuilder(w, true, constants.Success, dataResponse)
 	if err != nil {
-		helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.CannotEncodeResponse)
 		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
 		return
 	}

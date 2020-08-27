@@ -18,6 +18,7 @@ import (
 
 func sendMessageToTelegram(r *http.Request, status int, errorMessage string) error {
 
+	current_time := time.Now()
 	chat_id := os.Getenv("CHATID")
 	text := "There has been an exception.\n" +
 		"<b>HTTP Status</b>:" + strconv.Itoa(status) + "\n" +

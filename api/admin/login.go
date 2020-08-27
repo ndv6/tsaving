@@ -33,7 +33,6 @@ func LoginAdminHandler(jwt *tokens.JWT, db *sql.DB) http.HandlerFunc { // Handle
 		err := json.NewDecoder(r.Body).Decode(&l)
 		if err != nil {
 			helpers.HTTPError(w, http.StatusBadRequest, constants.CannotReadRequest) //Format JSON Tidak Sesuai
-			helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.CannotReadRequest)
 			return
 		}
 
@@ -44,7 +43,6 @@ func LoginAdminHandler(jwt *tokens.JWT, db *sql.DB) http.HandlerFunc { // Handle
 		objAdmin, err := models.LoginAdmin(db, l.Username, Pass)
 		if err != nil {
 			helpers.HTTPError(w, http.StatusBadRequest, "Wrong Username or Password")
-			helpers.SendMessageToTelegram(r, http.StatusBadRequest, "Wrong Username or Password")
 			return
 		}
 		_, tokenLoginAdmin, _ := jwt.JWTAuth.Encode(&tokens.TokenAdmin{

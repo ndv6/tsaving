@@ -29,7 +29,6 @@ func VerifyEmailToken(eh database.EmailHandler) http.HandlerFunc {
 		err = json.Unmarshal(requestBody, &et)
 		if err != nil {
 			helpers.HTTPError(w, http.StatusBadRequest, constants.CannotParseRequest)
-			helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.CannotParseRequest)
 			return
 		}
 
@@ -42,7 +41,6 @@ func VerifyEmailToken(eh database.EmailHandler) http.HandlerFunc {
 
 		if et.Token != dbEt.Token {
 			helpers.HTTPError(w, http.StatusBadRequest, constants.VerifyEmailFailed)
-			helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.VerifyEmailFailed)
 			return
 		}
 
@@ -63,7 +61,6 @@ func VerifyEmailToken(eh database.EmailHandler) http.HandlerFunc {
 		w, resp, err := helpers.NewResponseBuilder(w, true, constants.SuccessVerifyEmail, models.VerifiedEmailResponse{Email: et.Email})
 		if err != nil {
 			helpers.HTTPError(w, http.StatusInternalServerError, constants.CannotEncodeResponse)
-			helpers.SendMessageToTelegram(r, http.StatusInternalServerError, constants.CannotEncodeResponse)
 			return
 		}
 		fmt.Fprintf(w, resp)

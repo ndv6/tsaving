@@ -73,20 +73,17 @@ func (vh VAHandler) DeleteVac(w http.ResponseWriter, r *http.Request) {
 	err := token.Valid()
 	if err != nil {
 		helpers.HTTPError(w, http.StatusBadRequest, constants.TokenExpires)
-		helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.TokenExpires)
 		return
 	}
 
 	trx, err := vh.db.Begin()
 	if err != nil {
 		helpers.HTTPError(w, http.StatusInternalServerError, constants.FailSqlTransaction)
-		helpers.SendMessageToTelegram(r, http.StatusInternalServerError, constants.FailSqlTransaction)
 	}
 
 	vaNum := chi.URLParam(r, "va_num")
 	if !CheckVaNumValid(vaNum) {
 		helpers.HTTPError(w, http.StatusBadRequest, constants.InvalidVaNumber)
-		helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.InvalidVaNumber)
 		trx.Rollback()
 		return
 	}
@@ -94,7 +91,6 @@ func (vh VAHandler) DeleteVac(w http.ResponseWriter, r *http.Request) {
 	vac, err := database.GetVacByAccountNum(trx, token.AccountNum, vaNum)
 	if err != nil {
 		helpers.HTTPError(w, http.StatusNotFound, constants.VANotFound)
-		helpers.SendMessageToTelegram(r, http.StatusNotFound, constants.VANotFound)
 		trx.Rollback()
 		return
 	}
@@ -118,7 +114,6 @@ func (vh VAHandler) DeleteVac(w http.ResponseWriter, r *http.Request) {
 		})
 		if err != nil {
 			helpers.HTTPError(w, http.StatusInternalServerError, constants.InitLogFailed)
-			helpers.SendMessageToTelegram(r, http.StatusInternalServerError, constants.InitLogFailed)
 			trx.Rollback()
 			return
 		}

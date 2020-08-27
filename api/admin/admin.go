@@ -336,6 +336,7 @@ func (adm *AdminHandler) TransactionHistoryAll(w http.ResponseWriter, r *http.Re
 
 		if err != nil {
 			helpers.HTTPError(w, r, http.StatusBadRequest, err.Error())
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
 			return
 		}
 

@@ -122,6 +122,7 @@ func (la *LogAdminHandler) GetFilteredLog(w http.ResponseWriter, r *http.Request
 
 		if err != nil {
 			helper.HTTPError(w, r, http.StatusBadRequest, constants.LogAdminFailed)
+			helper.SendMessageToTelegram(r, http.StatusBadRequest, constants.LogAdminFailed)
 			return
 		}
 
@@ -143,6 +144,7 @@ func (la *LogAdminHandler) GetFilteredLog(w http.ResponseWriter, r *http.Request
 
 		if err != nil {
 			helper.HTTPError(w, r, http.StatusBadRequest, constants.LogAdminFailed)
+			helper.SendMessageToTelegram(r, http.StatusBadRequest, constants.LogAdminFailed)
 			return
 		}
 
@@ -164,6 +166,7 @@ func (la *LogAdminHandler) GetFilteredLog(w http.ResponseWriter, r *http.Request
 
 		if err != nil {
 			helper.HTTPError(w, r, http.StatusBadRequest, constants.LogAdminFailed)
+			helper.SendMessageToTelegram(r, http.StatusBadRequest, constants.LogAdminFailed)
 			return
 		}
 

@@ -382,6 +382,7 @@ func (va *VAHandler) VacListAdmin(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.Header().Set(constants.ContentType, constants.Json)
 		helpers.HTTPError(w, r, http.StatusBadRequest, "Cannot get va list")
+		helpers.SendMessageToTelegram(r, http.StatusBadRequest, "Cannot get va list")
 		return
 	}
 
@@ -423,6 +424,7 @@ func (va *VAHandler) VacListAdminFilter(w http.ResponseWriter, r *http.Request) 
 		w.Header().Set(constants.ContentType, constants.Json)
 		fmt.Println(err)
 		helpers.HTTPError(w, r, http.StatusBadRequest, "Cannot get va list")
+		helpers.SendMessageToTelegram(r, http.StatusBadRequest, "Cannot get va list")
 		return
 	}
 

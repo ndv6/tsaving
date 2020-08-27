@@ -43,6 +43,6 @@ stages:
               chartName: tsavingchart
               releaseName: tsaving
               install: true
-              overrideValues: 'image.tag=$(Build.BuildId),environment.jwt=$JWT_SECRET,environment.db=$DATABASE_URL,environment.port=$PORT,environment.telegram=$TELEGRAM,environment.chatId=$CHATID'
+              overrideValues: 'image.tag=$(Build.BuildId),environment.jwt=$(JWT_SECRET),environment.db=$(DATABASE_URL),environment.port=$(PORT),environment.telegram=$(TELEGRAM),environment.chatId=$(CHATID)'
               waitForExecution: false
         condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/')

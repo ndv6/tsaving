@@ -345,14 +345,12 @@ func (ch *CustomerHandler) UpdatePassword(w http.ResponseWriter, r *http.Request
 	err := tokens.Valid()
 	if err != nil {
 		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
-		helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	requestedBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotReadRequest)
-		helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.CannotReadRequest)
 		return
 	}
 
@@ -398,7 +396,6 @@ func (ch *CustomerHandler) UpdatePassword(w http.ResponseWriter, r *http.Request
 	_, res, err := helpers.NewResponseBuilder(w, true, constants.UpdatePasswordSuccess, nil)
 	if err != nil {
 		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
-		helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.CannotEncodeResponse)
 		return
 	}
 

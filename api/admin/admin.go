@@ -123,8 +123,6 @@ func (adm *AdminHandler) TransactionHistoryHandler(w http.ResponseWriter, r *htt
 	page, err := strconv.Atoi(chi.URLParam(r, "page"))
 	if err != nil {
 		w.Header().Set(constants.ContentType, constants.Json)
-		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotParseURLParams)
-		helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.CannotParseURLParams)
 		return
 	}
 
@@ -258,8 +256,6 @@ func (adm *AdminHandler) TransactionHistoryAll(w http.ResponseWriter, r *http.Re
 	page, err := strconv.Atoi(chi.URLParam(r, "page"))
 	if err != nil {
 		w.Header().Set(constants.ContentType, constants.Json)
-		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotParseURLParams)
-		helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.CannotParseURLParams)
 		return
 	}
 

@@ -87,6 +87,7 @@ func (adm *AdminHandler) EditCustomerData(admInterface AdminInterface, tokenInte
 		err = admInterface.EditCustomerData(customerData, request.AdminUsername)
 		if err != nil {
 			helpers.HTTPError(w, r, http.StatusInternalServerError, constants.InsertFailed)
+			helpers.SendMessageToTelegram(r, http.StatusInternalServerError, constants.InsertFailed)
 			return
 		}
 
@@ -136,6 +137,7 @@ func (adm *AdminHandler) TransactionHistoryHandler(w http.ResponseWriter, r *htt
 
 		if err != nil {
 			helpers.HTTPError(w, r, http.StatusBadRequest, err.Error())
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
 			return
 		}
 
@@ -147,6 +149,7 @@ func (adm *AdminHandler) TransactionHistoryHandler(w http.ResponseWriter, r *htt
 		_, res, err := helpers.NewResponseBuilder(w, r, true, constants.GetAllTransactionSuccess, responseBody)
 		if err != nil {
 			helpers.HTTPError(w, r, http.StatusBadRequest, constants.CannotEncodeResponse)
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.CannotEncodeResponse)
 			return
 		}
 
@@ -158,6 +161,7 @@ func (adm *AdminHandler) TransactionHistoryHandler(w http.ResponseWriter, r *htt
 		if err != nil {
 			fmt.Println(err)
 			helpers.HTTPError(w, r, http.StatusBadRequest, err.Error())
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
 			return
 		}
 
@@ -170,6 +174,7 @@ func (adm *AdminHandler) TransactionHistoryHandler(w http.ResponseWriter, r *htt
 		if err != nil {
 			fmt.Println(err)
 			helpers.HTTPError(w, r, http.StatusBadRequest, constants.CannotEncodeResponse)
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.CannotEncodeResponse)
 			return
 		}
 
@@ -181,6 +186,8 @@ func (adm *AdminHandler) TransactionHistoryHandler(w http.ResponseWriter, r *htt
 		if err != nil {
 			fmt.Println(err)
 			helpers.HTTPError(w, r, http.StatusBadRequest, err.Error())
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
+
 			return
 		}
 
@@ -193,6 +200,7 @@ func (adm *AdminHandler) TransactionHistoryHandler(w http.ResponseWriter, r *htt
 		if err != nil {
 			fmt.Println(err)
 			helpers.HTTPError(w, r, http.StatusBadRequest, constants.CannotEncodeResponse)
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.CannotEncodeResponse)
 			return
 		}
 
@@ -204,6 +212,7 @@ func (adm *AdminHandler) TransactionHistoryHandler(w http.ResponseWriter, r *htt
 		if err != nil {
 			fmt.Println(err)
 			helpers.HTTPError(w, r, http.StatusBadRequest, err.Error())
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
 			return
 		}
 
@@ -216,6 +225,7 @@ func (adm *AdminHandler) TransactionHistoryHandler(w http.ResponseWriter, r *htt
 		if err != nil {
 			fmt.Println(err)
 			helpers.HTTPError(w, r, http.StatusBadRequest, constants.CannotEncodeResponse)
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.CannotEncodeResponse)
 			return
 		}
 
@@ -226,12 +236,14 @@ func (adm *AdminHandler) TransactionHistoryHandler(w http.ResponseWriter, r *htt
 	transactions, err := database.AllHistoryTransaction(adm.db)
 	if err != nil {
 		helpers.HTTPError(w, r, http.StatusBadRequest, err.Error())
+		helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	_, res, err := helpers.NewResponseBuilder(w, r, true, constants.GetAllTransactionSuccess, transactions)
 	if err != nil {
 		helpers.HTTPError(w, r, http.StatusBadRequest, constants.CannotEncodeResponse)
+		helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.CannotEncodeResponse)
 		return
 	}
 
@@ -255,6 +267,7 @@ func (adm *AdminHandler) TransactionHistoryAll(w http.ResponseWriter, r *http.Re
 
 		if err != nil {
 			helpers.HTTPError(w, r, http.StatusBadRequest, err.Error())
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
 			return
 		}
 
@@ -266,6 +279,7 @@ func (adm *AdminHandler) TransactionHistoryAll(w http.ResponseWriter, r *http.Re
 		_, res, err := helpers.NewResponseBuilder(w, r, true, constants.GetAllTransactionSuccess, responseBody)
 		if err != nil {
 			helpers.HTTPError(w, r, http.StatusBadRequest, constants.CannotEncodeResponse)
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.CannotEncodeResponse)
 			return
 		}
 
@@ -276,6 +290,7 @@ func (adm *AdminHandler) TransactionHistoryAll(w http.ResponseWriter, r *http.Re
 
 		if err != nil {
 			helpers.HTTPError(w, r, http.StatusBadRequest, err.Error())
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
 			return
 		}
 
@@ -287,6 +302,7 @@ func (adm *AdminHandler) TransactionHistoryAll(w http.ResponseWriter, r *http.Re
 		_, res, err := helpers.NewResponseBuilder(w, r, true, constants.GetAllTransactionSuccess, responseBody)
 		if err != nil {
 			helpers.HTTPError(w, r, http.StatusBadRequest, constants.CannotEncodeResponse)
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.CannotEncodeResponse)
 			return
 		}
 
@@ -297,6 +313,7 @@ func (adm *AdminHandler) TransactionHistoryAll(w http.ResponseWriter, r *http.Re
 
 		if err != nil {
 			helpers.HTTPError(w, r, http.StatusBadRequest, err.Error())
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
 			return
 		}
 
@@ -308,6 +325,7 @@ func (adm *AdminHandler) TransactionHistoryAll(w http.ResponseWriter, r *http.Re
 		_, res, err := helpers.NewResponseBuilder(w, r, true, constants.GetAllTransactionSuccess, responseBody)
 		if err != nil {
 			helpers.HTTPError(w, r, http.StatusBadRequest, constants.CannotEncodeResponse)
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.CannotEncodeResponse)
 			return
 		}
 
@@ -344,88 +362,103 @@ func (ah *AdminHandler) GetDashboard() http.HandlerFunc {
 		act, inact, err := database.GetActInActUserCount(ah.db)
 		if err != nil {
 			helpers.HTTPError(w, r, http.StatusBadRequest, err.Error())
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
 			return
 		}
 
 		total, err := database.GetTotalTransactionCount(ah.db)
 		if err != nil {
 			helpers.HTTPError(w, r, http.StatusBadRequest, err.Error())
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
 			return
 		}
 
 		newUserToday, err := database.GetNewUserToday(ah.db)
 		if err != nil {
 			helpers.HTTPError(w, r, http.StatusBadRequest, err.Error())
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
 			return
 		}
 
 		newUserYesterday, err := database.GetNewUserYesterday(ah.db)
 		if err != nil {
 			helpers.HTTPError(w, r, http.StatusBadRequest, err.Error())
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
 			return
 		}
 
 		newUserThisWeek, err := database.GetNewUserThisWeek(ah.db)
 		if err != nil {
 			helpers.HTTPError(w, r, http.StatusBadRequest, err.Error())
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
 			return
 		}
 
 		newUserThisMonth, err := database.GetNewUserThisMonth(ah.db)
 		if err != nil {
 			helpers.HTTPError(w, r, http.StatusBadRequest, err.Error())
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
 			return
 		}
 
 		totalTransactionAmountMonth, err := database.GetTransactionAmountMonth(ah.db)
 		if err != nil {
 			helpers.HTTPError(w, r, http.StatusBadRequest, err.Error())
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
 			return
 		}
 
 		totalTransactionAmountToday, err := database.GetTransactionAmountToday(ah.db)
 		if err != nil {
 			helpers.HTTPError(w, r, http.StatusBadRequest, err.Error())
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
 			return
 		}
 
 		totalTransactionAmountYesterday, err := database.GetTransactionAmountYesterday(ah.db)
 		if err != nil {
 			helpers.HTTPError(w, r, http.StatusBadRequest, err.Error())
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
 			return
 		}
 
 		transactionMonthbyWeek, err := database.GetTransactionByWeek(ah.db)
 		if err != nil {
 			helpers.HTTPError(w, r, http.StatusBadRequest, err.Error())
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
 			return
 		}
 
 		transactionAmount, err := database.GetTransactionAmount(ah.db)
 		if err != nil {
 			helpers.HTTPError(w, r, http.StatusBadRequest, err.Error())
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
 			return
 		}
 
 		totalVa, amountVa, err := database.GetTotalFromLog(ah.db, constants.TransferToMainAccount)
 		if err != nil {
 			helpers.HTTPError(w, r, http.StatusBadRequest, err.Error())
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
 			return
 		}
 		totalMain, amountMain, err := database.GetTotalFromLog(ah.db, constants.TransferToVirtualAccount)
 		if err != nil {
 			helpers.HTTPError(w, r, http.StatusBadRequest, err.Error())
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
 			return
 		}
 		totalDeposit, amountDeposit, err := database.GetTotalFromLog(ah.db, constants.Deposit)
 		if err != nil {
 			helpers.HTTPError(w, r, http.StatusBadRequest, err.Error())
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
 			return
 		}
 
 		transactionAmountWeek, err := database.GetTransactionAmountWeek(ah.db)
 		if err != nil {
 			helpers.HTTPError(w, r, http.StatusBadRequest, err.Error())
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
 			return
 		}
 

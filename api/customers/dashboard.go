@@ -18,6 +18,7 @@ func (ch *CustomerHandler) GetDashboardData(db *sql.DB) http.HandlerFunc {
 		result, err := database.GetDashboardData(token.CustId, db)
 		if err != nil {
 			helpers.HTTPError(w, r, http.StatusBadRequest, constants.CannotEncodeResponse)
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
 			return
 		}
 

@@ -45,6 +45,7 @@ func (la *LogAdminHandler) Get(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Fprint(w, err)
 		helper.HTTPError(w, r, http.StatusBadRequest, constants.LogAdminFailed)
+		helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.LogAdminFailed)
 		return
 	}
 
@@ -90,6 +91,7 @@ func (la *LogAdminHandler) Insert(w http.ResponseWriter, r *http.Request) {
 	err = database.InsertLogAdmin(la.db, lar, username)
 	if err != nil {
 		helper.HTTPError(w, r, http.StatusBadRequest, constants.InsertAdminLogFailed)
+		helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.InsertAdminLogFailed)
 		return
 	}
 

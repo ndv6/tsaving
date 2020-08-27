@@ -298,6 +298,7 @@ func (va *VAHandler) Update(w http.ResponseWriter, r *http.Request) {
 	req, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		helper.HTTPError(w, r, http.StatusBadRequest, "unable to read request body")
+		helper.SendMessageToTelegram(r, http.StatusBadRequest, "unable to read request body")
 		return
 	}
 
@@ -306,6 +307,7 @@ func (va *VAHandler) Update(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(req, &vac)
 	if err != nil {
 		helper.HTTPError(w, r, http.StatusBadRequest, "unable to parse json request")
+		helper.SendMessageToTelegram(r, http.StatusBadRequest, "unable to read json body")
 		return
 	}
 
@@ -313,6 +315,7 @@ func (va *VAHandler) Update(w http.ResponseWriter, r *http.Request) {
 	var vam models.VirtualAccounts
 	vam, err = database.GetVaNumber(va.db, vaNumber)
 	if err != nil {
+		helper.SendMessageToTelegram(r, http.StatusBadRequest, "validate va number failed, make sure va number is correct")
 		helper.HTTPError(w, r, http.StatusBadRequest, "validate va number failed, make sure va number is correct")
 		return
 	}
@@ -321,6 +324,7 @@ func (va *VAHandler) Update(w http.ResponseWriter, r *http.Request) {
 	vam, err = database.UpdateVA(vam.VaNum, vac.VaColor, vac.VaLabel, va.db)
 
 	if err != nil {
+		helper.SendMessageToTelegram(r, http.StatusBadRequest, "failed insert data to db")
 		helper.HTTPError(w, r, http.StatusBadRequest, "failed insert data to db")
 		return
 	}
@@ -333,6 +337,7 @@ func (va *VAHandler) Update(w http.ResponseWriter, r *http.Request) {
 	err = json.NewEncoder(w).Encode(response)
 	if err != nil {
 		helpers.HTTPError(w, r, http.StatusBadRequest, "unable to encode response")
+		helper.SendMessageToTelegram(r, http.StatusBadRequest, "unable to encode response")
 		return
 	}
 }
@@ -344,6 +349,7 @@ func (va *VAHandler) VacList(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		helper.HTTPError(w, r, http.StatusBadRequest, "id must be integer")
+		helper.SendMessageToTelegram(r, http.StatusBadRequest, "id must be integer")
 		return
 	}
 

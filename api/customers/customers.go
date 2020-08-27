@@ -88,6 +88,7 @@ func (ch *CustomerHandler) GetProfileforAdmin(w http.ResponseWriter, r *http.Req
 	cus, err := models.GetProfile(ch.db, CustId)
 	if err != nil {
 		helpers.HTTPError(w, r, http.StatusBadRequest, err.Error())
+		helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -107,6 +108,7 @@ func (ch *CustomerHandler) GetCardCustomers(w http.ResponseWriter, r *http.Reque
 	cardDetails, err := models.GetDetailsCard(ch.db, AccountNum)
 	if err != nil {
 		helpers.HTTPError(w, r, http.StatusBadRequest, err.Error())
+		helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -262,6 +264,7 @@ func (ch *CustomerHandler) UpdateProfile(w http.ResponseWriter, r *http.Request)
 	err = models.UpdateProfile(ch.db, cus)
 	if err != nil {
 		helpers.HTTPError(w, r, http.StatusBadRequest, constants.UpdateFailed+err.Error())
+		helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.UpdateFailed+err.Error())
 	}
 
 	if isEmailChanged {
@@ -269,11 +272,13 @@ func (ch *CustomerHandler) UpdateProfile(w http.ResponseWriter, r *http.Request)
 
 		if err := models.AddEmailTokens(ch.db, OTPEmail, cus.CustEmail); err != nil {
 			helpers.HTTPError(w, r, http.StatusBadRequest, "Email Token Failed")
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, "Email Token Failed")
 			return
 		}
 		if err := ch.sendMail(w, OTPEmail, cus.CustEmail); err != nil {
 			w.Header().Set(constants.ContentType, constants.Json)
 			helpers.HTTPError(w, r, http.StatusBadRequest, constants.MailFailed)
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.MailFailed)
 			return
 		}
 	}
@@ -359,11 +364,14 @@ func (ch *CustomerHandler) UpdatePassword(w http.ResponseWriter, r *http.Request
 	err = json.Unmarshal(requestedBody, &reqPass)
 	if err != nil {
 		helpers.HTTPError(w, r, http.StatusBadRequest, constants.CannotParseRequest)
+		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotParseRequest)
+
 		return
 	}
 
 	if len(reqPass.OldPassword) < 6 || len(reqPass.NewPassword) < 6 {
 		helpers.HTTPError(w, r, http.StatusBadRequest, constants.MinimumPassword)
+		helpers.HTTPError(w, http.StatusBadRequest, constants.MinimumPassword)
 		return
 	}
 
@@ -373,17 +381,21 @@ func (ch *CustomerHandler) UpdatePassword(w http.ResponseWriter, r *http.Request
 	isOldPasswordCorrect, err := models.IsOldPasswordCorrect(ch.db, hashedOldPass, tokens.CustId)
 	if err != nil {
 		helpers.HTTPError(w, r, http.StatusBadRequest, err.Error())
+		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	if !isOldPasswordCorrect {
 		helpers.HTTPError(w, r, http.StatusBadRequest, "Incorrect password")
+		helpers.SendMessageToTelegram(r, http.StatusBadRequest, "Incorrect password")
 		return
 	}
 
 	err = models.UpdateCustomerPassword(ch.db, hashedNewPass, tokens.CustId)
 	if err != nil {
 		helpers.HTTPError(w, r, http.StatusBadRequest, err.Error())
+		helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
+
 		return
 	}
 
@@ -523,6 +535,7 @@ func (ch *CustomerHandler) SoftDelete(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Fprint(w, err)
 		helpers.HTTPError(w, r, http.StatusBadRequest, constants.SoftDeleteCustFailed)
+		helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.SoftDeleteCustFailed)
 		return
 	}
 

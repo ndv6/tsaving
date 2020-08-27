@@ -47,14 +47,14 @@ services:
       - elasticsearch
       - kibana
 
-  postgres:
-    image: postgres:12.3-alpine
-    ports:
-      - 5432:5432
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: db
+  # postgres:
+  #   image: postgres:12.3-alpine
+  #   ports:
+  #     - 5432:5432
+  #   environment:
+  #     POSTGRES_USER: postgres
+  #     POSTGRES_PASSWORD: password
+  #     POSTGRES_DB: db
 
   tsaving:
     build: .
@@ -67,5 +67,5 @@ services:
     environment:
       DATABASE_URL: postgres://postgres:password@postgres:5432/db?sslmode=disable
     depends_on:
-      - postgres
+      # - postgres
       - filebeat

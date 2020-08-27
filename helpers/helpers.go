@@ -36,7 +36,6 @@ func SendMessageToTelegram(r *http.Request, status int, errorMessage string) err
 	}
 
 	url_bot_telegram := os.Getenv("TELEGRAM")
-
 	resp, err := http.Post(url_bot_telegram, "application/json", bytes.NewBuffer(data))
 	if err != nil {
 		return err

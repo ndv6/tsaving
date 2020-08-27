@@ -89,6 +89,7 @@ func (ch *CustomerHandler) GetProfileforAdmin(w http.ResponseWriter, r *http.Req
 	cus, err := models.GetProfile(ch.db, CustId)
 	if err != nil {
 		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+		helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -108,6 +109,7 @@ func (ch *CustomerHandler) GetCardCustomers(w http.ResponseWriter, r *http.Reque
 	cardDetails, err := models.GetDetailsCard(ch.db, AccountNum)
 	if err != nil {
 		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+		helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -534,6 +536,7 @@ func (ch *CustomerHandler) SoftDelete(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Fprint(w, err)
 		helpers.HTTPError(w, http.StatusBadRequest, constants.SoftDeleteCustFailed)
+		helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.SoftDeleteCustFailed)
 		return
 	}
 

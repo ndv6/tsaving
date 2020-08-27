@@ -1,0 +1,20 @@
+output.elasticsearch:
+  hosts: ["elasticsearch:9200"]
+  # username: "elastic"
+  # password: "changeme"
+ 
+setup.kibana:
+  host: "kibana:5601"
+ 
+heartbeat.monitors:
+- type: http
+  urls: ["http://elasticsearch:9200"]
+  schedule: "@every 10s"
+ 
+- type: http
+  urls: ["https://www.google.com"]
+  schedule: "@every 10s"
+
+- type: http
+  urls: ["http://localhost:8000"]
+  schedule: "@every 10s"

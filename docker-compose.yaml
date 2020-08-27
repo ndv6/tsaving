@@ -1,0 +1,71 @@
+version: '3'
+
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.9.0
+    container_name: elasticsearch
+    environment:
+      discovery.type: single-node
+      ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+    ports: 
+      - 9200:9200
+      - 9300:9300
+  
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.9.0
+    container_name: kibana
+    ports:
+      - 5601:5601
+    environment:
+      elasticsearch.hosts: "[\"http://elasticsearch:9200\"]"
+    depends_on:
+      - elasticsearch
+
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:7.9.0
+    user: root
+    container_name: filebeat
+    environment:
+      ELASTICSEARCH_HOST: elasticsearch:9200
+      KIBANA_HOST: kibana:5601
+    volumes: 
+      - ./filebeat.yaml:/usr/share/filebeat/filebeat.yml:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - 9000:9000
+    depends_on:
+      - elasticsearch
+      - kibana
+
+  heartbeat:
+    image: docker.elastic.co/beats/heartbeat:7.9.0
+    container_name: heartbeat
+    volumes: 
+      - ./heartbeat.yml:/usr/share/heartbeat/heartbeat.yml:ro
+    depends_on:
+      - elasticsearch
+      - kibana
+
+  postgres:
+    image: postgres:12.3-alpine
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: db
+
+  tsaving:
+    build: .
+    container_name: tsaving
+    labels:
+      co.elastic.logs/fileset.stdout: access
+      co.elastic.logs/fileset.stderr: error
+    ports:
+      - 8000:8000
+    environment:
+      DATABASE_URL: postgres://postgres:password@postgres:5432/db?sslmode=disable
+    depends_on:
+      - postgres
+      - filebeat

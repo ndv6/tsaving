@@ -77,3 +77,10 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+environment:
+  jwt: ''
+  db: ''
+  port: ''
+  telegram: ''
+  chatId: ''

@@ -179,15 +179,15 @@ func (va *VAHandler) AddBalanceVA(w http.ResponseWriter, r *http.Request) {
 	var vac AddBalanceVARequest
 	err := json.NewDecoder(r.Body).Decode(&vac)
 	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
 		helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.CannotEncodeResponse)
+		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
 		return
 	}
 	//check if va number is exist and valid to its owner
 	err = database.CheckAccountVA(va.db, vac.VaNum, token.CustId)
 	if err != nil {
-		helper.HTTPError(w, http.StatusBadRequest, constants.InvalidVA)
 		helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.InvalidVA)
+		helper.HTTPError(w, http.StatusBadRequest, constants.InvalidVA)
 		return
 	}
 

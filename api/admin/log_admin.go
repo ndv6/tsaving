@@ -111,6 +111,7 @@ func (la *LogAdminHandler) GetFilteredLog(w http.ResponseWriter, r *http.Request
 	search := chi.URLParam(r, "search")
 	page, err := strconv.Atoi(chi.URLParam(r, "page"))
 	if err != nil {
+		helper.SendMessageToTelegram(r, http.StatusBadRequest, constants.CannotParseURLParams)
 		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotParseURLParams)
 		return
 	}

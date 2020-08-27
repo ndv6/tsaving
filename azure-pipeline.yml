@@ -39,12 +39,7 @@ stages:
               command: login
           - task: CmdLine@2
             inputs: 
-              script: helm upgrade --install --set image.tag=$(Build.BuildId) \
-                  --set environment.jwt=$(JWT_SECRET) \
-                  --set environment.db="$(DATABASE_URL)" \
-                  --set environment.port=$(PORT) \
-                  --set environment.telegram="$(TELEGRAM)" \
-                  tsaving ./tsavingchart
+              script: helm upgrade --install --set image.tag=$(Build.BuildId) --set environment.jwt=$(JWT_SECRET) --set environment.db="$(DATABASE_URL)" --set environment.port=$(PORT) --set environment.telegram="$(TELEGRAM)" tsaving ./tsavingchart
           # - task: HelmDeploy@0
           #   displayName: Helm upgrade
           #   inputs:

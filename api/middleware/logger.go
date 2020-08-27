@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"encoding/json"
-	"fmt"
 	"html"
 	"log"
 	"net/http"
@@ -47,10 +46,6 @@ type Logger3 struct {
 	Url       string `json:"url"`
 	Method    string `json:"method"`
 	Agent     string `json"user_agent"`
-}
-
-func (l3 Logger3) ToString() string {
-	return fmt.Sprintf("timestamp: %v endpoint: %v method: %v agent: %v", l3.Timestamp, l3.Url, l3.Method, l3.Agent)
 }
 
 func (jl *JSONLogger2) ServeHTTP(w http.ResponseWriter, r *http.Request) {

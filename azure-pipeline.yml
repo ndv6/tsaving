@@ -30,29 +30,30 @@ stages:
             displayName: Helm installer
             inputs: 
               helmVersionToInstall: 3.3.0
-          - task: Kubernetes@1
-            inputs: 
-              connectionType: 'Kubernetes Service Connection'
-              kubernetesServiceEndpoint: baitkubernetescluster
-              azureResourceGroup: ba-it-tools
-              kubernetesCluster: ba-it-aks-cluster
-              command: login
-          - task: CmdLine@2
-            inputs: 
-              script: helm upgrade --install --set image.tag=$(Build.BuildId) --set environment.jwt=$(JWT_SECRET) --set environment.db="$(DATABASE_URL)" --set environment.port=$(PORT) --set environment.telegram="$(TELEGRAM)" tsaving ./tsavingchart
-          # - task: HelmDeploy@0
-          #   displayName: Helm upgrade
-          #   inputs:
-          #     kubernetesServiceEndpoint: baitkubernetescluster
+          # - task: Kubernetes@1
+          #   inputs: 
           #     connectionType: 'Kubernetes Service Connection'
+          #     kubernetesServiceEndpoint: baitkubernetescluster
           #     azureResourceGroup: ba-it-tools
           #     kubernetesCluster: ba-it-aks-cluster
-          #     command: upgrade
-          #     chartType: filepath
-          #     chartPath: tsavingchart
-          #     chartName: tsavingchart
-          #     releaseName: tsaving
-          #     install: true
-          #     overrideValues: 'image.tag=$(Build.BuildId),environment.jwt=$(JWT_SECRET),environment.db="$(DATABASE_URL)",environment.port=$(PORT),environment.telegram="$(TELEGRAM)",environment.chatId="$(CHATID)"'
-          #     waitForExecution: false
+          #     command: login
+          # - task: CmdLine@2
+          #   inputs: 
+          #     script: helm upgrade --install --set image.tag=$(Build.BuildId) --set environment.jwt=$(JWT_SECRET) --set environment.db="$(DATABASE_URL)" --set environment.port=$(PORT) --set environment.telegram="$(TELEGRAM)" tsaving ./tsavingchart
+          - task: HelmDeploy@0
+            displayName: Helm upgrade
+            inputs:
+              kubernetesServiceEndpoint: baitkubernetescluster
+              connectionType: 'Kubernetes Service Connection'
+              azureResourceGroup: ba-it-tools
+              kubernetesCluster: ba-it-aks-cluster
+              command: upgrade
+              chartType: filepath
+              chartPath: tsavingchart
+              chartName: tsavingchart
+              releaseName: tsaving
+              install: true
+              # overrideValues: 'image.tag=$(Build.BuildId),environment.jwt=$(JWT_SECRET),environment.db="$(DATABASE_URL)",environment.port=$(PORT),environment.telegram="$(TELEGRAM)",environment.chatId="$(CHATID)"'
+              arguments: '--set image.tag=$(Build.BuildId) --set environment.jwt=$(JWT_SECRET) --set environment.db="$(DATABASE_URL)" --set environment.port=$(PORT) --set environment.telegram="$(TELEGRAM)" tsaving ./tsavingchart'
+              waitForExecution: false
         condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/')

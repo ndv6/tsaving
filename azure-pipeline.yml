@@ -1,0 +1,48 @@
+trigger:
+  - feature/*
+  - develop
+
+pr: 
+  - develop
+
+stages:
+  - stage: test
+    jobs:
+      - job: tsaving
+        displayName: "Deploy tsaving"
+        pool: 
+          vmImage: "ubuntu-18.04"
+        steps:
+          - script: "printenv"
+          - task: Docker@2
+            displayName: Login
+            inputs:
+              command: login
+              containerRegistry: baitregistry
+          - task: Docker@2
+            displayName: "Build and Push"
+            inputs:
+              command: buildAndPush
+              containerRegistry: baitregistry
+              repository: tsaving
+              tag: $(Build.BuildId)
+          - task: HelmInstaller@1
+            displayName: Helm installer
+            inputs: 
+              helmVersionToInstall: 3.3.0
+          - task: HelmDeploy@0
+            displayName: Helm upgrade
+            inputs:
+              kubernetesServiceEndpoint: baitkubernetescluster
+              connectionType: 'Kubernetes Service Connection'
+              azureResourceGroup: ba-it-tools
+              kubernetesCluster: ba-it-aks-cluster
+              command: upgrade
+              chartType: filepath
+              chartPath: tsavingchart
+              chartName: tsavingchart
+              releaseName: tsaving
+              install: true
+              overrideValues: 'image.tag=$(Build.BuildId),environment.jwt=$JWT,environment.db=$DB,environment.port=$PORT,environment.telegram=$TELEGRAM,environment.chatId=$CHATID'
+              waitForExecution: false
+        condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/')

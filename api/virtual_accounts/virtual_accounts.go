@@ -344,6 +344,7 @@ func (va *VAHandler) VacList(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		helper.HTTPError(w, http.StatusBadRequest, "id must be integer")
+		helper.SendMessageToTelegram(r, http.StatusBadRequest, "id must be integer")
 		return
 	}
 

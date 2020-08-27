@@ -87,6 +87,7 @@ func (adm *AdminHandler) EditCustomerData(admInterface AdminInterface, tokenInte
 		err = admInterface.EditCustomerData(customerData, request.AdminUsername)
 		if err != nil {
 			helpers.HTTPError(w, http.StatusInternalServerError, constants.InsertFailed)
+			helpers.SendMessageToTelegram(r, http.StatusInternalServerError, constants.InsertFailed)
 			return
 		}
 

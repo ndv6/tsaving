@@ -298,6 +298,7 @@ func (va *VAHandler) Update(w http.ResponseWriter, r *http.Request) {
 	req, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		helper.HTTPError(w, http.StatusBadRequest, "unable to read request body")
+		helpers.SendMessageToTelegram(r, http.StatusBadRequest, "unable to read request body")
 		return
 	}
 
@@ -306,6 +307,7 @@ func (va *VAHandler) Update(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(req, &vac)
 	if err != nil {
 		helper.HTTPError(w, http.StatusBadRequest, "unable to parse json request")
+		helpers.SendMessageToTelegram(r, http.StatusBadRequest, "unable to parse json request")
 		return
 	}
 
@@ -314,6 +316,7 @@ func (va *VAHandler) Update(w http.ResponseWriter, r *http.Request) {
 	vam, err = database.GetVaNumber(va.db, vaNumber)
 	if err != nil {
 		helper.HTTPError(w, http.StatusBadRequest, "validate va number failed, make sure va number is correct")
+		helpers.SendMessageToTelegram(r, http.StatusBadRequest, "validate va number failed, make sure va number is correct")
 		return
 	}
 
@@ -322,6 +325,7 @@ func (va *VAHandler) Update(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		helper.HTTPError(w, http.StatusBadRequest, "failed insert data to db")
+		helpers.SendMessageToTelegram(r, http.StatusBadRequest, "failed insert data to db")
 		return
 	}
 
@@ -333,6 +337,7 @@ func (va *VAHandler) Update(w http.ResponseWriter, r *http.Request) {
 	err = json.NewEncoder(w).Encode(response)
 	if err != nil {
 		helpers.HTTPError(w, http.StatusBadRequest, "unable to encode response")
+		helpers.SendMessageToTelegram(r, http.StatusBadRequest, "unable to encode response")
 		return
 	}
 }

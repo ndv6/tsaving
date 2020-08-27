@@ -124,6 +124,7 @@ func (adm *AdminHandler) TransactionHistoryHandler(w http.ResponseWriter, r *htt
 	if err != nil {
 		w.Header().Set(constants.ContentType, constants.Json)
 		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotParseURLParams)
+		helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.CannotParseURLParams)
 		return
 	}
 
@@ -136,6 +137,7 @@ func (adm *AdminHandler) TransactionHistoryHandler(w http.ResponseWriter, r *htt
 
 		if err != nil {
 			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
 			return
 		}
 
@@ -147,6 +149,7 @@ func (adm *AdminHandler) TransactionHistoryHandler(w http.ResponseWriter, r *htt
 		_, res, err := helpers.NewResponseBuilder(w, true, constants.GetAllTransactionSuccess, responseBody)
 		if err != nil {
 			helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.CannotEncodeResponse)
 			return
 		}
 
@@ -158,6 +161,7 @@ func (adm *AdminHandler) TransactionHistoryHandler(w http.ResponseWriter, r *htt
 		if err != nil {
 			fmt.Println(err)
 			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
 			return
 		}
 
@@ -170,6 +174,7 @@ func (adm *AdminHandler) TransactionHistoryHandler(w http.ResponseWriter, r *htt
 		if err != nil {
 			fmt.Println(err)
 			helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.CannotEncodeResponse)
 			return
 		}
 
@@ -181,6 +186,8 @@ func (adm *AdminHandler) TransactionHistoryHandler(w http.ResponseWriter, r *htt
 		if err != nil {
 			fmt.Println(err)
 			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
+
 			return
 		}
 
@@ -193,6 +200,7 @@ func (adm *AdminHandler) TransactionHistoryHandler(w http.ResponseWriter, r *htt
 		if err != nil {
 			fmt.Println(err)
 			helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.CannotEncodeResponse)
 			return
 		}
 
@@ -204,6 +212,7 @@ func (adm *AdminHandler) TransactionHistoryHandler(w http.ResponseWriter, r *htt
 		if err != nil {
 			fmt.Println(err)
 			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
 			return
 		}
 
@@ -216,6 +225,7 @@ func (adm *AdminHandler) TransactionHistoryHandler(w http.ResponseWriter, r *htt
 		if err != nil {
 			fmt.Println(err)
 			helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.CannotEncodeResponse)
 			return
 		}
 
@@ -226,12 +236,14 @@ func (adm *AdminHandler) TransactionHistoryHandler(w http.ResponseWriter, r *htt
 	transactions, err := database.AllHistoryTransaction(adm.db)
 	if err != nil {
 		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+		helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	_, res, err := helpers.NewResponseBuilder(w, true, constants.GetAllTransactionSuccess, transactions)
 	if err != nil {
 		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
+		helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.CannotEncodeResponse)
 		return
 	}
 
@@ -247,6 +259,7 @@ func (adm *AdminHandler) TransactionHistoryAll(w http.ResponseWriter, r *http.Re
 	if err != nil {
 		w.Header().Set(constants.ContentType, constants.Json)
 		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotParseURLParams)
+		helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.CannotParseURLParams)
 		return
 	}
 
@@ -255,6 +268,7 @@ func (adm *AdminHandler) TransactionHistoryAll(w http.ResponseWriter, r *http.Re
 
 		if err != nil {
 			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
 			return
 		}
 
@@ -266,6 +280,7 @@ func (adm *AdminHandler) TransactionHistoryAll(w http.ResponseWriter, r *http.Re
 		_, res, err := helpers.NewResponseBuilder(w, true, constants.GetAllTransactionSuccess, responseBody)
 		if err != nil {
 			helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.CannotEncodeResponse)
 			return
 		}
 
@@ -276,6 +291,7 @@ func (adm *AdminHandler) TransactionHistoryAll(w http.ResponseWriter, r *http.Re
 
 		if err != nil {
 			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
 			return
 		}
 
@@ -287,6 +303,7 @@ func (adm *AdminHandler) TransactionHistoryAll(w http.ResponseWriter, r *http.Re
 		_, res, err := helpers.NewResponseBuilder(w, true, constants.GetAllTransactionSuccess, responseBody)
 		if err != nil {
 			helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.CannotEncodeResponse)
 			return
 		}
 
@@ -297,6 +314,7 @@ func (adm *AdminHandler) TransactionHistoryAll(w http.ResponseWriter, r *http.Re
 
 		if err != nil {
 			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
 			return
 		}
 
@@ -308,6 +326,7 @@ func (adm *AdminHandler) TransactionHistoryAll(w http.ResponseWriter, r *http.Re
 		_, res, err := helpers.NewResponseBuilder(w, true, constants.GetAllTransactionSuccess, responseBody)
 		if err != nil {
 			helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.CannotEncodeResponse)
 			return
 		}
 
@@ -318,6 +337,7 @@ func (adm *AdminHandler) TransactionHistoryAll(w http.ResponseWriter, r *http.Re
 
 		if err != nil {
 			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
 			return
 		}
 
@@ -329,6 +349,7 @@ func (adm *AdminHandler) TransactionHistoryAll(w http.ResponseWriter, r *http.Re
 		_, res, err := helpers.NewResponseBuilder(w, true, constants.GetAllTransactionSuccess, responseBody)
 		if err != nil {
 			helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.CannotEncodeResponse)
 			return
 		}
 

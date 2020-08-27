@@ -345,12 +345,14 @@ func (ch *CustomerHandler) UpdatePassword(w http.ResponseWriter, r *http.Request
 	err := tokens.Valid()
 	if err != nil {
 		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+		helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	requestedBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotReadRequest)
+		helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.CannotReadRequest)
 		return
 	}
 
@@ -358,11 +360,14 @@ func (ch *CustomerHandler) UpdatePassword(w http.ResponseWriter, r *http.Request
 	err = json.Unmarshal(requestedBody, &reqPass)
 	if err != nil {
 		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotParseRequest)
+		helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.CannotParseRequest)
+		
 		return
 	}
 
 	if len(reqPass.OldPassword) < 6 || len(reqPass.NewPassword) < 6 {
 		helpers.HTTPError(w, http.StatusBadRequest, constants.MinimumPassword)
+		helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.MinimumPassword)
 		return
 	}
 
@@ -372,23 +377,28 @@ func (ch *CustomerHandler) UpdatePassword(w http.ResponseWriter, r *http.Request
 	isOldPasswordCorrect, err := models.IsOldPasswordCorrect(ch.db, hashedOldPass, tokens.CustId)
 	if err != nil {
 		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+		helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	if !isOldPasswordCorrect {
 		helpers.HTTPError(w, http.StatusBadRequest, "Incorrect password")
+		helpers.SendMessageToTelegram(r, http.StatusBadRequest, "Incorrect password")
 		return
 	}
 
 	err = models.UpdateCustomerPassword(ch.db, hashedNewPass, tokens.CustId)
 	if err != nil {
 		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+		helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
+		
 		return
 	}
 
 	_, res, err := helpers.NewResponseBuilder(w, true, constants.UpdatePasswordSuccess, nil)
 	if err != nil {
 		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
+		helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.CannotEncodeResponse)
 		return
 	}
 

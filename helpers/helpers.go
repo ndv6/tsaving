@@ -25,9 +25,9 @@ func sendMessageToTelegram(r *http.Request, status int, errorMessage string) err
 		return err
 	}
 
-	token := os.Getenv("BOT_TELEGRAM_TOKEN")
+	url_bot_telegram := os.Getenv("URL_BOT_TELEGRAM_TOKEN")
 
-	resp, err := http.Post("https://api.telegram.org/bot"+token+"/sendMessage", "application/json", bytes.NewBuffer(data))
+	resp, err := http.Post(url_bot_telegram, "application/json", bytes.NewBuffer(data))
 	if err != nil {
 		return err
 	}

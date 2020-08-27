@@ -263,6 +263,7 @@ func (ch *CustomerHandler) UpdateProfile(w http.ResponseWriter, r *http.Request)
 
 	err = models.UpdateProfile(ch.db, cus)
 	if err != nil {
+		helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.UpdateFailed+err.Error())
 		helpers.HTTPError(w, http.StatusBadRequest, constants.UpdateFailed+err.Error())
 	}
 
@@ -270,11 +271,13 @@ func (ch *CustomerHandler) UpdateProfile(w http.ResponseWriter, r *http.Request)
 		OTPEmail := gotp.NewDefaultTOTP("4S62BZNFXXSZLCRO").Now()
 
 		if err := models.AddEmailTokens(ch.db, OTPEmail, cus.CustEmail); err != nil {
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, "Email Token Failed")
 			helpers.HTTPError(w, http.StatusBadRequest, "Email Token Failed")
 			return
 		}
 		if err := ch.sendMail(w, OTPEmail, cus.CustEmail); err != nil {
 			w.Header().Set(constants.ContentType, constants.Json)
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.MailFailed)
 			helpers.HTTPError(w, http.StatusBadRequest, constants.MailFailed)
 			return
 		}

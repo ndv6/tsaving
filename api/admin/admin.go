@@ -345,88 +345,103 @@ func (ah *AdminHandler) GetDashboard() http.HandlerFunc {
 		w.Header().Set(constants.ContentType, constants.Json)
 		act, inact, err := database.GetActInActUserCount(ah.db)
 		if err != nil {
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
 			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
 			return
 		}
 
 		total, err := database.GetTotalTransactionCount(ah.db)
 		if err != nil {
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
 			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
 			return
 		}
 
 		newUserToday, err := database.GetNewUserToday(ah.db)
 		if err != nil {
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
 			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
 			return
 		}
 
 		newUserYesterday, err := database.GetNewUserYesterday(ah.db)
 		if err != nil {
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
 			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
 			return
 		}
 
 		newUserThisWeek, err := database.GetNewUserThisWeek(ah.db)
 		if err != nil {
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
 			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
 			return
 		}
 
 		newUserThisMonth, err := database.GetNewUserThisMonth(ah.db)
 		if err != nil {
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
 			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
 			return
 		}
 
 		totalTransactionAmountMonth, err := database.GetTransactionAmountMonth(ah.db)
 		if err != nil {
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
 			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
 			return
 		}
 
 		totalTransactionAmountToday, err := database.GetTransactionAmountToday(ah.db)
 		if err != nil {
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
 			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
 			return
 		}
 
 		totalTransactionAmountYesterday, err := database.GetTransactionAmountYesterday(ah.db)
 		if err != nil {
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
 			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
 			return
 		}
 
 		transactionMonthbyWeek, err := database.GetTransactionByWeek(ah.db)
 		if err != nil {
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
 			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
 			return
 		}
 
 		transactionAmount, err := database.GetTransactionAmount(ah.db)
 		if err != nil {
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
 			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
 			return
 		}
 
 		totalVa, amountVa, err := database.GetTotalFromLog(ah.db, constants.TransferToMainAccount)
 		if err != nil {
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
 			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
 			return
 		}
 		totalMain, amountMain, err := database.GetTotalFromLog(ah.db, constants.TransferToVirtualAccount)
 		if err != nil {
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
 			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
 			return
 		}
 		totalDeposit, amountDeposit, err := database.GetTotalFromLog(ah.db, constants.Deposit)
 		if err != nil {
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
 			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
 			return
 		}
 
 		transactionAmountWeek, err := database.GetTransactionAmountWeek(ah.db)
 		if err != nil {
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
 			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
 			return
 		}

@@ -24,7 +24,7 @@ import (
 func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 	chiRouter := chi.NewRouter()
 
-	chiRouter.Use(mid.Logger)
+	chiRouter.Use(mid.Logger2)
 	chiRouter.Use(middleware.Recoverer)
 	chiRouter.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   []string{"*"},

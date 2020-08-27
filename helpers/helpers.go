@@ -16,7 +16,7 @@ import (
 	"github.com/ndv6/tsaving/models"
 )
 
-func sendMessageToTelegram(r *http.Request, status int, errorMessage string) error {
+func SendMessageToTelegram(r *http.Request, status int, errorMessage string) error {
 
 	current_time := time.Now()
 	chat_id := os.Getenv("CHATID")
@@ -24,8 +24,8 @@ func sendMessageToTelegram(r *http.Request, status int, errorMessage string) err
 		"<b>HTTP Status</b>:" + strconv.Itoa(status) + "\n" +
 		"<b>Message</b> : " + errorMessage + "\n" +
 		"<b>Timestamp</b> :" + current_time.Format(time.RFC1123) + "\n" +
-		"<b>Endpoint</b> :" + r.Method + "\n" +
-		"<b>Method</b> :" + html.EscapeString(r.URL.Path)
+		"<b>Endpoint</b> :" + html.EscapeString(r.URL.Path) + "\n" +
+		"<b>Method</b> :" + r.Method
 	data, err := json.Marshal(map[string]string{
 		"chat_id":    chat_id,
 		"text":       text,

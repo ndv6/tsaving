@@ -296,52 +296,54 @@ func (va *VAHandler) Update(w http.ResponseWriter, r *http.Request) {
 
 	// set response header
 	w.Header().Set("Content-Type", "application/json")
-
+   
 	// get va number in url
 	vaNumber := chi.URLParam(r, "va_num")
-
+   
 	// read request body
 	req, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		helper.HTTPError(w, http.StatusBadRequest, "unable to read request body")
-		return
+	 helper.SendMessageToTelegram(r, http.StatusBadRequest, "unable to read request body")
+	 return
 	}
-
+   
 	// parse json request
 	var vac VirtualAcc
 	err = json.Unmarshal(req, &vac)
 	if err != nil {
-		helper.HTTPError(w, http.StatusBadRequest, "unable to parse json request")
-		return
+	 helper.SendMessageToTelegram(r, http.StatusBadRequest, "unable to read json body")
+	 return
 	}
-
+   
 	// validasi
 	var vam models.VirtualAccounts
 	vam, err = database.GetVaNumber(va.db, vaNumber)
 	if err != nil {
-		helper.HTTPError(w, http.StatusBadRequest, "validate va number failed, make sure va number is correct")
-		return
+	 helper.SendMessageToTelegram(r, http.StatusBadRequest, "validate va number failed, make sure va number is correct")
+	 helper.HTTPError(w, http.StatusBadRequest, "validate va number failed, make sure va number is correct")
+	 return
 	}
-
+   
 	// update to db
 	vam, err = database.UpdateVA(vam.VaNum, vac.VaColor, vac.VaLabel, va.db)
-
+   
 	if err != nil {
-		helper.HTTPError(w, http.StatusBadRequest, "failed insert data to db")
-		return
+	 helper.SendMessageToTelegram(r, http.StatusBadRequest, "failed insert data to db")
+	 helper.HTTPError(w, http.StatusBadRequest, "failed insert data to db")
+	 return
 	}
-
+   
 	response := VAResponse{
-		Status:  "SUCCESS",
-		Message: fmt.Sprintf("successfully edit your virtual account! virtual account number : %v", vam.VaNum),
+	 Status:  "SUCCESS",
+	 Message: fmt.Sprintf("successfully edit your virtual account! virtual account number : %v", vam.VaNum),
 	}
-
+   
 	err = json.NewEncoder(w).Encode(response)
 	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, "unable to encode response")
-		return
+	 helper.SendMessageToTelegram(r, http.StatusBadRequest, "unable to encode response")
+	 return
 	}
-}
+   }
 
 func (va *VAHandler) VacList(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set(constants.ContentType, constants.Json)

@@ -29,6 +29,7 @@ type LoginResponse struct {
 
 func LoginHandler(jwt *tokens.JWT, db *sql.DB) http.HandlerFunc { // Handle by Caesar Gusti
 	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set(constants.ContentType, constants.Json)
 		var l LoginRequest // Ngambil dari body API
 		err := json.NewDecoder(r.Body).Decode(&l)
 		if err != nil {
@@ -44,6 +45,7 @@ func LoginHandler(jwt *tokens.JWT, db *sql.DB) http.HandlerFunc { // Handle by C
 		if err != nil {
 			w.Header().Set(constants.ContentType, constants.Json)
 			helpers.HTTPError(w, r, http.StatusBadRequest, "Failed to check verified status")
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
 			return
 		}
 

@@ -33,6 +33,7 @@ stages:
           - task: Kubernetes@1
             inputs: 
               connectionType: 'Kubernetes Service Connection'
+              kubernetesServiceEndpoint: baitkubernetescluster
               azureResourceGroup: ba-it-tools
               kubernetesCluster: ba-it-aks-cluster
               command: login

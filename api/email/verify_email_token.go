@@ -74,7 +74,6 @@ func GetEmailToken(eh database.EmailHandler) http.HandlerFunc {
 		var req models.GetTokenRequest
 		err := json.NewDecoder(r.Body).Decode(&req)
 		if err != nil {
-			helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.CannotReadRequest)
 			helpers.HTTPError(w, http.StatusBadRequest, constants.CannotReadRequest)
 			return
 		}
@@ -91,7 +90,6 @@ func GetEmailToken(eh database.EmailHandler) http.HandlerFunc {
 			Token: dbEt.Token,
 		})
 		if err != nil {
-			helpers.SendMessageToTelegram(r, http.StatusInternalServerError, constants.CannotEncodeResponse)
 			helpers.HTTPError(w, http.StatusInternalServerError, constants.CannotEncodeResponse)
 			return
 		}

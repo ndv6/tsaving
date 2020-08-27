@@ -2,8 +2,11 @@ package middleware
 
 import (
 	"encoding/json"
+	"fmt"
+	"html"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/go-chi/chi/middleware"
 )
@@ -15,6 +18,11 @@ func Logger(next http.Handler) http.Handler {
 }
 
 type JSONLog struct {
+	timeStamp time.Time `json:"timestamp"`
+	url       string    `json:"url"`
+	method    string    `json:"method"`
+	status    string    `json:"status"`
+	message   string    `json:"message"`
 }
 
 func (j *JSONLog) Print(v ...interface{}) {
@@ -34,8 +42,26 @@ type JSONLogger2 struct {
 	next http.Handler
 }
 
-func (jl *JSONLogger2) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	log.Println(r.URL.Path)
+type Logger3 struct {
+	Timestamp string `json:"timestamp"`
+	Url       string `json:"url"`
+	Method    string `json:"method"`
+	Agent     string `json"user_agent"`
+}
 
+func (l3 Logger3) ToString() string {
+	return fmt.Sprintf("timestamp: %v endpoint: %v method: %v agent: %v", l3.Timestamp, l3.Url, l3.Method, l3.Agent)
+}
+
+func (jl *JSONLogger2) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+
+	current_time := time.Now()
+	b, _ := json.Marshal(Logger3{
+		Timestamp: current_time.Format(time.RFC1123),
+		Method:    r.Method,
+		Url:       html.EscapeString(r.URL.Path),
+		Agent:     r.UserAgent(),
+	})
+	log.Println(string(b))
 	jl.next.ServeHTTP(w, r)
 }

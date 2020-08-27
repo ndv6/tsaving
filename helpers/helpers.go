@@ -56,7 +56,7 @@ func HTTPError(w http.ResponseWriter, status int, errorMessage string) {
 		json.NewEncoder(w).Encode(map[string]string{"error": constants.CannotEncodeResponse})
 		w.WriteHeader(http.StatusInternalServerError)
 	}
-	// fmt.Println(w.Header())
+
 	fmt.Fprintln(w, resp)
 }
 

@@ -62,18 +62,18 @@ func (adm *AdminHandler) EditCustomerData(admInterface AdminInterface, tokenInte
 
 		b, err := ioutil.ReadAll(r.Body)
 		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, constants.CannotReadRequest)
+			helpers.HTTPError(w, r, http.StatusBadRequest, constants.CannotReadRequest)
 			return
 		}
 
 		err = json.Unmarshal(b, &request)
 		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, constants.CannotParseRequest)
+			helpers.HTTPError(w, r, http.StatusBadRequest, constants.CannotParseRequest)
 			return
 		}
 
 		if !helpers.IsRequestValid(request.AccountNum, request.AdminUsername, request.CustEmail, request.CustPhone) {
-			helpers.HTTPError(w, http.StatusBadRequest, constants.RequestHasInvalidFields)
+			helpers.HTTPError(w, r, http.StatusBadRequest, constants.RequestHasInvalidFields)
 			return
 		}
 
@@ -86,7 +86,7 @@ func (adm *AdminHandler) EditCustomerData(admInterface AdminInterface, tokenInte
 
 		err = admInterface.EditCustomerData(customerData, request.AdminUsername)
 		if err != nil {
-			helpers.HTTPError(w, http.StatusInternalServerError, constants.InsertFailed)
+			helpers.HTTPError(w, r, http.StatusInternalServerError, constants.InsertFailed)
 			return
 		}
 
@@ -94,20 +94,20 @@ func (adm *AdminHandler) EditCustomerData(admInterface AdminInterface, tokenInte
 			OTPEmail := gotp.NewDefaultTOTP("4S62BZNFXXSZLCRO").Now()
 
 			if err := tokenInterface.UpsertEmailToken(OTPEmail, request.CustEmail); err != nil {
-				helpers.HTTPError(w, http.StatusInternalServerError, constants.GenerateEmailTokenFailed)
+				helpers.HTTPError(w, r, http.StatusInternalServerError, constants.GenerateEmailTokenFailed)
 				return
 			}
 
 			if err := admInterface.SendMail(w, OTPEmail, request.CustEmail); err != nil {
 				w.Header().Set(constants.ContentType, constants.Json)
-				helpers.HTTPError(w, http.StatusInternalServerError, constants.EditSuccessMailNotSent)
+				helpers.HTTPError(w, r, http.StatusInternalServerError, constants.EditSuccessMailNotSent)
 				return
 			}
 		}
 
-		w, responseJson, err := helpers.NewResponseBuilder(w, true, constants.EditCustomerDataSuccess, nil)
+		w, responseJson, err := helpers.NewResponseBuilder(w, r, true, constants.EditCustomerDataSuccess, nil)
 		if err != nil {
-			helpers.HTTPError(w, http.StatusInternalServerError, constants.CannotEncodeResponse)
+			helpers.HTTPError(w, r, http.StatusInternalServerError, constants.CannotEncodeResponse)
 			return
 		}
 
@@ -123,7 +123,7 @@ func (adm *AdminHandler) TransactionHistoryHandler(w http.ResponseWriter, r *htt
 	page, err := strconv.Atoi(chi.URLParam(r, "page"))
 	if err != nil {
 		w.Header().Set(constants.ContentType, constants.Json)
-		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotParseURLParams)
+		helpers.HTTPError(w, r, http.StatusBadRequest, constants.CannotParseURLParams)
 		return
 	}
 
@@ -135,7 +135,7 @@ func (adm *AdminHandler) TransactionHistoryHandler(w http.ResponseWriter, r *htt
 		transactions, count, err := database.CustomerHistoryTransaction(adm.db, accNum, page)
 
 		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+			helpers.HTTPError(w, r, http.StatusBadRequest, err.Error())
 			return
 		}
 
@@ -144,9 +144,9 @@ func (adm *AdminHandler) TransactionHistoryHandler(w http.ResponseWriter, r *htt
 			TransactionList: transactions,
 		}
 
-		_, res, err := helpers.NewResponseBuilder(w, true, constants.GetAllTransactionSuccess, responseBody)
+		_, res, err := helpers.NewResponseBuilder(w, r, true, constants.GetAllTransactionSuccess, responseBody)
 		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
+			helpers.HTTPError(w, r, http.StatusBadRequest, constants.CannotEncodeResponse)
 			return
 		}
 
@@ -157,7 +157,7 @@ func (adm *AdminHandler) TransactionHistoryHandler(w http.ResponseWriter, r *htt
 
 		if err != nil {
 			fmt.Println(err)
-			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+			helpers.HTTPError(w, r, http.StatusBadRequest, err.Error())
 			return
 		}
 
@@ -166,10 +166,10 @@ func (adm *AdminHandler) TransactionHistoryHandler(w http.ResponseWriter, r *htt
 			TransactionList: transactions,
 		}
 
-		_, res, err := helpers.NewResponseBuilder(w, true, constants.GetAllTransactionSuccess, responseBody)
+		_, res, err := helpers.NewResponseBuilder(w, r, true, constants.GetAllTransactionSuccess, responseBody)
 		if err != nil {
 			fmt.Println(err)
-			helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
+			helpers.HTTPError(w, r, http.StatusBadRequest, constants.CannotEncodeResponse)
 			return
 		}
 
@@ -180,7 +180,7 @@ func (adm *AdminHandler) TransactionHistoryHandler(w http.ResponseWriter, r *htt
 
 		if err != nil {
 			fmt.Println(err)
-			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+			helpers.HTTPError(w, r, http.StatusBadRequest, err.Error())
 			return
 		}
 
@@ -189,10 +189,10 @@ func (adm *AdminHandler) TransactionHistoryHandler(w http.ResponseWriter, r *htt
 			TransactionList: transactions,
 		}
 
-		_, res, err := helpers.NewResponseBuilder(w, true, constants.GetAllTransactionSuccess, responseBody)
+		_, res, err := helpers.NewResponseBuilder(w, r, true, constants.GetAllTransactionSuccess, responseBody)
 		if err != nil {
 			fmt.Println(err)
-			helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
+			helpers.HTTPError(w, r, http.StatusBadRequest, constants.CannotEncodeResponse)
 			return
 		}
 
@@ -203,7 +203,7 @@ func (adm *AdminHandler) TransactionHistoryHandler(w http.ResponseWriter, r *htt
 
 		if err != nil {
 			fmt.Println(err)
-			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+			helpers.HTTPError(w, r, http.StatusBadRequest, err.Error())
 			return
 		}
 
@@ -212,10 +212,10 @@ func (adm *AdminHandler) TransactionHistoryHandler(w http.ResponseWriter, r *htt
 			TransactionList: transactions,
 		}
 
-		_, res, err := helpers.NewResponseBuilder(w, true, constants.GetAllTransactionSuccess, responseBody)
+		_, res, err := helpers.NewResponseBuilder(w, r, true, constants.GetAllTransactionSuccess, responseBody)
 		if err != nil {
 			fmt.Println(err)
-			helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
+			helpers.HTTPError(w, r, http.StatusBadRequest, constants.CannotEncodeResponse)
 			return
 		}
 
@@ -225,13 +225,13 @@ func (adm *AdminHandler) TransactionHistoryHandler(w http.ResponseWriter, r *htt
 
 	transactions, err := database.AllHistoryTransaction(adm.db)
 	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+		helpers.HTTPError(w, r, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	_, res, err := helpers.NewResponseBuilder(w, true, constants.GetAllTransactionSuccess, transactions)
+	_, res, err := helpers.NewResponseBuilder(w, r, true, constants.GetAllTransactionSuccess, transactions)
 	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
+		helpers.HTTPError(w, r, http.StatusBadRequest, constants.CannotEncodeResponse)
 		return
 	}
 
@@ -246,7 +246,7 @@ func (adm *AdminHandler) TransactionHistoryAll(w http.ResponseWriter, r *http.Re
 	page, err := strconv.Atoi(chi.URLParam(r, "page"))
 	if err != nil {
 		w.Header().Set(constants.ContentType, constants.Json)
-		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotParseURLParams)
+		helpers.HTTPError(w, r, http.StatusBadRequest, constants.CannotParseURLParams)
 		return
 	}
 
@@ -254,7 +254,7 @@ func (adm *AdminHandler) TransactionHistoryAll(w http.ResponseWriter, r *http.Re
 		transactions, count, err := database.AllHistoryTransactionPaged(adm.db, page)
 
 		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+			helpers.HTTPError(w, r, http.StatusBadRequest, err.Error())
 			return
 		}
 
@@ -263,9 +263,9 @@ func (adm *AdminHandler) TransactionHistoryAll(w http.ResponseWriter, r *http.Re
 			TransactionList: transactions,
 		}
 
-		_, res, err := helpers.NewResponseBuilder(w, true, constants.GetAllTransactionSuccess, responseBody)
+		_, res, err := helpers.NewResponseBuilder(w, r, true, constants.GetAllTransactionSuccess, responseBody)
 		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
+			helpers.HTTPError(w, r, http.StatusBadRequest, constants.CannotEncodeResponse)
 			return
 		}
 
@@ -275,7 +275,7 @@ func (adm *AdminHandler) TransactionHistoryAll(w http.ResponseWriter, r *http.Re
 		transactions, count, err := database.AllHistoryTransactionFilteredAccNum(adm.db, search, page)
 
 		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+			helpers.HTTPError(w, r, http.StatusBadRequest, err.Error())
 			return
 		}
 
@@ -284,9 +284,9 @@ func (adm *AdminHandler) TransactionHistoryAll(w http.ResponseWriter, r *http.Re
 			TransactionList: transactions,
 		}
 
-		_, res, err := helpers.NewResponseBuilder(w, true, constants.GetAllTransactionSuccess, responseBody)
+		_, res, err := helpers.NewResponseBuilder(w, r, true, constants.GetAllTransactionSuccess, responseBody)
 		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
+			helpers.HTTPError(w, r, http.StatusBadRequest, constants.CannotEncodeResponse)
 			return
 		}
 
@@ -296,7 +296,7 @@ func (adm *AdminHandler) TransactionHistoryAll(w http.ResponseWriter, r *http.Re
 		transactions, count, err := database.AllHistoryTransactionFilteredDate(adm.db, date, page)
 
 		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+			helpers.HTTPError(w, r, http.StatusBadRequest, err.Error())
 			return
 		}
 
@@ -305,9 +305,9 @@ func (adm *AdminHandler) TransactionHistoryAll(w http.ResponseWriter, r *http.Re
 			TransactionList: transactions,
 		}
 
-		_, res, err := helpers.NewResponseBuilder(w, true, constants.GetAllTransactionSuccess, responseBody)
+		_, res, err := helpers.NewResponseBuilder(w, r, true, constants.GetAllTransactionSuccess, responseBody)
 		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
+			helpers.HTTPError(w, r, http.StatusBadRequest, constants.CannotEncodeResponse)
 			return
 		}
 
@@ -317,8 +317,7 @@ func (adm *AdminHandler) TransactionHistoryAll(w http.ResponseWriter, r *http.Re
 		transactions, count, err := database.AllHistoryTransactionFilteredAccNumDate(adm.db, search, date, page)
 
 		if err != nil {
-			helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
-			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+			helpers.HTTPError(w, r, http.StatusBadRequest, err.Error())
 			return
 		}
 
@@ -327,10 +326,9 @@ func (adm *AdminHandler) TransactionHistoryAll(w http.ResponseWriter, r *http.Re
 			TransactionList: transactions,
 		}
 
-		_, res, err := helpers.NewResponseBuilder(w, true, constants.GetAllTransactionSuccess, responseBody)
+		_, res, err := helpers.NewResponseBuilder(w, r, true, constants.GetAllTransactionSuccess, responseBody)
 		if err != nil {
-			helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.CannotEncodeResponse)
-			helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
+			helpers.HTTPError(w, r, http.StatusBadRequest, constants.CannotEncodeResponse)
 			return
 		}
 
@@ -345,89 +343,89 @@ func (ah *AdminHandler) GetDashboard() http.HandlerFunc {
 		w.Header().Set(constants.ContentType, constants.Json)
 		act, inact, err := database.GetActInActUserCount(ah.db)
 		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+			helpers.HTTPError(w, r, http.StatusBadRequest, err.Error())
 			return
 		}
 
 		total, err := database.GetTotalTransactionCount(ah.db)
 		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+			helpers.HTTPError(w, r, http.StatusBadRequest, err.Error())
 			return
 		}
 
 		newUserToday, err := database.GetNewUserToday(ah.db)
 		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+			helpers.HTTPError(w, r, http.StatusBadRequest, err.Error())
 			return
 		}
 
 		newUserYesterday, err := database.GetNewUserYesterday(ah.db)
 		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+			helpers.HTTPError(w, r, http.StatusBadRequest, err.Error())
 			return
 		}
 
 		newUserThisWeek, err := database.GetNewUserThisWeek(ah.db)
 		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+			helpers.HTTPError(w, r, http.StatusBadRequest, err.Error())
 			return
 		}
 
 		newUserThisMonth, err := database.GetNewUserThisMonth(ah.db)
 		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+			helpers.HTTPError(w, r, http.StatusBadRequest, err.Error())
 			return
 		}
 
 		totalTransactionAmountMonth, err := database.GetTransactionAmountMonth(ah.db)
 		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+			helpers.HTTPError(w, r, http.StatusBadRequest, err.Error())
 			return
 		}
 
 		totalTransactionAmountToday, err := database.GetTransactionAmountToday(ah.db)
 		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+			helpers.HTTPError(w, r, http.StatusBadRequest, err.Error())
 			return
 		}
 
 		totalTransactionAmountYesterday, err := database.GetTransactionAmountYesterday(ah.db)
 		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+			helpers.HTTPError(w, r, http.StatusBadRequest, err.Error())
 			return
 		}
 
 		transactionMonthbyWeek, err := database.GetTransactionByWeek(ah.db)
 		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+			helpers.HTTPError(w, r, http.StatusBadRequest, err.Error())
 			return
 		}
 
 		transactionAmount, err := database.GetTransactionAmount(ah.db)
 		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+			helpers.HTTPError(w, r, http.StatusBadRequest, err.Error())
 			return
 		}
 
 		totalVa, amountVa, err := database.GetTotalFromLog(ah.db, constants.TransferToMainAccount)
 		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+			helpers.HTTPError(w, r, http.StatusBadRequest, err.Error())
 			return
 		}
 		totalMain, amountMain, err := database.GetTotalFromLog(ah.db, constants.TransferToVirtualAccount)
 		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+			helpers.HTTPError(w, r, http.StatusBadRequest, err.Error())
 			return
 		}
 		totalDeposit, amountDeposit, err := database.GetTotalFromLog(ah.db, constants.Deposit)
 		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+			helpers.HTTPError(w, r, http.StatusBadRequest, err.Error())
 			return
 		}
 
 		transactionAmountWeek, err := database.GetTransactionAmountWeek(ah.db)
 		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+			helpers.HTTPError(w, r, http.StatusBadRequest, err.Error())
 			return
 		}
 
@@ -465,7 +463,7 @@ func (ah *AdminHandler) GetDashboard() http.HandlerFunc {
 			DashboardTotalTransaction: dashboardTotalTransaction,
 		}
 
-		w, res, err := helpers.NewResponseBuilder(w, true, "Success fetching dashboard data", dashboardAdm)
+		w, res, err := helpers.NewResponseBuilder(w, r, true, "Success fetching dashboard data", dashboardAdm)
 		fmt.Fprint(w, res)
 		return
 	}

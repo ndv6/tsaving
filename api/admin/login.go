@@ -32,8 +32,7 @@ func LoginAdminHandler(jwt *tokens.JWT, db *sql.DB) http.HandlerFunc { // Handle
 		var l LoginAdminRequest // Ngambil dari body API
 		err := json.NewDecoder(r.Body).Decode(&l)
 		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, constants.CannotReadRequest) //Format JSON Tidak Sesuai
-			helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.CannotReadRequest)
+			helpers.HTTPError(w, r, http.StatusBadRequest, constants.CannotReadRequest) //Format JSON Tidak Sesuai
 			return
 		}
 
@@ -43,8 +42,7 @@ func LoginAdminHandler(jwt *tokens.JWT, db *sql.DB) http.HandlerFunc { // Handle
 
 		objAdmin, err := models.LoginAdmin(db, l.Username, Pass)
 		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, "Wrong Username or Password")
-			helpers.SendMessageToTelegram(r, http.StatusBadRequest, "Wrong Username or Password")
+			helpers.HTTPError(w, r, http.StatusBadRequest, "Wrong Username or Password")
 			return
 		}
 		_, tokenLoginAdmin, _ := jwt.JWTAuth.Encode(&tokens.TokenAdmin{
@@ -58,11 +56,10 @@ func LoginAdminHandler(jwt *tokens.JWT, db *sql.DB) http.HandlerFunc { // Handle
 			Username: objAdmin.Username,
 		}
 
-		_, res, err := helpers.NewResponseBuilder(w, true, constants.LoginSucceed, data)
+		_, res, err := helpers.NewResponseBuilder(w, r, true, constants.LoginSucceed, data)
 
 		if err != nil {
-			helpers.HTTPError(w, http.StatusInternalServerError, constants.CannotEncodeResponse)
-			helpers.SendMessageToTelegram(r, http.StatusInternalServerError, constants.CannotEncodeResponse)
+			helpers.HTTPError(w, r, http.StatusInternalServerError, constants.CannotEncodeResponse)
 			return
 		}
 

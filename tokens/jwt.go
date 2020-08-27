@@ -56,31 +56,31 @@ func (j *JWT) AuthAdminMiddleware(handler http.Handler) http.Handler {
 		w.Header().Set(constants.ContentType, constants.Json)
 		jwtTokenAdmin, err := jwtauth.VerifyRequest(j.JWTAuth, r, TokenFromHeader)
 		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, "Error Verifying Token")
+			helpers.HTTPError(w, r, http.StatusBadRequest, "Error Verifying Token")
 			return
 		}
 
 		var claimsAdmin TokenAdmin
 		b, err := json.Marshal(jwtTokenAdmin.Claims) //Encode Token
 		if err != nil {
-			helpers.HTTPError(w, http.StatusUnauthorized, "Invalid Token")
+			helpers.HTTPError(w, r, http.StatusUnauthorized, "Invalid Token")
 			return
 		}
 
 		err = json.Unmarshal(b, &claimsAdmin)
 		if err != nil {
-			helpers.HTTPError(w, http.StatusUnauthorized, "Unable to Parse Token")
+			helpers.HTTPError(w, r, http.StatusUnauthorized, "Unable to Parse Token")
 			return
 		}
 
 		if len(claimsAdmin.Username) < 1 {
-			helpers.HTTPError(w, http.StatusUnauthorized, "Invalid User")
+			helpers.HTTPError(w, r, http.StatusUnauthorized, "Invalid User")
 			return
 		}
 
 		err = claimsAdmin.Valid()
 		if err != nil {
-			helpers.HTTPError(w, http.StatusUnauthorized, "Token Not Valid")
+			helpers.HTTPError(w, r, http.StatusUnauthorized, "Token Not Valid")
 			return
 		}
 
@@ -94,31 +94,31 @@ func (j *JWT) AuthMiddleware(handler http.Handler) http.Handler {
 		w.Header().Set(constants.ContentType, constants.Json)
 		jwtToken, err := jwtauth.VerifyRequest(j.JWTAuth, r, TokenFromHeader)
 		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, "Error Verifying Token")
+			helpers.HTTPError(w, r, http.StatusBadRequest, "Error Verifying Token")
 			return
 		}
 
 		var claims Token
 		b, err := json.Marshal(jwtToken.Claims) //Encode Token
 		if err != nil {
-			helpers.HTTPError(w, http.StatusUnauthorized, "Invalid Token")
+			helpers.HTTPError(w, r, http.StatusUnauthorized, "Invalid Token")
 			return
 		}
 
 		err = json.Unmarshal(b, &claims)
 		if err != nil {
-			helpers.HTTPError(w, http.StatusUnauthorized, "Unable to Parse Token")
+			helpers.HTTPError(w, r, http.StatusUnauthorized, "Unable to Parse Token")
 			return
 		}
 
 		if len(claims.AccountNum) < 1 {
-			helpers.HTTPError(w, http.StatusUnauthorized, "Invalid User")
+			helpers.HTTPError(w, r, http.StatusUnauthorized, "Invalid User")
 			return
 		}
 
 		err = claims.Valid()
 		if err != nil {
-			helpers.HTTPError(w, http.StatusUnauthorized, "Token Expired")
+			helpers.HTTPError(w, r, http.StatusUnauthorized, "Token Expired")
 			return
 		}
 
@@ -132,25 +132,25 @@ func (j *JWT) ValidateAccount(handler http.Handler) http.Handler {
 		w.Header().Set(constants.ContentType, constants.Json)
 		jwtToken, err := jwtauth.VerifyRequest(j.JWTAuth, r, TokenFromHeader)
 		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, "Error Verifying Token")
+			helpers.HTTPError(w, r, http.StatusBadRequest, "Error Verifying Token")
 			return
 		}
 
 		var claims Token
 		b, err := json.Marshal(jwtToken.Claims)
 		if err != nil {
-			helpers.HTTPError(w, http.StatusUnauthorized, "Invalid Token")
+			helpers.HTTPError(w, r, http.StatusUnauthorized, "Invalid Token")
 			return
 		}
 
 		err = json.Unmarshal(b, &claims)
 		if err != nil {
-			helpers.HTTPError(w, http.StatusUnauthorized, "Unable to Parse Token")
+			helpers.HTTPError(w, r, http.StatusUnauthorized, "Unable to Parse Token")
 			return
 		}
 
 		if claims.AccountExpiration.Before(time.Now()) {
-			helpers.HTTPError(w, http.StatusBadRequest, "Card expired, please renew it")
+			helpers.HTTPError(w, r, http.StatusBadRequest, "Card expired, please renew it")
 			return
 		}
 		handler.ServeHTTP(w, r)

@@ -10,6 +10,7 @@ require (
 	github.com/joho/godotenv v1.3.0
 	github.com/lib/pq v1.7.1
 	github.com/rs/cors v1.7.0
+	github.com/sirupsen/logrus v1.6.0
 	github.com/theplant/luhn v0.0.0-20170224032821-81a1a381387a
 	github.com/xlzd/gotp v0.0.0-20181030022105-c8557ba2c119
 	golang.org/x/net v0.0.0-20200707034311-ab3426394381 // indirect

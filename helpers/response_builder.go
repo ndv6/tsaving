@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	mid "github.com/ndv6/tsaving/api/middleware"
 	"github.com/ndv6/tsaving/constants"
 )
 
@@ -16,7 +17,7 @@ type ResponseBuilder struct {
 }
 
 //This function will immediately return a templated json response
-func NewResponseBuilder(w http.ResponseWriter, isAPICallSuccess bool, message string, obj interface{}) (rw http.ResponseWriter, responseJson string, err error) {
+func NewResponseBuilder(w http.ResponseWriter, r *http.Request, isAPICallSuccess bool, message string, obj interface{}) (rw http.ResponseWriter, responseJson string, err error) {
 	status := constants.Failed
 	if isAPICallSuccess {
 		status = constants.Success
@@ -39,5 +40,6 @@ func NewResponseBuilder(w http.ResponseWriter, isAPICallSuccess bool, message st
 	responseJson = string(b)
 	rw = w
 	rw.Header().Set(constants.ContentType, constants.Json)
+	mid.InsertApplicationLog(r, status, message)
 	return
 }

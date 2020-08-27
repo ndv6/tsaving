@@ -72,37 +72,32 @@ func (vh VAHandler) DeleteVac(w http.ResponseWriter, r *http.Request) {
 	token := vh.jwt.GetToken(r)
 	err := token.Valid()
 	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, constants.TokenExpires)
-		helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.TokenExpires)
+		helpers.HTTPError(w, r, http.StatusBadRequest, constants.TokenExpires)
 		return
 	}
 
 	trx, err := vh.db.Begin()
 	if err != nil {
-		helpers.HTTPError(w, http.StatusInternalServerError, constants.FailSqlTransaction)
-		helpers.SendMessageToTelegram(r, http.StatusInternalServerError, constants.FailSqlTransaction)
+		helpers.HTTPError(w, r, http.StatusInternalServerError, constants.FailSqlTransaction)
 	}
 
 	vaNum := chi.URLParam(r, "va_num")
 	if !CheckVaNumValid(vaNum) {
-		helpers.HTTPError(w, http.StatusBadRequest, constants.InvalidVaNumber)
-		helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.InvalidVaNumber)
+		helpers.HTTPError(w, r, http.StatusBadRequest, constants.InvalidVaNumber)
 		trx.Rollback()
 		return
 	}
 
 	vac, err := database.GetVacByAccountNum(trx, token.AccountNum, vaNum)
 	if err != nil {
-		helpers.HTTPError(w, http.StatusNotFound, constants.VANotFound)
-		helpers.SendMessageToTelegram(r, http.StatusNotFound, constants.VANotFound)
+		helpers.HTTPError(w, r, http.StatusNotFound, constants.VANotFound)
 		trx.Rollback()
 		return
 	}
 
 	err = database.RevertVacBalanceToMainAccount(trx, vac)
 	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, constants.FailToRevertBalance)
-		helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.FailToRevertBalance)
+		helpers.HTTPError(w, r, http.StatusBadRequest, constants.FailToRevertBalance)
 		trx.Rollback()
 		return
 	}
@@ -117,8 +112,7 @@ func (vh VAHandler) DeleteVac(w http.ResponseWriter, r *http.Request) {
 			CreatedAt:   time.Now(),
 		})
 		if err != nil {
-			helpers.HTTPError(w, http.StatusInternalServerError, constants.InitLogFailed)
-			helpers.SendMessageToTelegram(r, http.StatusInternalServerError, constants.InitLogFailed)
+			helpers.HTTPError(w, r, http.StatusInternalServerError, constants.InitLogFailed)
 			trx.Rollback()
 			return
 		}
@@ -126,8 +120,7 @@ func (vh VAHandler) DeleteVac(w http.ResponseWriter, r *http.Request) {
 
 	err = trx.Commit()
 	if err != nil {
-		helpers.HTTPError(w, http.StatusInternalServerError, constants.InsertFailed)
-		helpers.SendMessageToTelegram(r, http.StatusInternalServerError, constants.InsertFailed)
+		helpers.HTTPError(w, r, http.StatusInternalServerError, constants.InsertFailed)
 	}
 
 	w.WriteHeader(http.StatusNoContent)
@@ -140,13 +133,13 @@ func (va *VAHandler) VacToMain(w http.ResponseWriter, r *http.Request) {
 	//ambil input dari jsonnya (no rek VAC dan saldo input)
 	b, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		helper.HTTPError(w, http.StatusBadRequest, constants.CannotReadRequest)
+		helper.HTTPError(w, r, http.StatusBadRequest, constants.CannotReadRequest)
 		return
 	}
 	var VirAcc InputVa
 	err = json.Unmarshal(b, &VirAcc)
 	if err != nil {
-		helper.HTTPError(w, http.StatusBadRequest, constants.CannotParseRequest)
+		helper.HTTPError(w, r, http.StatusBadRequest, constants.CannotParseRequest)
 		return
 	}
 
@@ -154,7 +147,7 @@ func (va *VAHandler) VacToMain(w http.ResponseWriter, r *http.Request) {
 	// cek rekening
 	err = database.CheckAccountVA(va.db, vaNum, token.CustId)
 	if err != nil {
-		helper.HTTPError(w, http.StatusBadRequest, constants.InvalidVA)
+		helper.HTTPError(w, r, http.StatusBadRequest, constants.InvalidVA)
 		return
 	}
 
@@ -164,13 +157,13 @@ func (va *VAHandler) VacToMain(w http.ResponseWriter, r *http.Request) {
 	//update balance at both accounts
 	err = database.UpdateVacToMain(va.db, VirAcc.BalanceChange, vaNum, AccountNumber)
 	if err != nil {
-		helper.HTTPError(w, http.StatusOK, err.Error())
+		helper.HTTPError(w, r, http.StatusOK, err.Error())
 		return
 	}
 
-	_, res, err := helpers.NewResponseBuilder(w, true, fmt.Sprintf("successfully move balance to your main account : %v", VirAcc.BalanceChange), nil)
+	_, res, err := helpers.NewResponseBuilder(w, r, true, fmt.Sprintf("successfully move balance to your main account : %v", VirAcc.BalanceChange), nil)
 	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
+		helpers.HTTPError(w, r, http.StatusBadRequest, constants.CannotEncodeResponse)
 		return
 	}
 	fmt.Fprint(w, string(res))
@@ -186,29 +179,25 @@ func (va *VAHandler) AddBalanceVA(w http.ResponseWriter, r *http.Request) {
 	var vac AddBalanceVARequest
 	err := json.NewDecoder(r.Body).Decode(&vac)
 	if err != nil {
-		helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.CannotEncodeResponse)
-		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
+		helpers.HTTPError(w, r, http.StatusBadRequest, constants.CannotEncodeResponse)
 		return
 	}
 	//check if va number is exist and valid to its owner
 	err = database.CheckAccountVA(va.db, vac.VaNum, token.CustId)
 	if err != nil {
-		helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.InvalidVA)
-		helper.HTTPError(w, http.StatusBadRequest, constants.InvalidVA)
+		helper.HTTPError(w, r, http.StatusBadRequest, constants.InvalidVA)
 		return
 	}
 
 	updateBalanceVA := database.TransferFromMainToVa(token.AccountNum, vac.VaNum, vac.VaBalance, va.db)
 	if updateBalanceVA != nil {
-		helpers.SendMessageToTelegram(r, http.StatusOK, updateBalanceVA.Error())
-		helpers.HTTPError(w, http.StatusOK, updateBalanceVA.Error())
+		helpers.HTTPError(w, r, http.StatusOK, updateBalanceVA.Error())
 		return
 	}
 
-	_, res, err := helpers.NewResponseBuilder(w, true, fmt.Sprintf("successfully add balance to your virtual account : %v", vac.VaBalance), nil)
+	_, res, err := helpers.NewResponseBuilder(w, r, true, fmt.Sprintf("successfully add balance to your virtual account : %v", vac.VaBalance), nil)
 	if err != nil {
-		helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.CannotEncodeResponse)
-		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
+		helpers.HTTPError(w, r, http.StatusBadRequest, constants.CannotEncodeResponse)
 		return
 	}
 
@@ -228,7 +217,7 @@ func (va *VAHandler) Create(w http.ResponseWriter, r *http.Request) {
 	var vac VirtualAcc
 	err = json.Unmarshal(req, &vac)
 	if err != nil {
-		helper.HTTPError(w, http.StatusBadRequest, "unable to parse json request")
+		helper.HTTPError(w, r, http.StatusBadRequest, "unable to parse json request")
 		return
 	}
 
@@ -239,14 +228,14 @@ func (va *VAHandler) Create(w http.ResponseWriter, r *http.Request) {
 	am, err := models.GetMainAccount(va.db, token.AccountNum)
 	fmt.Println(token.AccountNum)
 	if err != nil {
-		helper.HTTPError(w, http.StatusBadRequest, err.Error())
+		helper.HTTPError(w, r, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	// generate va number
 	res, err := database.GetListVANum(token.AccountNum, va.db)
 	if err != nil {
-		helper.HTTPError(w, http.StatusBadRequest, "unable to get virtual account list")
+		helper.HTTPError(w, r, http.StatusBadRequest, "unable to get virtual account list")
 		return
 	}
 
@@ -259,7 +248,7 @@ func (va *VAHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 	lastVaNum, err := strconv.Atoi(suffixVaNum)
 	if err != nil {
-		helper.HTTPError(w, http.StatusBadRequest, "error generating va number")
+		helper.HTTPError(w, r, http.StatusBadRequest, "error generating va number")
 		return
 	}
 
@@ -277,7 +266,7 @@ func (va *VAHandler) Create(w http.ResponseWriter, r *http.Request) {
 	vam, err = database.CreateVA(newVaNum, token.AccountNum, vac.VaColor, vac.VaLabel, va.db)
 
 	if err != nil {
-		helper.HTTPError(w, http.StatusBadRequest, "failed insert data to db")
+		helper.HTTPError(w, r, http.StatusBadRequest, "failed insert data to db")
 		return
 	}
 
@@ -291,7 +280,7 @@ func (va *VAHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 	err = json.NewEncoder(w).Encode(response)
 	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, "unable to encode response")
+		helpers.HTTPError(w, r, http.StatusBadRequest, "unable to encode response")
 		return
 	}
 }
@@ -308,7 +297,7 @@ func (va *VAHandler) Update(w http.ResponseWriter, r *http.Request) {
 	// read request body
 	req, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		helper.HTTPError(w, http.StatusBadRequest, "unable to read request body")
+		helper.HTTPError(w, r, http.StatusBadRequest, "unable to read request body")
 		return
 	}
 
@@ -316,7 +305,7 @@ func (va *VAHandler) Update(w http.ResponseWriter, r *http.Request) {
 	var vac VirtualAcc
 	err = json.Unmarshal(req, &vac)
 	if err != nil {
-		helper.HTTPError(w, http.StatusBadRequest, "unable to parse json request")
+		helper.HTTPError(w, r, http.StatusBadRequest, "unable to parse json request")
 		return
 	}
 
@@ -324,7 +313,7 @@ func (va *VAHandler) Update(w http.ResponseWriter, r *http.Request) {
 	var vam models.VirtualAccounts
 	vam, err = database.GetVaNumber(va.db, vaNumber)
 	if err != nil {
-		helper.HTTPError(w, http.StatusBadRequest, "validate va number failed, make sure va number is correct")
+		helper.HTTPError(w, r, http.StatusBadRequest, "validate va number failed, make sure va number is correct")
 		return
 	}
 
@@ -332,7 +321,7 @@ func (va *VAHandler) Update(w http.ResponseWriter, r *http.Request) {
 	vam, err = database.UpdateVA(vam.VaNum, vac.VaColor, vac.VaLabel, va.db)
 
 	if err != nil {
-		helper.HTTPError(w, http.StatusBadRequest, "failed insert data to db")
+		helper.HTTPError(w, r, http.StatusBadRequest, "failed insert data to db")
 		return
 	}
 
@@ -343,7 +332,7 @@ func (va *VAHandler) Update(w http.ResponseWriter, r *http.Request) {
 
 	err = json.NewEncoder(w).Encode(response)
 	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, "unable to encode response")
+		helpers.HTTPError(w, r, http.StatusBadRequest, "unable to encode response")
 		return
 	}
 }
@@ -354,13 +343,13 @@ func (va *VAHandler) VacList(w http.ResponseWriter, r *http.Request) {
 	res, err := database.GetListVA(va.db, token.CustId)
 
 	if err != nil {
-		helper.HTTPError(w, http.StatusBadRequest, "id must be integer")
+		helper.HTTPError(w, r, http.StatusBadRequest, "id must be integer")
 		return
 	}
 
 	err = json.NewEncoder(w).Encode(res)
 	if err != nil {
-		helper.HTTPError(w, http.StatusBadRequest, "unable to parse json request")
+		helper.HTTPError(w, r, http.StatusBadRequest, "unable to parse json request")
 		return
 	}
 
@@ -372,21 +361,21 @@ func (va *VAHandler) VacListAdmin(w http.ResponseWriter, r *http.Request) {
 	custId, err := strconv.Atoi(chi.URLParam(r, "cust_id"))
 	if err != nil {
 		w.Header().Set(constants.ContentType, constants.Json)
-		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotParseURLParams)
+		helpers.HTTPError(w, r, http.StatusBadRequest, constants.CannotParseURLParams)
 		return
 	}
 
 	page, err := strconv.Atoi(chi.URLParam(r, "page"))
 	if err != nil {
 		w.Header().Set(constants.ContentType, constants.Json)
-		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotParseURLParams)
+		helpers.HTTPError(w, r, http.StatusBadRequest, constants.CannotParseURLParams)
 		return
 	}
 
 	data, count, err := database.GetListVAAdmin(va.db, custId, page)
 	if err != nil {
 		w.Header().Set(constants.ContentType, constants.Json)
-		helpers.HTTPError(w, http.StatusBadRequest, "Cannot get va list")
+		helpers.HTTPError(w, r, http.StatusBadRequest, "Cannot get va list")
 		return
 	}
 
@@ -395,9 +384,9 @@ func (va *VAHandler) VacListAdmin(w http.ResponseWriter, r *http.Request) {
 		VAList: data,
 	}
 
-	_, res, err := helpers.NewResponseBuilder(w, true, constants.GetListSuccess, responseBody)
+	_, res, err := helpers.NewResponseBuilder(w, r, true, constants.GetListSuccess, responseBody)
 	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
+		helpers.HTTPError(w, r, http.StatusBadRequest, constants.CannotEncodeResponse)
 		return
 	}
 
@@ -411,7 +400,7 @@ func (va *VAHandler) VacListAdminFilter(w http.ResponseWriter, r *http.Request) 
 	custId, err := strconv.Atoi(chi.URLParam(r, "cust_id"))
 	if err != nil {
 		w.Header().Set(constants.ContentType, constants.Json)
-		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotParseURLParams)
+		helpers.HTTPError(w, r, http.StatusBadRequest, constants.CannotParseURLParams)
 		return
 	}
 
@@ -419,7 +408,7 @@ func (va *VAHandler) VacListAdminFilter(w http.ResponseWriter, r *http.Request) 
 	page, err := strconv.Atoi(chi.URLParam(r, "page"))
 	if err != nil {
 		w.Header().Set(constants.ContentType, constants.Json)
-		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotParseURLParams)
+		helpers.HTTPError(w, r, http.StatusBadRequest, constants.CannotParseURLParams)
 		return
 	}
 
@@ -427,7 +416,7 @@ func (va *VAHandler) VacListAdminFilter(w http.ResponseWriter, r *http.Request) 
 	if err != nil {
 		w.Header().Set(constants.ContentType, constants.Json)
 		fmt.Println(err)
-		helpers.HTTPError(w, http.StatusBadRequest, "Cannot get va list")
+		helpers.HTTPError(w, r, http.StatusBadRequest, "Cannot get va list")
 		return
 	}
 
@@ -436,9 +425,9 @@ func (va *VAHandler) VacListAdminFilter(w http.ResponseWriter, r *http.Request) 
 		VAList: data,
 	}
 
-	_, res, err := helpers.NewResponseBuilder(w, true, constants.GetListSuccess, responseBody)
+	_, res, err := helpers.NewResponseBuilder(w, r, true, constants.GetListSuccess, responseBody)
 	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
+		helpers.HTTPError(w, r, http.StatusBadRequest, constants.CannotEncodeResponse)
 		return
 	}
 

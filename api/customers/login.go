@@ -33,7 +33,7 @@ func LoginHandler(jwt *tokens.JWT, db *sql.DB) http.HandlerFunc { // Handle by C
 		err := json.NewDecoder(r.Body).Decode(&l)
 		if err != nil {
 			w.Header().Set(constants.ContentType, constants.Json)
-			helpers.HTTPError(w, http.StatusBadRequest, constants.CannotReadRequest) //Format JSON Tidak Sesuai
+			helpers.HTTPError(w, r, http.StatusBadRequest, constants.CannotReadRequest) //Format JSON Tidak Sesuai
 			return
 		}
 
@@ -43,20 +43,20 @@ func LoginHandler(jwt *tokens.JWT, db *sql.DB) http.HandlerFunc { // Handle by C
 		isVerified, err := models.CheckLoginVerified(db, l.CustEmail, Pass)
 		if err != nil {
 			w.Header().Set(constants.ContentType, constants.Json)
-			helpers.HTTPError(w, http.StatusBadRequest, "Failed to check verified status")
+			helpers.HTTPError(w, r, http.StatusBadRequest, "Failed to check verified status")
 			return
 		}
 
 		if isVerified == false {
 			w.Header().Set(constants.ContentType, constants.Json)
-			helpers.HTTPError(w, http.StatusUnauthorized, "This account is not verified")
+			helpers.HTTPError(w, r, http.StatusUnauthorized, "This account is not verified")
 			return
 		}
 
 		objCustomer, err := models.LoginCustomer(db, l.CustEmail, Pass)
 		if err != nil {
 			w.Header().Set(constants.ContentType, constants.Json)
-			helpers.HTTPError(w, http.StatusBadRequest, "Wrong Email or Password")
+			helpers.HTTPError(w, r, http.StatusBadRequest, "Wrong Email or Password")
 			return
 		}
 		_, tokenLogin, _ := jwt.JWTAuth.Encode(&tokens.Token{
@@ -72,11 +72,11 @@ func LoginHandler(jwt *tokens.JWT, db *sql.DB) http.HandlerFunc { // Handle by C
 			CustName:  objCustomer.CustName,
 		}
 
-		_, res, err := helpers.NewResponseBuilder(w, true, constants.LoginSucceed, data)
+		_, res, err := helpers.NewResponseBuilder(w, r, true, constants.LoginSucceed, data)
 
 		if err != nil {
 			w.Header().Set(constants.ContentType, constants.Json)
-			helpers.HTTPError(w, http.StatusInternalServerError, constants.CannotEncodeResponse)
+			helpers.HTTPError(w, r, http.StatusInternalServerError, constants.CannotEncodeResponse)
 			return
 		}
 

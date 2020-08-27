@@ -119,6 +119,7 @@ func (la *LogAdminHandler) GetFilteredLog(w http.ResponseWriter, r *http.Request
 		LogAdmin, count, err := database.GetLogAdminFilteredDate(la.db, date, page)
 
 		if err != nil {
+			helper.SendMessageToTelegram(r, http.StatusBadRequest, constants.LogAdminFailed)
 			helper.HTTPError(w, http.StatusBadRequest, constants.LogAdminFailed)
 			return
 		}
@@ -130,6 +131,7 @@ func (la *LogAdminHandler) GetFilteredLog(w http.ResponseWriter, r *http.Request
 
 		_, res, err := helpers.NewResponseBuilder(w, true, constants.GetLogAdminSuccess, responseBody)
 		if err != nil {
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.CannotEncodeResponse)
 			helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
 			return
 		}
@@ -140,6 +142,7 @@ func (la *LogAdminHandler) GetFilteredLog(w http.ResponseWriter, r *http.Request
 		LogAdmin, count, err := database.GetLogAdminFilteredSearch(la.db, search, page)
 
 		if err != nil {
+			helper.SendMessageToTelegram(r, http.StatusBadRequest, constants.LogAdminFailed)
 			helper.HTTPError(w, http.StatusBadRequest, constants.LogAdminFailed)
 			return
 		}
@@ -151,6 +154,7 @@ func (la *LogAdminHandler) GetFilteredLog(w http.ResponseWriter, r *http.Request
 
 		_, res, err := helpers.NewResponseBuilder(w, true, constants.GetLogAdminSuccess, responseBody)
 		if err != nil {
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.CannotEncodeResponse)
 			helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
 			return
 		}
@@ -161,6 +165,7 @@ func (la *LogAdminHandler) GetFilteredLog(w http.ResponseWriter, r *http.Request
 		LogAdmin, count, err := database.GetLogAdminFilteredSearchDate(la.db, search, date, page)
 
 		if err != nil {
+			helper.SendMessageToTelegram(r, http.StatusBadRequest, constants.LogAdminFailed)
 			helper.HTTPError(w, http.StatusBadRequest, constants.LogAdminFailed)
 			return
 		}
@@ -172,6 +177,7 @@ func (la *LogAdminHandler) GetFilteredLog(w http.ResponseWriter, r *http.Request
 
 		_, res, err := helpers.NewResponseBuilder(w, true, constants.GetLogAdminSuccess, responseBody)
 		if err != nil {
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.CannotEncodeResponse)
 			helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
 			return
 		}

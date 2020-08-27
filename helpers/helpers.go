@@ -27,8 +27,9 @@ func sendMessageToTelegram(r *http.Request, status int, errorMessage string) err
 		"<b>Endpoint</b> :" + r.Method + "\n" +
 		"<b>Method</b> :" + html.EscapeString(r.URL.Path)
 	data, err := json.Marshal(map[string]string{
-		"chat_id": chat_id,
-		"text":    text,
+		"chat_id":    chat_id,
+		"text":       text,
+		"parse_mode": "HTML",
 	})
 	if err != nil {
 		return err

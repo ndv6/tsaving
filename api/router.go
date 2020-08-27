@@ -15,6 +15,7 @@ import (
 	"github.com/ndv6/tsaving/api/customers"
 	"github.com/ndv6/tsaving/api/email"
 	"github.com/ndv6/tsaving/api/home"
+	mid "github.com/ndv6/tsaving/api/middleware"
 	"github.com/ndv6/tsaving/api/not_found"
 	"github.com/ndv6/tsaving/api/virtual_accounts"
 	"github.com/ndv6/tsaving/tokens"
@@ -23,7 +24,7 @@ import (
 func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 	chiRouter := chi.NewRouter()
 
-	chiRouter.Use(middleware.Logger)
+	chiRouter.Use(mid.Logger)
 	chiRouter.Use(middleware.Recoverer)
 	chiRouter.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   []string{"*"},

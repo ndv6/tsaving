@@ -35,15 +35,15 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
             - name: JWT_SECRET
-              value: {{ .Values.environment.jwt}}
+              value: {{ .Values.environment.jwt | quote }}
             - name: DATABASE_URL
-              value: {{ .Values.environment.db}}
+              value: {{ .Values.environment.db | quote }}
             - name: PORT
-              value: {{ .Values.environment.port}}
+              value: {{ .Values.environment.port | quote }}
             - name: TELEGRAM
-              value: {{ .Values.environment.telegram}}
+              value: {{ .Values.environment.telegram | quote }}
             - name: CHATID
-              value: {{ .Values.environment.chatId}}
+              value: {{ .Values.environment.chatId | quote }}
           ports:
             - name: http
               containerPort: 8000

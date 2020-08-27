@@ -180,23 +180,27 @@ func (va *VAHandler) AddBalanceVA(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&vac)
 	if err != nil {
 		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
+		helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.CannotEncodeResponse)
 		return
 	}
 	//check if va number is exist and valid to its owner
 	err = database.CheckAccountVA(va.db, vac.VaNum, token.CustId)
 	if err != nil {
 		helper.HTTPError(w, http.StatusBadRequest, constants.InvalidVA)
+		helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.InvalidVA)
 		return
 	}
 
 	updateBalanceVA := database.TransferFromMainToVa(token.AccountNum, vac.VaNum, vac.VaBalance, va.db)
 	if updateBalanceVA != nil {
+		helpers.SendMessageToTelegram(r, http.StatusOK, updateBalanceVA.Error())
 		helpers.HTTPError(w, http.StatusOK, updateBalanceVA.Error())
 		return
 	}
 
 	_, res, err := helpers.NewResponseBuilder(w, true, fmt.Sprintf("successfully add balance to your virtual account : %v", vac.VaBalance), nil)
 	if err != nil {
+		helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.CannotEncodeResponse)
 		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
 		return
 	}

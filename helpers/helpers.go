@@ -1,6 +1,7 @@
 package helpers
 
 import (
+	"bytes"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
@@ -11,6 +12,29 @@ import (
 	"github.com/ndv6/tsaving/constants"
 	"github.com/ndv6/tsaving/models"
 )
+
+func sendMessageToTelegram(r *http.Request, status int, errorMessage string) error {
+
+	chat_id := os.Getenv("CHATID")
+	text := ""
+	data, err := json.Marshal(map[string]string{
+		"chat_id": chat_id,
+		"text":    text,
+	})
+	if err != nil {
+		return err
+	}
+
+	url_bot_telegram := os.Getenv("TELEGRAM")
+
+	resp, err := http.Post(url_bot_telegram, "application/json", bytes.NewBuffer(data))
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(resp)
+	return nil
+}
 
 // made by Joseph
 func HTTPError(w http.ResponseWriter, status int, errorMessage string) {

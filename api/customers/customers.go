@@ -12,6 +12,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/ndv6/tsaving/api/middleware"
+
 	"github.com/go-chi/chi"
 	"github.com/ndv6/tsaving/constants"
 	"github.com/ndv6/tsaving/database"
@@ -131,8 +133,10 @@ func (ch *CustomerHandler) GetCardCustomers(w http.ResponseWriter, r *http.Reque
 func (ch *CustomerHandler) Create(w http.ResponseWriter, r *http.Request) { // Handle by Caesar Gusti
 	b, err := ioutil.ReadAll(r.Body)
 	w.Header().Set(constants.ContentType, constants.Json)
+	jsonLog := middleware.JSONLog{}
 
 	if err != nil {
+		jsonLog.Print(err)
 		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotReadRequest)
 		return
 	}
@@ -162,8 +166,8 @@ func (ch *CustomerHandler) Create(w http.ResponseWriter, r *http.Request) { // H
 	cardNum, err := GenerateCardNumber(AccNum, date)
 
 	if err != nil {
-		w.Header().Set(constants.ContentType, constants.Json)
 		helpers.HTTPError(w, http.StatusBadRequest, "Cannot generate card number")
+		helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -177,16 +181,19 @@ func (ch *CustomerHandler) Create(w http.ResponseWriter, r *http.Request) { // H
 
 	if err := models.AddEmailTokens(ch.db, OTPEmail, cus.CustEmail); err != nil {
 		helpers.HTTPError(w, http.StatusBadRequest, constants.EmailToken)
+		helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	if err := models.AddAccountsWhileRegister(ch.db, AccNum); err != nil {
 		helpers.HTTPError(w, http.StatusBadRequest, constants.AccountFailed)
+		helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	if err := ch.sendMail(w, OTPEmail, cus.CustEmail); err != nil {
 		helpers.HTTPError(w, http.StatusBadRequest, constants.MailFailed)
+		helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
 		return
 	}
 

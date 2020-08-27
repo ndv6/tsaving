@@ -63,18 +63,21 @@ func (ch *CustomerHandler) GetProfile(w http.ResponseWriter, r *http.Request) {
 	err := token.Valid()
 	if err != nil {
 		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+		helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	cus, err := models.GetProfile(ch.db, token.CustId)
 	if err != nil {
 		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+		helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	_, res, err := helpers.NewResponseBuilder(w, true, constants.GetProfilSuccess, cus)
 	if err != nil {
 		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
+		helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.CannotEncodeResponse)
 		return
 	}
 

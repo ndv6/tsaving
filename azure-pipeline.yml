@@ -1,5 +1,9 @@
 trigger:
   - feature/azure-pipeline
+  - develop
+
+pr: 
+  - develop
 
 stages:
   - stage: test
@@ -40,4 +44,4 @@ stages:
               install: true
               overrideValues: 'image.tag=$(Build.BuildId) environment.jwt=$JWT environment.db=$DB environment.port=$PORT environment.telegram=$TELEGRAM environment.chatId=$CHATID'
               waitForExecution: false
-        condition: eq(variables['Build.SourceBranch'], 'refs/heads/feature/azure-pipeline')
+        condition: eq(variables['Build.SourceBranch'], 'refs/heads/develop')

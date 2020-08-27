@@ -44,4 +44,4 @@ stages:
               install: true
               overrideValues: 'image.tag=$(Build.BuildId) environment.jwt=$JWT environment.db=$DB environment.port=$PORT environment.telegram=$TELEGRAM environment.chatId=$CHATID'
               waitForExecution: false
-        condition: eq(variables['Build.SourceBranch'], 'refs/heads/develop')
+        condition: eq(variables['Build.SourceBranch'], 'refs/heads/*')

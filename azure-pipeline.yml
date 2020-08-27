@@ -1,5 +1,5 @@
 trigger:
-  - feature/azure-pipeline
+  - feature/*
   - develop
 
 pr: 

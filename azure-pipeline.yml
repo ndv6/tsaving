@@ -39,7 +39,7 @@ stages:
               command: login
           - task: CmdLine@2
             inputs: 
-              scripts: helm upgrade --install --set image.tag=$(Build.BuildId) \
+              script: helm upgrade --install --set image.tag=$(Build.BuildId) \
                   --set environment.jwt=$(JWT_SECRET) \
                   --set environment.db="$(DATABASE_URL)" \
                   --set environment.port=$(PORT) \

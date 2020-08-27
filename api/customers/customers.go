@@ -138,6 +138,7 @@ func (ch *CustomerHandler) Create(w http.ResponseWriter, r *http.Request) { // H
 
 	if err != nil {
 		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotParseRequest)
+		helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.CannotParseRequest)
 		return
 	}
 

@@ -20,6 +20,7 @@ func (ch *CustomerHandler) HistoryTransactionHandler(db *sql.DB) http.HandlerFun
 		err := token.Valid()
 		if err != nil {
 			w.Header().Set(constants.ContentType, constants.Json)
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
 			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
 			return
 		}
@@ -27,6 +28,7 @@ func (ch *CustomerHandler) HistoryTransactionHandler(db *sql.DB) http.HandlerFun
 		page, err := strconv.Atoi(chi.URLParam(r, "page"))
 		if err != nil {
 			w.Header().Set(constants.ContentType, constants.Json)
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.CannotParseURLParams)
 			helpers.HTTPError(w, http.StatusBadRequest, constants.CannotParseURLParams)
 			return
 		}
@@ -34,12 +36,14 @@ func (ch *CustomerHandler) HistoryTransactionHandler(db *sql.DB) http.HandlerFun
 		listHistoryTransaction, err := models.ListTransactionLog(db, token.CustId, page)
 		if err != nil {
 			w.Header().Set(constants.ContentType, constants.Json)
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, "Cannot get history transaction")
 			helpers.HTTPError(w, http.StatusBadRequest, "Cannot get history transaction")
 			return
 		}
 		_, res, err := helpers.NewResponseBuilder(w, true, constants.GetListSuccess, listHistoryTransaction)
 		if err != nil {
 			w.Header().Set(constants.ContentType, constants.Json)
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.CannotEncodeResponse)
 			helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
 			return
 		}
@@ -48,5 +52,4 @@ func (ch *CustomerHandler) HistoryTransactionHandler(db *sql.DB) http.HandlerFun
 		fmt.Fprint(w, string(res))
 	})
 
-	
 }

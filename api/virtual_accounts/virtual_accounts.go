@@ -73,17 +73,20 @@ func (vh VAHandler) DeleteVac(w http.ResponseWriter, r *http.Request) {
 	err := token.Valid()
 	if err != nil {
 		helpers.HTTPError(w, http.StatusBadRequest, constants.TokenExpires)
+		helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.TokenExpires)
 		return
 	}
 
 	trx, err := vh.db.Begin()
 	if err != nil {
 		helpers.HTTPError(w, http.StatusInternalServerError, constants.FailSqlTransaction)
+		helpers.SendMessageToTelegram(r, http.StatusInternalServerError, constants.FailSqlTransaction)
 	}
 
 	vaNum := chi.URLParam(r, "va_num")
 	if !CheckVaNumValid(vaNum) {
 		helpers.HTTPError(w, http.StatusBadRequest, constants.InvalidVaNumber)
+		helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.InvalidVaNumber)
 		trx.Rollback()
 		return
 	}
@@ -91,6 +94,7 @@ func (vh VAHandler) DeleteVac(w http.ResponseWriter, r *http.Request) {
 	vac, err := database.GetVacByAccountNum(trx, token.AccountNum, vaNum)
 	if err != nil {
 		helpers.HTTPError(w, http.StatusNotFound, constants.VANotFound)
+		helpers.SendMessageToTelegram(r, http.StatusNotFound, constants.VANotFound)
 		trx.Rollback()
 		return
 	}
@@ -98,6 +102,7 @@ func (vh VAHandler) DeleteVac(w http.ResponseWriter, r *http.Request) {
 	err = database.RevertVacBalanceToMainAccount(trx, vac)
 	if err != nil {
 		helpers.HTTPError(w, http.StatusBadRequest, constants.FailToRevertBalance)
+		helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.FailToRevertBalance)
 		trx.Rollback()
 		return
 	}
@@ -113,6 +118,7 @@ func (vh VAHandler) DeleteVac(w http.ResponseWriter, r *http.Request) {
 		})
 		if err != nil {
 			helpers.HTTPError(w, http.StatusInternalServerError, constants.InitLogFailed)
+			helpers.SendMessageToTelegram(r, http.StatusInternalServerError, constants.InitLogFailed)
 			trx.Rollback()
 			return
 		}
@@ -121,6 +127,7 @@ func (vh VAHandler) DeleteVac(w http.ResponseWriter, r *http.Request) {
 	err = trx.Commit()
 	if err != nil {
 		helpers.HTTPError(w, http.StatusInternalServerError, constants.InsertFailed)
+		helpers.SendMessageToTelegram(r, http.StatusInternalServerError, constants.InsertFailed)
 	}
 
 	w.WriteHeader(http.StatusNoContent)
@@ -179,24 +186,28 @@ func (va *VAHandler) AddBalanceVA(w http.ResponseWriter, r *http.Request) {
 	var vac AddBalanceVARequest
 	err := json.NewDecoder(r.Body).Decode(&vac)
 	if err != nil {
+		helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.CannotEncodeResponse)
 		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
 		return
 	}
 	//check if va number is exist and valid to its owner
 	err = database.CheckAccountVA(va.db, vac.VaNum, token.CustId)
 	if err != nil {
+		helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.InvalidVA)
 		helper.HTTPError(w, http.StatusBadRequest, constants.InvalidVA)
 		return
 	}
 
 	updateBalanceVA := database.TransferFromMainToVa(token.AccountNum, vac.VaNum, vac.VaBalance, va.db)
 	if updateBalanceVA != nil {
+		helpers.SendMessageToTelegram(r, http.StatusOK, updateBalanceVA.Error())
 		helpers.HTTPError(w, http.StatusOK, updateBalanceVA.Error())
 		return
 	}
 
 	_, res, err := helpers.NewResponseBuilder(w, true, fmt.Sprintf("successfully add balance to your virtual account : %v", vac.VaBalance), nil)
 	if err != nil {
+		helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.CannotEncodeResponse)
 		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
 		return
 	}

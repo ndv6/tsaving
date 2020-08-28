@@ -40,24 +40,24 @@ func DepositToMainAccount(partner PartnerInterface, trx Transactor) http.Handler
 
 		b, err := ioutil.ReadAll(r.Body)
 		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, constants.CannotReadRequest)
+			helpers.HTTPError(w, r, http.StatusBadRequest, constants.CannotReadRequest)
 			return
 		}
 
 		err = json.Unmarshal(b, &request)
 		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, constants.CannotParseRequest)
+			helpers.HTTPError(w, r, http.StatusBadRequest, constants.CannotParseRequest)
 			return
 		}
 
 		if !helpers.IsRequestValid(request.AccountNumber, request.AuthCode) || !helpers.IsValidInt(request.BalanceAdded, request.ClientId) {
-			helpers.HTTPError(w, http.StatusBadRequest, constants.RequestHasInvalidFields)
+			helpers.HTTPError(w, r, http.StatusBadRequest, constants.RequestHasInvalidFields)
 			return
 		}
 
 		isValidAuthCode, err := isValidPartnerAuthCode(request, partner)
 		if !isValidAuthCode || err != nil {
-			helpers.HTTPError(w, http.StatusUnauthorized, constants.UnauthorizedRequest)
+			helpers.HTTPError(w, r, http.StatusUnauthorized, constants.UnauthorizedRequest)
 			return
 		}
 
@@ -71,14 +71,14 @@ func DepositToMainAccount(partner PartnerInterface, trx Transactor) http.Handler
 		}
 		err = trx.DepositToMainAccountDatabaseAccessor(request.BalanceAdded, request.AccountNumber, log)
 		if err != nil {
-			helpers.HTTPError(w, http.StatusInternalServerError, constants.InsertFailed)
+			helpers.HTTPError(w, r, http.StatusInternalServerError, constants.InsertFailed)
 			helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
 			return
 		}
 
-		w, responseJson, err := helpers.NewResponseBuilder(w, true, constants.DepositSuccess, nil)
+		w, responseJson, err := helpers.NewResponseBuilder(w, r, true, constants.DepositSuccess, nil)
 		if err != nil {
-			helpers.HTTPError(w, http.StatusInternalServerError, constants.CannotEncodeResponse)
+			helpers.HTTPError(w, r, http.StatusInternalServerError, constants.CannotEncodeResponse)
 			return
 		}
 

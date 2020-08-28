@@ -20,7 +20,7 @@ func VerifyEmailToken(eh database.EmailHandler) http.HandlerFunc {
 		w.Header().Set(constants.ContentType, constants.Json)
 		requestBody, err := ioutil.ReadAll(r.Body)
 		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, constants.CannotReadRequest)
+			helpers.HTTPError(w, r, http.StatusBadRequest, constants.CannotReadRequest)
 			return
 		}
 
@@ -28,39 +28,36 @@ func VerifyEmailToken(eh database.EmailHandler) http.HandlerFunc {
 
 		err = json.Unmarshal(requestBody, &et)
 		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, constants.CannotParseRequest)
+			helpers.HTTPError(w, r, http.StatusBadRequest, constants.CannotParseRequest)
 			return
 		}
 
 		dbEt, err := eh.GetEmailTokenByEmail(et.Email)
 		if err != nil {
-			helpers.HTTPError(w, http.StatusNotFound, constants.EmailTokenNotFound)
-			helpers.SendMessageToTelegram(r, http.StatusNotFound, constants.EmailTokenNotFound)
+			helpers.HTTPError(w, r, http.StatusNotFound, constants.EmailTokenNotFound)
 			return
 		}
 
 		if et.Token != dbEt.Token {
-			helpers.HTTPError(w, http.StatusBadRequest, constants.VerifyEmailFailed)
+			helpers.HTTPError(w, r, http.StatusBadRequest, constants.VerifyEmailFailed)
 			return
 		}
 
 		err = eh.UpdateCustomerVerificationStatusByEmail(dbEt.Email)
 		if err != nil {
-			helpers.HTTPError(w, http.StatusNotFound, constants.UpdateEmailStatusFailed)
-			helpers.SendMessageToTelegram(r, http.StatusNotFound, constants.UpdateEmailStatusFailed)
+			helpers.HTTPError(w, r, http.StatusNotFound, constants.UpdateEmailStatusFailed)
 			return
 		}
 
 		err = eh.DeleteVerifiedEmailTokenById(dbEt.EtId)
 		if err != nil {
-			helpers.HTTPError(w, http.StatusNotFound, constants.DeleteEmailTokenFailed)
-			helpers.SendMessageToTelegram(r, http.StatusNotFound, constants.DeleteEmailTokenFailed)
+			helpers.HTTPError(w, r, http.StatusNotFound, constants.DeleteEmailTokenFailed)
 			return
 		}
 
-		w, resp, err := helpers.NewResponseBuilder(w, true, constants.SuccessVerifyEmail, models.VerifiedEmailResponse{Email: et.Email})
+		w, resp, err := helpers.NewResponseBuilder(w, r, true, constants.SuccessVerifyEmail, models.VerifiedEmailResponse{Email: et.Email})
 		if err != nil {
-			helpers.HTTPError(w, http.StatusInternalServerError, constants.CannotEncodeResponse)
+			helpers.HTTPError(w, r, http.StatusInternalServerError, constants.CannotEncodeResponse)
 			return
 		}
 		fmt.Fprintf(w, resp)
@@ -74,23 +71,22 @@ func GetEmailToken(eh database.EmailHandler) http.HandlerFunc {
 		var req models.GetTokenRequest
 		err := json.NewDecoder(r.Body).Decode(&req)
 		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, constants.CannotReadRequest)
+			helpers.HTTPError(w, r, http.StatusBadRequest, constants.CannotReadRequest)
 			return
 		}
 
 		dbEt, err := eh.GetEmailTokenByEmail(req.Email)
 		if err != nil {
-			helpers.SendMessageToTelegram(r, http.StatusNotFound, constants.EmailTokenNotFound)
-			helpers.HTTPError(w, http.StatusNotFound, constants.EmailTokenNotFound)
+			helpers.HTTPError(w, r, http.StatusNotFound, constants.EmailTokenNotFound)
 			return
 		}
 
-		w, resp, err := helpers.NewResponseBuilder(w, true, constants.SuccessGetToken, models.EmailToken{
+		w, resp, err := helpers.NewResponseBuilder(w, r, true, constants.SuccessGetToken, models.EmailToken{
 			Email: dbEt.Email,
 			Token: dbEt.Token,
 		})
 		if err != nil {
-			helpers.HTTPError(w, http.StatusInternalServerError, constants.CannotEncodeResponse)
+			helpers.HTTPError(w, r, http.StatusInternalServerError, constants.CannotEncodeResponse)
 			return
 		}
 		fmt.Fprintf(w, resp)

@@ -46,11 +46,11 @@ func SendMessageToTelegram(r *http.Request, status int, errorMessage string) err
 }
 
 // made by Joseph
-func HTTPError(w http.ResponseWriter, status int, errorMessage string) {
+func HTTPError(w http.ResponseWriter, r *http.Request, status int, errorMessage string) {
 	w.WriteHeader(status)
 	w.Header().Set("Content-Type", "application/json")
 
-	w, resp, err := NewResponseBuilder(w, false, errorMessage, make(map[string]string))
+	w, resp, err := NewResponseBuilder(w, r, false, errorMessage, make(map[string]string))
 	if err != nil {
 		json.NewEncoder(w).Encode(map[string]string{"error": constants.CannotEncodeResponse})
 		w.WriteHeader(http.StatusInternalServerError)

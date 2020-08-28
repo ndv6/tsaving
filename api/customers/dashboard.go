@@ -17,14 +17,14 @@ func (ch *CustomerHandler) GetDashboardData(db *sql.DB) http.HandlerFunc {
 		token := ch.jwt.GetToken(r)
 		result, err := database.GetDashboardData(token.CustId, db)
 		if err != nil {
+			helpers.HTTPError(w, r, http.StatusBadRequest, constants.CannotEncodeResponse)
 			helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
-			helpers.HTTPError(w, http.StatusBadRequest, err.Error())
 			return
 		}
 
-		_, res, err := helpers.NewResponseBuilder(w, true, constants.Success, result)
+		_, res, err := helpers.NewResponseBuilder(w, r, true, constants.Success, result)
 		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
+			helpers.HTTPError(w, r, http.StatusBadRequest, constants.CannotEncodeResponse)
 			return
 		}
 

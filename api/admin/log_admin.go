@@ -37,15 +37,15 @@ func (la *LogAdminHandler) Get(w http.ResponseWriter, r *http.Request) {
 
 	page, err := strconv.Atoi(chi.URLParam(r, "page"))
 	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotParseURLParams)
+		helpers.HTTPError(w, r, http.StatusBadRequest, constants.CannotParseURLParams)
 		return
 	}
 
 	LogAdmin, count, err := database.GetLogAdmin(la.db, page)
 	if err != nil {
 		fmt.Fprint(w, err)
+		helper.HTTPError(w, r, http.StatusBadRequest, constants.LogAdminFailed)
 		helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.LogAdminFailed)
-		helper.HTTPError(w, http.StatusBadRequest, constants.LogAdminFailed)
 		return
 	}
 
@@ -54,9 +54,9 @@ func (la *LogAdminHandler) Get(w http.ResponseWriter, r *http.Request) {
 		LogAdminList: LogAdmin,
 	}
 
-	_, res, err := helpers.NewResponseBuilder(w, true, constants.GetLogAdminSuccess, responseBody)
+	_, res, err := helpers.NewResponseBuilder(w, r, true, constants.GetLogAdminSuccess, responseBody)
 	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
+		helpers.HTTPError(w, r, http.StatusBadRequest, constants.CannotEncodeResponse)
 		return
 	}
 
@@ -69,7 +69,7 @@ func (la *LogAdminHandler) Insert(w http.ResponseWriter, r *http.Request) {
 	tokens := la.jwt.GetTokenAdmin(r)
 	err := tokens.Valid()
 	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, err.Error())
+		helpers.HTTPError(w, r, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -77,27 +77,27 @@ func (la *LogAdminHandler) Insert(w http.ResponseWriter, r *http.Request) {
 
 	req, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		helper.HTTPError(w, http.StatusBadRequest, constants.CannotReadRequest)
+		helper.HTTPError(w, r, http.StatusBadRequest, constants.CannotReadRequest)
 		return
 	}
 
 	var lar models.LogAdmin
 	err = json.Unmarshal(req, &lar)
 	if err != nil {
-		helper.HTTPError(w, http.StatusBadRequest, constants.CannotParseRequest)
+		helper.HTTPError(w, r, http.StatusBadRequest, constants.CannotParseRequest)
 		return
 	}
 
 	err = database.InsertLogAdmin(la.db, lar, username)
 	if err != nil {
+		helper.HTTPError(w, r, http.StatusBadRequest, constants.InsertAdminLogFailed)
 		helpers.SendMessageToTelegram(r, http.StatusBadRequest, constants.InsertAdminLogFailed)
-		helper.HTTPError(w, http.StatusBadRequest, constants.InsertAdminLogFailed)
 		return
 	}
 
-	_, res, err := helper.NewResponseBuilder(w, true, constants.AddLogAdminSuccess, nil)
+	_, res, err := helper.NewResponseBuilder(w, r, true, constants.AddLogAdminSuccess, nil)
 	if err != nil {
-		helper.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
+		helper.HTTPError(w, r, http.StatusBadRequest, constants.CannotEncodeResponse)
 		return
 	}
 	fmt.Fprint(w, string(res))
@@ -113,7 +113,7 @@ func (la *LogAdminHandler) GetFilteredLog(w http.ResponseWriter, r *http.Request
 	search := chi.URLParam(r, "search")
 	page, err := strconv.Atoi(chi.URLParam(r, "page"))
 	if err != nil {
-		helpers.HTTPError(w, http.StatusBadRequest, constants.CannotParseURLParams)
+		helpers.HTTPError(w, r, http.StatusBadRequest, constants.CannotParseURLParams)
 		return
 	}
 
@@ -121,8 +121,8 @@ func (la *LogAdminHandler) GetFilteredLog(w http.ResponseWriter, r *http.Request
 		LogAdmin, count, err := database.GetLogAdminFilteredDate(la.db, date, page)
 
 		if err != nil {
+			helper.HTTPError(w, r, http.StatusBadRequest, constants.LogAdminFailed)
 			helper.SendMessageToTelegram(r, http.StatusBadRequest, constants.LogAdminFailed)
-			helper.HTTPError(w, http.StatusBadRequest, constants.LogAdminFailed)
 			return
 		}
 
@@ -131,9 +131,9 @@ func (la *LogAdminHandler) GetFilteredLog(w http.ResponseWriter, r *http.Request
 			LogAdminList: LogAdmin,
 		}
 
-		_, res, err := helpers.NewResponseBuilder(w, true, constants.GetLogAdminSuccess, responseBody)
+		_, res, err := helpers.NewResponseBuilder(w, r, true, constants.GetLogAdminSuccess, responseBody)
 		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
+			helpers.HTTPError(w, r, http.StatusBadRequest, constants.CannotEncodeResponse)
 			return
 		}
 
@@ -143,8 +143,8 @@ func (la *LogAdminHandler) GetFilteredLog(w http.ResponseWriter, r *http.Request
 		LogAdmin, count, err := database.GetLogAdminFilteredSearch(la.db, search, page)
 
 		if err != nil {
+			helper.HTTPError(w, r, http.StatusBadRequest, constants.LogAdminFailed)
 			helper.SendMessageToTelegram(r, http.StatusBadRequest, constants.LogAdminFailed)
-			helper.HTTPError(w, http.StatusBadRequest, constants.LogAdminFailed)
 			return
 		}
 
@@ -153,9 +153,9 @@ func (la *LogAdminHandler) GetFilteredLog(w http.ResponseWriter, r *http.Request
 			LogAdminList: LogAdmin,
 		}
 
-		_, res, err := helpers.NewResponseBuilder(w, true, constants.GetLogAdminSuccess, responseBody)
+		_, res, err := helpers.NewResponseBuilder(w, r, true, constants.GetLogAdminSuccess, responseBody)
 		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
+			helpers.HTTPError(w, r, http.StatusBadRequest, constants.CannotEncodeResponse)
 			return
 		}
 
@@ -165,8 +165,8 @@ func (la *LogAdminHandler) GetFilteredLog(w http.ResponseWriter, r *http.Request
 		LogAdmin, count, err := database.GetLogAdminFilteredSearchDate(la.db, search, date, page)
 
 		if err != nil {
+			helper.HTTPError(w, r, http.StatusBadRequest, constants.LogAdminFailed)
 			helper.SendMessageToTelegram(r, http.StatusBadRequest, constants.LogAdminFailed)
-			helper.HTTPError(w, http.StatusBadRequest, constants.LogAdminFailed)
 			return
 		}
 
@@ -175,9 +175,9 @@ func (la *LogAdminHandler) GetFilteredLog(w http.ResponseWriter, r *http.Request
 			LogAdminList: LogAdmin,
 		}
 
-		_, res, err := helpers.NewResponseBuilder(w, true, constants.GetLogAdminSuccess, responseBody)
+		_, res, err := helpers.NewResponseBuilder(w, r, true, constants.GetLogAdminSuccess, responseBody)
 		if err != nil {
-			helpers.HTTPError(w, http.StatusBadRequest, constants.CannotEncodeResponse)
+			helpers.HTTPError(w, r, http.StatusBadRequest, constants.CannotEncodeResponse)
 			return
 		}
 

@@ -8,7 +8,7 @@ import (
 )
 
 func HomeHandler(w http.ResponseWriter, r *http.Request) {
-	w, responseJson, _ := helpers.NewResponseBuilder(w, true, "Welcome to tsaving", nil)
+	w, responseJson, _ := helpers.NewResponseBuilder(w, r, true, "Welcome to tsaving", nil)
 	fmt.Println(w.Header())
 	fmt.Fprintln(w, responseJson)
 }

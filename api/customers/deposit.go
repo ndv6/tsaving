@@ -72,6 +72,7 @@ func DepositToMainAccount(partner PartnerInterface, trx Transactor) http.Handler
 		err = trx.DepositToMainAccountDatabaseAccessor(request.BalanceAdded, request.AccountNumber, log)
 		if err != nil {
 			helpers.HTTPError(w, http.StatusInternalServerError, constants.InsertFailed)
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
 			return
 		}
 

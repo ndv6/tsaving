@@ -160,6 +160,7 @@ func (va *VAHandler) VacToMain(w http.ResponseWriter, r *http.Request) {
 	err = database.UpdateVacToMain(va.db, VirAcc.BalanceChange, vaNum, AccountNumber)
 	if err != nil {
 		helper.HTTPError(w, http.StatusOK, err.Error())
+		helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -253,6 +254,7 @@ func (va *VAHandler) Create(w http.ResponseWriter, r *http.Request) {
 	lastVaNum, err := strconv.Atoi(suffixVaNum)
 	if err != nil {
 		helper.HTTPError(w, http.StatusBadRequest, "error generating va number")
+		helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -271,6 +273,7 @@ func (va *VAHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		helper.HTTPError(w, http.StatusBadRequest, "failed insert data to db")
+		helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
 		return
 	}
 

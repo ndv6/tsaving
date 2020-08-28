@@ -29,10 +29,10 @@ type LoginResponse struct {
 
 func LoginHandler(jwt *tokens.JWT, db *sql.DB) http.HandlerFunc { // Handle by Caesar Gusti
 	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set(constants.ContentType, constants.Json)
 		var l LoginRequest // Ngambil dari body API
 		err := json.NewDecoder(r.Body).Decode(&l)
 		if err != nil {
-			w.Header().Set(constants.ContentType, constants.Json)
 			helpers.HTTPError(w, http.StatusBadRequest, constants.CannotReadRequest) //Format JSON Tidak Sesuai
 			return
 		}
@@ -42,20 +42,18 @@ func LoginHandler(jwt *tokens.JWT, db *sql.DB) http.HandlerFunc { // Handle by C
 
 		isVerified, err := models.CheckLoginVerified(db, l.CustEmail, Pass)
 		if err != nil {
-			w.Header().Set(constants.ContentType, constants.Json)
 			helpers.HTTPError(w, http.StatusBadRequest, "Failed to check verified status")
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, err.Error())
 			return
 		}
 
 		if isVerified == false {
-			w.Header().Set(constants.ContentType, constants.Json)
 			helpers.HTTPError(w, http.StatusUnauthorized, "This account is not verified")
 			return
 		}
 
 		objCustomer, err := models.LoginCustomer(db, l.CustEmail, Pass)
 		if err != nil {
-			w.Header().Set(constants.ContentType, constants.Json)
 			helpers.HTTPError(w, http.StatusBadRequest, "Wrong Email or Password")
 			return
 		}

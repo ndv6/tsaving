@@ -105,5 +105,6 @@ const (
 
 // URLs
 const (
-	TnotifLocal = "http://localhost:8082/sendMail"
+	TnotifLocal  = "http://localhost:8082/sendMail"
+	TnotifServer = "http://52.139.252.182:8082/sendMail"
 )

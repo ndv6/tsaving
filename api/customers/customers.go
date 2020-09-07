@@ -431,7 +431,7 @@ func (ch *CustomerHandler) sendMail(w http.ResponseWriter, OTPEmail string, cusE
 		return
 	}
 
-	_, err = http.Post("http://localhost:8082/sendMail", "application/json", bytes.NewBuffer(requestBody))
+	_, err = http.Post(constants.TnotifServer, "application/json", bytes.NewBuffer(requestBody))
 	if err != nil {
 		return
 	}

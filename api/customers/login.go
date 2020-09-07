@@ -41,7 +41,7 @@ func LoginHandler(jwt *tokens.JWT, db *sql.DB) http.HandlerFunc { // Handle by C
 		//Membuat Hash Password
 		Pass := helpers.HashString(l.CustPassword)
 
-		isVerified, err := models.CheckLoginVerified(db, l.CustEmail, Pass)
+		isVerified, err := models.CheckLoginVerified(db, l.CustEmail)
 		if err != nil {
 			w.Header().Set(constants.ContentType, constants.Json)
 			helpers.HTTPError(w, r, http.StatusBadRequest, "Failed to check verified status")

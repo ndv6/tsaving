@@ -22,7 +22,6 @@ type Customers struct {
 	CreatedAt    time.Time `json:"created_at"`
 	UpdatedAt    time.Time `json:"updated_at"`
 	IsDeleted    time.Time `json:"is_deleted"`
-
 }
 
 type Card struct {
@@ -57,8 +56,8 @@ func LoginCustomer(db *sql.DB, email string, password string) (objCustomer Custo
 	return
 }
 
-func CheckLoginVerified(db *sql.DB, email string, password string) (isVerified bool, err error) {
-	err = db.QueryRow("SELECT is_verified FROM customers WHERE cust_email = ($1) and cust_password = ($2)", email, password).Scan(&isVerified)
+func CheckLoginVerified(db *sql.DB, email string) (isVerified bool, err error) {
+	err = db.QueryRow("SELECT is_verified FROM customers WHERE cust_email = ($1)", email).Scan(&isVerified)
 	return
 }
 

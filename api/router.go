@@ -60,7 +60,7 @@ func Router(jwt *tokens.JWT, db *sql.DB) *chi.Mux {
 	chiRouter.With(jwt.AuthMiddleware).Put("/me/update", ch.UpdateProfile)                               //Andreas
 	chiRouter.With(jwt.AuthMiddleware).Patch("/me/update-photo", ch.UpdatePhoto)                         //Andreas
 	chiRouter.With(jwt.AuthMiddleware).Patch("/me/update-password", ch.UpdatePassword)                   //Andreas
-	chiRouter.With(jwt.ValidateAccount).Post("/me/deposit", customers.DepositToMainAccount(ph, ah))      //Vici
+	chiRouter.Post("/me/deposit", customers.DepositToMainAccount(ph, ah))                                //Vici
 	chiRouter.With(jwt.AuthMiddleware).With(jwt.ValidateAccount).Put("/me/transfer-va", va.AddBalanceVA) //David
 	chiRouter.With(jwt.AuthMiddleware).Get("/me/dashboard", ch.GetDashboardData(db))                     //David
 

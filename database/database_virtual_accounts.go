@@ -68,8 +68,8 @@ func UpdateVacToMain(db *sql.DB, balanceInput int, vacNum string, accountNum str
 	//inpu transaction log
 	tLogs := models.TransactionLogs{
 		AccountNum:  accountNum,
-		FromAccount: accountNum,
-		DestAccount: vacNum,
+		FromAccount: vacNum,
+		DestAccount: accountNum,
 		TranAmount:  balanceInput,
 		Description: logDesc,
 		CreatedAt:   time.Now(),

@@ -43,6 +43,7 @@ func LoginAdminHandler(jwt *tokens.JWT, db *sql.DB) http.HandlerFunc { // Handle
 		objAdmin, err := models.LoginAdmin(db, l.Username, Pass)
 		if err != nil {
 			helpers.HTTPError(w, r, http.StatusBadRequest, "Wrong Username or Password")
+			helpers.SendMessageToTelegram(r, http.StatusBadRequest, "Wrong Username or Password")
 			return
 		}
 		_, tokenLoginAdmin, _ := jwt.JWTAuth.Encode(&tokens.TokenAdmin{
